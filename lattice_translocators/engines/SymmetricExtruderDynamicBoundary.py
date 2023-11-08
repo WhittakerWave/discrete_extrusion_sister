@@ -15,7 +15,7 @@ class SymmetricExtruderDynamicBoundary(SymmetricExtruder.SymmetricExtruder):
                  stall_prob_right,
                  ctcf_birth_prob,
                  ctcf_death_prob,
-                 *args):
+                 *args, **kwargs):
         
         super().__init__(num_LEF,
                          birth_prob,

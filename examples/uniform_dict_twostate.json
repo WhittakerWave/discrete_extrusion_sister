@@ -23,6 +23,8 @@
     "LEF_pause": {
         "A": 0
     },
+    "LEF_states": {},
+    "LEF_transition_rates": {},
     "LEF_separation": 10,
     "sites_per_monomer": 10,
     "monomers_per_replica": 100,

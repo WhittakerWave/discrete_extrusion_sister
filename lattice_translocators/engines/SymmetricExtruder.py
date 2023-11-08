@@ -11,7 +11,7 @@ class SymmetricExtruder():
                  pause_prob,
                  stall_prob_left,
                  stall_prob_right,
-                 *args):
+                 *args, **kwargs):
     
         self.num_site = len(birth_prob)
         self.num_LEF = num_LEF
