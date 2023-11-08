@@ -3,7 +3,7 @@ import io
 from setuptools import setup, find_packages
 
 VERSION = "0.1.0"
-DESCRIPTION = "Lattice translocators for loop extrusion simulations"
+DESCRIPTION = "Multistate lattice translocators for loop extrusion simulations"
 
 
 def _read(*parts, **kwargs):
@@ -25,10 +25,10 @@ def get_requirements(path):
 install_requires = get_requirements("requirements.txt")
 
 setup(
-    name="lattice-translocators",
+    name="multistate-extrusion",
     version=VERSION,
     description=DESCRIPTION,
-    url="https://github.com/mtortora/lattice-translocators",
+    url="https://github.com/Fudenberg-Research-Group/multistate-extrusion",
     author="Open2C",
     author_email="open.chromosome.collective@gmail.com",
     license="MIT",
