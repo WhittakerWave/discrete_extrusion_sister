@@ -24,7 +24,6 @@ class SymmetricExtruder():
         self.barrier = barrier_engine
         self.sites = np.arange(self.num_site, dtype=int)
 
-        # LEF state equals 0 if LEF is unbound, 1 if bound
         self.states = np.zeros(self.num_LEF, dtype=int)
         self.positions = np.zeros((self.num_LEF, 2), dtype=int) - 1
         
