@@ -27,6 +27,11 @@ class Translocator():
                                   *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays,
                                   **lef_transition_dict)
         
+        self.time_unit = 1. / (kwargs['sites_per_monomer'] * kwargs['velocity_multiplier'])
+        
+        kwargs['steps'] = int(kwargs['steps'] / self.time_unit)
+        kwargs['dummy_steps'] = int(kwargs['dummy_steps'] / self.time_unit)
+
         self.lef_trajectory = []
         self.ctcf_trajectory = []
         self.state_trajectory = []

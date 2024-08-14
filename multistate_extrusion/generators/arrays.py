@@ -52,38 +52,38 @@ def make_CTCF_arrays(type_list,
 
 def make_CTCF_dynamic_arrays(type_list,
                              site_types,
-                             CTCF_offtime,
-                             CTCF_lifetime,
+                             CTCF_on_rate,
+                             CTCF_off_rate,
                              sites_per_monomer,
                              velocity_multiplier,
                              **kwargs):
     
-    ctcf_offtime_array = make_site_array(type_list, site_types, CTCF_offtime, **kwargs)
-    ctcf_lifetime_array = make_site_array(type_list, site_types, CTCF_lifetime, **kwargs)
+    on_rate_array = make_site_array(type_list, site_types, CTCF_on_rate, **kwargs)
+    off_rate_array = make_site_array(type_list, site_types, CTCF_off_rate, **kwargs)
     
-    ctcf_birth_array = 1./ ctcf_offtime_array / (velocity_multiplier * sites_per_monomer)
-    ctcf_death_array = 1./ ctcf_lifetime_array / (velocity_multiplier * sites_per_monomer)
+    birth_array = on_rate_array / (velocity_multiplier * sites_per_monomer)
+    death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
 
-    return [ctcf_birth_array, ctcf_death_array]
+    return [birth_array, death_array]
     
 
 def make_LEF_arrays(type_list,
                     site_types,
-                    LEF_offtime,
-                    LEF_lifetime,
-                    LEF_stalled_lifetime,
+					LEF_on_rate,
+					LEF_off_rate,
+					LEF_stalled_off_rate,
                     LEF_pause,
                     sites_per_monomer,
                     velocity_multiplier,
                     **kwargs):
     
-    offtime_array = make_site_array(type_list, site_types, LEF_offtime, **kwargs)
-    lifetime_array = make_site_array(type_list, site_types, LEF_lifetime, **kwargs)
-    stalled_lifetime_array = make_site_array(type_list, site_types, LEF_stalled_lifetime, **kwargs)
+    on_rate_array = make_site_array(type_list, site_types, LEF_on_rate, **kwargs)
+    off_rate_array = make_site_array(type_list, site_types, LEF_off_rate, **kwargs)
+    stalled_off_rate_array = make_site_array(type_list, site_types, LEF_stalled_off_rate, **kwargs)
     
-    birth_array = 1./ offtime_array / (velocity_multiplier * sites_per_monomer)
-    death_array = 1./ lifetime_array / (velocity_multiplier * sites_per_monomer)
-    stalled_death_array = 1./ stalled_lifetime_array / (velocity_multiplier * sites_per_monomer)
+    birth_array = on_rate_array / (velocity_multiplier * sites_per_monomer)
+    death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
+    stalled_death_array = stalled_off_rate_array / (velocity_multiplier * sites_per_monomer)
 
     pause_array = make_site_array(type_list, site_types, LEF_pause, **kwargs)
 
