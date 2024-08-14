@@ -5,6 +5,7 @@ class Translocator():
 
     def __init__(self,
                  extrusion_engine,
+                 barrier_engine,
                  type_list,
                  site_types,
                  ctcf_left_positions,
@@ -23,9 +24,8 @@ class Translocator():
         ctcf_arrays = arrays.make_CTCF_arrays(type_list, site_types, ctcf_left_positions, ctcf_right_positions, **kwargs)
         ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
         
-        engine = extrusion_engine(number_of_LEFs,
-                                  *lef_arrays, *ctcf_arrays, *ctcf_dynamic_arrays,
-                                  **lef_transition_dict)
+        ctcf_engine = barrier_engine(*ctcf_arrays, *ctcf_dynamic_arrays)
+        engine = extrusion_engine(number_of_LEFs, ctcf_engine, *lef_arrays, **lef_transition_dict)
         
         self.time_unit = 1. / (kwargs['sites_per_monomer'] * kwargs['velocity_multiplier'])
         
@@ -53,12 +53,12 @@ class Translocator():
             
             self.lef_trajectory.append(bound_LEF_positions)
             self.ctcf_trajectory.append(bound_CTCF_positions)
-            self.state_trajectory.append(self.engine.lef_states.copy())
+            self.state_trajectory.append(self.engine.states.copy())
 
 
     def get_bound_LEFs(self):
 
-        lef_positions = self.engine.lef_positions
+        lef_positions = self.engine.positions
     
         bound_LEF_ids = (lef_positions >= 0).all(axis=1)
         bound_LEF_positions = lef_positions[bound_LEF_ids]
@@ -68,8 +68,8 @@ class Translocator():
 
     def get_bound_CTCFs(self):
 
-        ctcf_left_positions = self.engine.stall_prob_left
-        ctcf_right_positions = self.engine.stall_prob_right
+        ctcf_left_positions = self.engine.barrier.prob_left
+        ctcf_right_positions = self.engine.barrier.prob_right
 
         bound_left_positions, = ctcf_left_positions.nonzero()
         bound_right_positions, = ctcf_right_positions.nonzero()

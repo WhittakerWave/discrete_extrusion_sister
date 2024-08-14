@@ -7,22 +7,20 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
     
     def __init__(self,
                  num_LEF,
+                 barrier_engine,
                  birth_prob,
                  death_prob,
                  stalled_death_prob,
                  pause_prob,
-                 stall_prob_left,
-                 stall_prob_right,
                  *args,
                  **lef_transition_dict):
     
         super().__init__(num_LEF,
+                         barrier_engine,
                          birth_prob,
                          death_prob,
                          stalled_death_prob,
-                         pause_prob,
-                         stall_prob_left,
-                         stall_prob_right)
+                         pause_prob)
         
         self.state_dict = lef_transition_dict["LEF_states"]
         self.transition_dict = lef_transition_dict["LEF_transitions"]
@@ -40,12 +38,12 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
             for ids, transition_prob in self.transition_dict.items():
                 if state_id == int(ids[0]):
                     state_list.append(int(ids[1]))
-                    transition_list.append(transition_prob[self.lef_positions].max(axis=1))
+                    transition_list.append(transition_prob[self.positions].max(axis=1))
                     
             if state_id == max(self.state_dict.values()):
                 death_prob = np.where(self.stalled,
-                                      self.stalled_death_prob[self.lef_positions],
-                                      self.death_prob[self.lef_positions])
+                                      self.stalled_death_prob[self.positions],
+                                      self.death_prob[self.positions])
                                       
                 state_list.append(unbound_state_id)
                 transition_list.append(death_prob.max(axis=1))
@@ -58,7 +56,7 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
             
             product_states = np.where(rng1, state_list[0], state_list[-1])
         
-            ids = np.flatnonzero((rng1 + rng2) * (self.lef_states == state_id))
+            ids = np.flatnonzero((rng1 + rng2) * (self.states == state_id))
             products = product_states[ids]
             
             ids_list.append(ids)
@@ -67,15 +65,15 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
         return ids_list, products_list
             
         
-    def update_LEF_states(self, unbound_state_id, bound_state_id):
+    def update_states(self, unbound_state_id, bound_state_id):
         
         ids_list, products_list = self.lef_transitions(unbound_state_id)
         ids_birth = self.lef_birth(unbound_state_id)
         
-        self.lef_states[ids_birth] = bound_state_id
+        self.states[ids_birth] = bound_state_id
         
         for ids, products in zip(ids_list, products_list):
-            self.lef_states[ids] = products
+            self.states[ids] = products
             
         ids_death = ids[products == unbound_state_id]
         
