@@ -77,7 +77,7 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
             
         ids_death = ids[products == unbound_state_id]
         
-        self.update_occupancies(ids_death)
+        self.clear_occupancies(ids_death)
 
 
     def step(self):

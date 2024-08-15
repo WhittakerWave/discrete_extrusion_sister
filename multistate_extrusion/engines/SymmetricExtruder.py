@@ -107,7 +107,7 @@ class SymmetricExtruder():
         return ids
         
 
-    def update_occupancies(self, ids_death):
+    def clear_occupancies(self, ids_death):
     
         self.stalled[ids_death] = False
         self.occupied[self.positions[ids_death]] = False
@@ -123,7 +123,7 @@ class SymmetricExtruder():
         self.states[ids_birth] = bound_state_id
         self.states[ids_death] = unbound_state_id
 
-        self.update_occupancies(ids_death)
+        self.clear_occupancies(ids_death)
 
 
     def step(self, unbound_state_id=0, bound_state_id=1, active_state_id=1):
