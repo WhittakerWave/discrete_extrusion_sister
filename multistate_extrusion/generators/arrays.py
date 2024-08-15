@@ -27,22 +27,22 @@ def make_site_array(type_list,
 
 def make_CTCF_arrays(type_list,
                      site_types,
-                     ctcf_left_positions,
-                     ctcf_right_positions,
+                     left_positions,
+                     right_positions,
                      CTCF_facestall,
                      CTCF_backstall,
                      velocity_multiplier,
                      **kwargs):
     
     stall_left_array = make_site_array(type_list, site_types, CTCF_facestall,
-                                       at_ids=ctcf_left_positions, **kwargs)
+                                       at_ids=left_positions, **kwargs)
     stall_right_array = make_site_array(type_list, site_types, CTCF_facestall,
-                                        at_ids=ctcf_right_positions, **kwargs)
+                                        at_ids=right_positions, **kwargs)
     
     stall_left_array += make_site_array(type_list, site_types, CTCF_backstall,
-                                        at_ids=ctcf_right_positions, **kwargs)
+                                        at_ids=right_positions, **kwargs)
     stall_right_array += make_site_array(type_list, site_types, CTCF_backstall,
-                                         at_idsids=ctcf_left_positions, **kwargs)
+                                         at_idsids=left_positions, **kwargs)
     
     stall_left_array = 1 - (1-stall_left_array) ** velocity_multiplier
     stall_right_array = 1 - (1-stall_right_array) ** velocity_multiplier

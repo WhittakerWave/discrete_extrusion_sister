@@ -8,12 +8,12 @@
         "weak_CTCF": 0
     },
     "CTCF_on_rate": {
-        "strong_CTCF": 0.1,
-        "weak_CTCF": 0.001
+        "strong_CTCF": 0.01,
+        "weak_CTCF": 0.0001
     },
     "CTCF_off_rate": {
-        "strong_CTCF": 0.001,
-        "weak_CTCF": 0.001
+        "strong_CTCF": 0.01,
+        "weak_CTCF": 0.01
     },
     "LEF_on_rate": {
         "strong_CTCF": 0.0022592978797358358,

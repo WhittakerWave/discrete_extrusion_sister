@@ -68,8 +68,8 @@ class Translocator():
 
     def get_bound_CTCFs(self):
 
-        ctcf_left_positions = self.engine.barrier.prob_left
-        ctcf_right_positions = self.engine.barrier.prob_right
+        ctcf_left_positions = self.engine.barrier.stall_left
+        ctcf_right_positions = self.engine.barrier.stall_right
 
         bound_left_positions, = ctcf_left_positions.nonzero()
         bound_right_positions, = ctcf_right_positions.nonzero()

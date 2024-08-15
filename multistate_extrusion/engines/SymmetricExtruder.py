@@ -4,7 +4,7 @@ import numpy as np
 class SymmetricExtruder():
     
     def __init__(self,
-                 num_LEF,
+                 number,
                  barrier_engine,
                  birth_prob,
                  death_prob,
@@ -12,9 +12,9 @@ class SymmetricExtruder():
                  pause_prob,
                  *args, **kwargs):
     
-        self.num_site = len(birth_prob)
-        self.num_LEF = num_LEF
-        
+        self.number = number
+        self.lattice_size = len(birth_prob)
+
         self.birth_prob = birth_prob
         self.death_prob = death_prob
 
@@ -22,23 +22,23 @@ class SymmetricExtruder():
         self.stalled_death_prob = stalled_death_prob
 
         self.barrier = barrier_engine
-        self.sites = np.arange(self.num_site, dtype=int)
+        self.sites = np.arange(self.lattice_size, dtype=int)
 
-        self.states = np.zeros(self.num_LEF, dtype=int)
-        self.positions = np.zeros((self.num_LEF, 2), dtype=int) - 1
+        self.states = np.zeros(self.number, dtype=int)
+        self.positions = np.zeros((self.number, 2), dtype=int) - 1
         
-        self.occupied = np.zeros(self.num_site, dtype=bool)
-        self.stalled = np.zeros((self.num_LEF, 2), dtype=bool)
+        self.occupied = np.zeros(self.lattice_size, dtype=bool)
+        self.stalled = np.zeros((self.number, 2), dtype=bool)
 
         self.occupied[0] = self.occupied[-1] = True
         
 
-    def lef_step(self, active_state_id):
+    def extrusion_step(self, active_state_id):
     
-        for i in range(self.num_LEF):
+        for i in range(self.number):
             if self.states[i] == active_state_id:
-                stall1 = self.barrier.prob_left[self.positions[i, 0]]
-                stall2 = self.barrier.prob_right[self.positions[i, 1]]
+                stall1 = self.barrier.stall_left[self.positions[i, 0]]
+                stall2 = self.barrier.stall_right[self.positions[i, 1]]
                                         
                 if np.random.random() < stall1:
                     self.stalled[i, 0] = True
@@ -68,12 +68,12 @@ class SymmetricExtruder():
                             self.positions[i, 1] = cur2 + 1
                             
                             
-    def lef_birth(self, unbound_state_id):
+    def birth(self, unbound_state_id):
     
         free_sites = self.sites[~self.occupied]
-        binding_sites = np.random.choice(free_sites, size=self.num_LEF, replace=False)
+        binding_sites = np.random.choice(free_sites, size=self.number, replace=False)
 
-        rng = np.random.random(self.num_LEF) < self.birth_prob[binding_sites]
+        rng = np.random.random(self.number) < self.birth_prob[binding_sites]
         ids = np.flatnonzero(rng * (self.states == unbound_state_id))
                 
         if len(ids) > 0:
@@ -93,7 +93,7 @@ class SymmetricExtruder():
         return ids
                                                                                 
         
-    def lef_death(self, bound_state_id):
+    def death(self, bound_state_id):
     
         death_prob = np.where(self.stalled,
                               self.stalled_death_prob[self.positions],
@@ -101,13 +101,13 @@ class SymmetricExtruder():
                               
         death_prob = np.max(death_prob, axis=1)
         
-        rng = np.random.random(self.num_LEF) < death_prob
+        rng = np.random.random(self.number) < death_prob
         ids = np.flatnonzero(rng * (self.states == bound_state_id))
         
         return ids
         
 
-    def update_LEF_arrays(self, ids_death):
+    def update_occupancies(self, ids_death):
     
         self.stalled[ids_death] = False
         self.occupied[self.positions[ids_death]] = False
@@ -117,13 +117,13 @@ class SymmetricExtruder():
         
     def update_states(self, unbound_state_id, bound_state_id):
     
-        ids_birth = self.lef_birth(unbound_state_id)
-        ids_death = self.lef_death(bound_state_id)
+        ids_birth = self.birth(unbound_state_id)
+        ids_death = self.death(bound_state_id)
         
         self.states[ids_birth] = bound_state_id
         self.states[ids_death] = unbound_state_id
 
-        self.update_LEF_arrays(ids_death)
+        self.update_occupancies(ids_death)
 
 
     def step(self, unbound_state_id=0, bound_state_id=1, active_state_id=1):
@@ -131,7 +131,7 @@ class SymmetricExtruder():
         self.barrier.step(self)
 
         self.update_states(unbound_state_id, bound_state_id)
-        self.lef_step(active_state_id)
+        self.extrusion_step(active_state_id)
         
     
     def steps(self, N):
