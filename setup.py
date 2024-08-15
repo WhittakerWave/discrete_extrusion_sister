@@ -28,9 +28,9 @@ setup(
     name="discrete-time-extrusion",
     version=VERSION,
     description=DESCRIPTION,
-    url="https://github.com/Fudenberg-Research-Group/multistate-extrusion",
-    author="Open2C",
-    author_email="open.chromosome.collective@gmail.com",
+    url="https://github.com/Fudenberg-Research-Group/discrete-time-extrusion",
+    author="Maxime Tortora",
+    author_email="maxime.tortora@gmail.com",
     license="MIT",
     packages=find_packages(),
     install_requires=install_requires
