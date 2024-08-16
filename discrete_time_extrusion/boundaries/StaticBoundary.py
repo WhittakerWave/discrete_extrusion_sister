@@ -13,4 +13,4 @@ class StaticBoundary(NullBoundary.NullBoundary):
         self.stall_left = stall_left
         self.stall_right = stall_right
         
-        self.number = len(self.get_bound())
+        self.number = len(self.get_bound_positions())
