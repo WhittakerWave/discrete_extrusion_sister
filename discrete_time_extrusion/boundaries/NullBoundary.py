@@ -20,7 +20,7 @@ class NullBoundary():
         pass
         
         
-    def get_bound(self):
+    def get_bound_positions(self):
 
         bound_left_positions = np.flatnonzero(self.stall_left)
         bound_right_positions = np.flatnonzero(self.stall_right)
