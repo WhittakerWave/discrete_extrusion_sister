@@ -34,7 +34,7 @@ class NullExtruder():
             self.step(*args, **kwargs)
             
             
-    def get_bound(self):
+    def get_bound_positions(self):
 
         bound_ids = (self.positions >= 0).all(axis=1)
         bound_positions = self.positions[bound_ids]
