@@ -48,8 +48,8 @@ class Translocator():
         for _ in range(self.params['steps']):
             self.extrusion_engine.steps(period)
         
-            bound_LEF_positions = self.extrusion_engine.get_bound()
-            bound_CTCF_positions = self.barrier_engine.get_bound()
+            bound_LEF_positions = self.extrusion_engine.get_bound_positions()
+            bound_CTCF_positions = self.barrier_engine.get_bound_positions()
             
             self.lef_trajectory.append(bound_LEF_positions)
             self.ctcf_trajectory.append(bound_CTCF_positions)
