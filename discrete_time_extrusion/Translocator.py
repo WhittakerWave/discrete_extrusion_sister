@@ -48,13 +48,13 @@ class Translocator():
         for _ in range(self.params['steps']):
             self.extrusion_engine.steps(period)
         
-            LEF_states = self.extrusion_engine.states.copy()
+            LEF_states = self.extrusion_engine.states.tolist()
             CTCF_positions = self.barrier_engine.get_bound_positions()
 
             if prune_unbound_LEFs:
                 LEF_positions = self.extrusion_engine.get_bound_positions()
             else:
-                LEF_positions = self.extrusion_engine.positions.copy()
+                LEF_positions = self.extrusion_engine.positions.tolist()
             
             self.state_trajectory.append(LEF_states)
 
