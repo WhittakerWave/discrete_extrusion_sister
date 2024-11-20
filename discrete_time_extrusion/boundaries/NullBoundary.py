@@ -1,4 +1,12 @@
-import numpy as np
+try:
+    import cupy as xp
+    use_cuda = xp.cuda.is_available()
+    
+    if not use_cuda:
+        raise ImportError
+
+except:
+    import numpy as xp
 
 
 class NullBoundary():
@@ -11,8 +19,8 @@ class NullBoundary():
         self.number = 0
         self.lattice_size = len(stall_left)
 
-        self.stall_left = np.zeros_like(stall_left)
-        self.stall_right = np.zeros_like(stall_right)
+        self.stall_left = xp.zeros_like(stall_left)
+        self.stall_right = xp.zeros_like(stall_right)
 
                                 
     def step(self, *args, **kwargs):
@@ -22,7 +30,7 @@ class NullBoundary():
         
     def get_bound_positions(self):
 
-        bound_left_positions = np.flatnonzero(self.stall_left)
-        bound_right_positions = np.flatnonzero(self.stall_right)
+        bound_left_positions = xp.flatnonzero(self.stall_left)
+        bound_right_positions = xp.flatnonzero(self.stall_right)
     
         return bound_left_positions.tolist() + bound_right_positions.tolist()

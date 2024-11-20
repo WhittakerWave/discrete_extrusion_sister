@@ -1,4 +1,12 @@
-import numpy as np
+try:
+    import cupy as xp
+    use_cuda = xp.cuda.is_available()
+    
+    if not use_cuda:
+        raise ImportError
+
+except:
+    import numpy as xp
 
 
 class NullExtruder():
@@ -12,13 +20,13 @@ class NullExtruder():
         self.barrier_engine = barrier_engine
         
         self.lattice_size = barrier_engine.lattice_size
-        self.sites = np.arange(self.lattice_size, dtype=int)
+        self.sites = xp.arange(self.lattice_size, dtype=xp.int32)
 
-        self.states = np.zeros(self.number, dtype=int)
-        self.positions = np.zeros((self.number, 2), dtype=int) - 1
+        self.states = xp.zeros(self.number, dtype=xp.int32)
+        self.positions = xp.zeros((self.number, 2), dtype=xp.int32) - 1
         
-        self.occupied = np.zeros(self.lattice_size, dtype=bool)
-        self.stalled = np.zeros((self.number, 2), dtype=bool)
+        self.occupied = xp.zeros(self.lattice_size, dtype=bool)
+        self.stalled = xp.zeros((self.number, 2), dtype=bool)
 
         self.occupied[0] = self.occupied[-1] = True
 

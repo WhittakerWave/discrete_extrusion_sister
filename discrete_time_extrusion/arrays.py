@@ -1,5 +1,13 @@
-import numpy as np
+try:
+    import cupy as xp
+    use_cuda = xp.cuda.is_available()
+    
+    if not use_cuda:
+        raise ImportError
 
+except:
+    import numpy as xp
+    
 
 def make_site_array(type_list,
                     site_types,
@@ -11,18 +19,18 @@ def make_site_array(type_list,
     assert len(type_list) == len(value_dict), ('Number of values (%d) incompatible with number of site types (%d)'
                                             % (len(value_dict), len(type_list)))
     
-    prop_array = np.zeros(len(site_types), dtype=np.double)
+    prop_array = xp.zeros(len(site_types), dtype=xp.float32)
     
     for i, name in enumerate(type_list):
         prop_array[site_types == i] = value_dict[name]
         
-    if isinstance(at_ids, np.ndarray):
-        mask = np.zeros(len(site_types), dtype=bool)
+    if isinstance(at_ids, xp.ndarray):
+        mask = xp.zeros(len(site_types), dtype=bool)
         mask[at_ids] = True
         
         prop_array[~mask] = 0
         
-    return np.tile(prop_array, number_of_replica)
+    return xp.tile(prop_array, number_of_replica)
 
 
 def make_CTCF_arrays(type_list,

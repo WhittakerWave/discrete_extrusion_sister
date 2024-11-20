@@ -1,6 +1,14 @@
-import numpy as np
-
 from . import StaticBoundary
+
+try:
+    import cupy as xp
+    use_cuda = xp.cuda.is_available()
+    
+    if not use_cuda:
+        raise ImportError
+
+except:
+    import numpy as xp
 
 
 class DynamicBoundary(StaticBoundary.StaticBoundary):
@@ -22,13 +30,13 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
         self.states_left = stall_left > 0
         self.states_right = stall_right > 0
                 
-        rng_left = np.random.random(self.lattice_size) < occupancy
-        rng_right = np.random.random(self.lattice_size) < occupancy
+        rng_left = xp.random.random(self.lattice_size) < occupancy
+        rng_right = xp.random.random(self.lattice_size) < occupancy
         
-        self.states_left = np.where(self.states_left,
+        self.states_left = xp.where(self.states_left,
                                     self.states_left*rng_left,
                                     -1)
-        self.states_right = np.where(self.states_right,
+        self.states_right = xp.where(self.states_right,
                                      self.states_right*rng_right,
                                      -1)
 
@@ -38,11 +46,11 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
 
     def birth(self, unbound_state_id):
     
-        rng_left = np.random.random(self.lattice_size) < self.birth_prob
-        rng_right = np.random.random(self.lattice_size) < self.birth_prob
+        rng_left = xp.random.random(self.lattice_size) < self.birth_prob
+        rng_right = xp.random.random(self.lattice_size) < self.birth_prob
 
-        ids_left = np.flatnonzero(rng_left * (self.states_left == unbound_state_id))
-        ids_right = np.flatnonzero(rng_right * (self.states_right == unbound_state_id))
+        ids_left = xp.flatnonzero(rng_left * (self.states_left == unbound_state_id))
+        ids_right = xp.flatnonzero(rng_right * (self.states_right == unbound_state_id))
         
         self.stall_left[ids_left] = 1
         self.stall_right[ids_right] = 1
@@ -52,11 +60,11 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
         
     def death(self, bound_state_id):
 
-        rng_left = np.random.random(self.lattice_size) < self.death_prob
-        rng_right = np.random.random(self.lattice_size) < self.death_prob
+        rng_left = xp.random.random(self.lattice_size) < self.death_prob
+        rng_right = xp.random.random(self.lattice_size) < self.death_prob
 
-        ids_left = np.flatnonzero(rng_left * (self.states_left == bound_state_id))
-        ids_right = np.flatnonzero(rng_right * (self.states_right == bound_state_id))
+        ids_left = xp.flatnonzero(rng_left * (self.states_left == bound_state_id))
+        ids_right = xp.flatnonzero(rng_right * (self.states_right == bound_state_id))
         
         self.stall_left[ids_left] = 0
         self.stall_right[ids_right] = 0
@@ -75,8 +83,8 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
         self.states_right[ids_birth[1]] = bound_state_id
         self.states_right[ids_death[1]] = unbound_state_id
 
-        lef_ids_left = np.flatnonzero(np.in1d(extrusion_engine.positions[:, 0], ids_death[0]))
-        lef_ids_right = np.flatnonzero(np.in1d(extrusion_engine.positions[:, 1], ids_death[1]))
+        lef_ids_left = xp.flatnonzero(xp.in1d(extrusion_engine.positions[:, 0], ids_death[0]))
+        lef_ids_right = xp.flatnonzero(xp.in1d(extrusion_engine.positions[:, 1], ids_death[1]))
 
         extrusion_engine.stalled[lef_ids_left, 0] = 0
         extrusion_engine.stalled[lef_ids_right, 1] = 0

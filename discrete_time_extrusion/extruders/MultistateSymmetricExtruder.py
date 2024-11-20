@@ -1,7 +1,15 @@
-import numpy as np
-
 from . import SymmetricExtruder
 
+try:
+    import cupy as xp
+    use_cuda = xp.cuda.is_available()
+    
+    if not use_cuda:
+        raise ImportError
+
+except:
+    import numpy as xp
+    
 
 class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
     
@@ -41,22 +49,22 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
                     transition_list.append(transition_prob[self.positions].max(axis=1))
                     
             if state_id == max(self.state_dict.values()):
-                death_prob = np.where(self.stalled,
+                death_prob = xp.where(self.stalled,
                                       self.stalled_death_prob[self.positions],
                                       self.death_prob[self.positions])
                                       
                 state_list.append(unbound_state_id)
                 transition_list.append(death_prob.max(axis=1))
 
-            rng = np.random.random(self.number)
-            cumul_prob = np.cumsum(transition_list, axis=0)
+            rng = xp.random.random(self.number)
+            cumul_prob = xp.cumsum(transition_list, axis=0)
             
             rng1 = (rng < cumul_prob[0])
             rng2 = ~rng1 * (rng < cumul_prob[-1])
             
-            product_states = np.where(rng1, state_list[0], state_list[-1])
+            product_states = xp.where(rng1, state_list[0], state_list[-1])
         
-            ids = np.flatnonzero((rng1 + rng2) * (self.states == state_id))
+            ids = xp.flatnonzero((rng1 + rng2) * (self.states == state_id))
             products = product_states[ids]
             
             ids_list.append(ids)
@@ -77,7 +85,7 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
             
         ids_death = ids[products == unbound_state_id]
         
-        self.clear_occupancies(ids_death)
+        self.unload(ids_death)
 
 
     def step(self):
