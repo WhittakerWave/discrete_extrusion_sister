@@ -38,11 +38,14 @@ def SteppingEngine(sim, active_state_id, mode='Symmetric', **kwargs):
 		rngs = xp.random.random((sim.number, 4)).astype(xp.float32)
 		
 		args = tuple([active_state_id, rngs,
-					  sim.number, 0, sim.lattice_size,
-					  sim.states, sim.occupied,
-					  sim.barrier_engine.stall_left, sim.barrier_engine.stall_right,
-					  sim.pause_prob,
-					  sim.positions, sim.stalled])
+			      sim.number, 
+			      0, sim.lattice_size,
+			      sim.states, 
+			      sim.occupied,
+			      sim.barrier_engine.stall_left, sim.barrier_engine.stall_right,
+			      sim.pause_prob,
+			      sim.positions, 
+			      sim.stalled])
 					  
 		if kwargs['backend'] == "Numba":
 			if use_cuda:
