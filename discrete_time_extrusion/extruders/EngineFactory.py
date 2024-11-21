@@ -60,7 +60,7 @@ def SteppingEngine(sim, active_state_id, mode='Symmetric', **kwargs):
 				threads_per_block = kwargs['threads_per_block']
 				num_blocks = (sim.number+threads_per_block-1) // threads_per_block
 				
-				warnings.warn("Running lattice extrusion on the GPU using %d threads per block" % kwargs['threads_per_block'])
+				warnings.warn("Running lattice extrusion on the GPU")
 				_symmetric_step_gpu((num_blocks,), (threads_per_block,), args)
 										
 			else:
