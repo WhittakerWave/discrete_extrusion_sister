@@ -28,7 +28,7 @@ try:
 
     _symmetric_step_numba = nb.njit(fastmath=True)(SteppingEngines._symmetric_step)
 
-except ImportError:
+except:
     use_numba = False
     
 	
