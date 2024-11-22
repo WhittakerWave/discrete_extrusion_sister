@@ -13,17 +13,17 @@ def _symmetric_step(active_state_id,
 					
 	for i in range(N):
 		if states[i] == active_state_id:
-			stall1 = stall_left[positions[i, 0]]
-			stall2 = stall_right[positions[i, 1]]
+			cur1 = positions[i, 0]
+			cur2 = positions[i, 1]
+			
+			stall1 = stall_left[cur1]
+			stall2 = stall_right[cur2]
 									
 			if rngs[i, 0] < stall1:
 				stalled[i, 0] = True
 				
 			if rngs[i, 1] < stall2:
 				stalled[i, 1] = True
-						 
-			cur1 = positions[i, 0]
-			cur2 = positions[i, 1]
 
 			if not stalled[i, 0]:
 				if (not occupied[cur1-1] and (not occupied[cur1-2] if cur1>N_min+2 else True)):
