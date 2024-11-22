@@ -5,9 +5,9 @@ from . import SteppingEngines
 
 try:
     import cupy as xp
+    use_cuda = xp.cuda.is_available()
     
     dpath = os.path.dirname(os.path.abspath(__file__))
-    use_cuda = xp.cuda.is_available()
     
     if not use_cuda:
         raise ImportError
