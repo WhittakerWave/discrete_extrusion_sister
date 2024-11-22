@@ -40,7 +40,7 @@ class Translocator():
         self.params = kwargs
         
 
-    def run(self, period=None, prune_unbound_LEFs=True, backend="Python", threads_per_block=256):
+    def run(self, dry_run=False, period=None, prune_unbound_LEFs=True, backend="Python", threads_per_block=256):
 
         period = int(period) if period else self.params['sites_per_monomer']
         self.extrusion_engine.steps(self.params['dummy_steps']*period, backend=backend, threads_per_block=threads_per_block)
@@ -48,15 +48,16 @@ class Translocator():
         for _ in range(self.params['steps']):
             self.extrusion_engine.steps(period, backend=backend, threads_per_block=threads_per_block)
 
-            LEF_states = self.extrusion_engine.states.tolist()
-            CTCF_positions = self.barrier_engine.get_bound_positions()
-
-            if prune_unbound_LEFs:
-                LEF_positions = self.extrusion_engine.get_bound_positions()
-            else:
-                LEF_positions = self.extrusion_engine.positions.tolist()
-            
-            self.state_trajectory.append(LEF_states)
-
-            self.lef_trajectory.append(LEF_positions)
-            self.ctcf_trajectory.append(CTCF_positions)
+            if not dry_run:
+                LEF_states = self.extrusion_engine.states.tolist()
+                CTCF_positions = self.barrier_engine.get_bound_positions()
+    
+                if prune_unbound_LEFs:
+                    LEF_positions = self.extrusion_engine.get_bound_positions()
+                else:
+                    LEF_positions = self.extrusion_engine.positions.tolist()
+                
+                self.state_trajectory.append(LEF_states)
+    
+                self.lef_trajectory.append(LEF_positions)
+                self.ctcf_trajectory.append(CTCF_positions)
