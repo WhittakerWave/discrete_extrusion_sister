@@ -11,7 +11,7 @@ except:
     import numpy as xp
     
 
-class SymmetricExtruder(NullExtruder.NullExtruder):
+class SimpleExtruder(NullExtruder.NullExtruder):
     
     def __init__(self,
                  number,
@@ -36,23 +36,18 @@ class SymmetricExtruder(NullExtruder.NullExtruder):
         free_sites = self.sites[~self.occupied]
         binding_sites = xp.random.choice(free_sites, size=self.number, replace=False)
 
-        rng = xp.random.random(self.number) < self.birth_prob[binding_sites]
-        ids = xp.flatnonzero(rng * (self.states == unbound_state_id))
+        rng = xp.less(xp.random.random(self.number), self.birth_prob[binding_sites])
+        ids = xp.flatnonzero(rng * xp.equal(self.states, unbound_state_id))
                 
         if len(ids) > 0:
             binding_sites = binding_sites[ids]
-			
-            self.occupied[binding_sites] = True
             self.positions[ids] = binding_sites[:, None]
         
-            rng_stagger = (xp.random.random(len(ids)) < 0.5) * ~self.occupied[binding_sites+1]
+            rng_stagger = xp.less(xp.random.random(len(ids)), 0.5) * ~self.occupied[binding_sites+1]
 
             self.positions[ids, 1] = xp.where(rng_stagger,
                                               self.positions[ids, 1] + 1,
                                               self.positions[ids, 1])
-            self.occupied[binding_sites+1] = xp.where(rng_stagger,
-                                                      True,
-                                                      self.occupied[binding_sites])
                                                            
         return ids
                                                                                 
@@ -64,20 +59,10 @@ class SymmetricExtruder(NullExtruder.NullExtruder):
                               self.death_prob[self.positions])
         death_prob = xp.max(death_prob, axis=1)
         
-        rng = xp.random.random(self.number) < death_prob
-        ids = xp.flatnonzero(rng * (self.states == bound_state_id))
+        rng = xp.less(xp.random.random(self.number), death_prob)
+        ids = xp.flatnonzero(rng * xp.equal(self.states, bound_state_id))
         
         return ids
-        
-
-    def update_occupancies(self):
-        
-        ids = self.positions[xp.greater_equal(self.positions, 0)]
-        
-        self.occupied.fill(False)
-        
-        self.occupied[ids] = True
-        self.occupied[0] = self.occupied[-1] = True
         
 	
     def unload(self, ids_death):
@@ -97,11 +82,11 @@ class SymmetricExtruder(NullExtruder.NullExtruder):
         self.unload(ids_death)
         
 
-    def step(self, unbound_state_id=0, bound_state_id=1, active_state_id=1, **kwargs):
+    def step(self, mode, unbound_state_id=0, bound_state_id=1, active_state_id=1, **kwargs):
     
-        self.update_occupancies()
         self.update_states(unbound_state_id, bound_state_id)
+        self.update_occupancies()
 
-        super().step()
+        super().step(**kwargs)
 
-        EngineFactory.SteppingEngine(self, active_state_id, mode='Symmetric', **kwargs)
+        EngineFactory.SteppingEngine(self, mode, active_state_id, **kwargs)

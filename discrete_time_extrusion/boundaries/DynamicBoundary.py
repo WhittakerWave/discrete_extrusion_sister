@@ -27,11 +27,11 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
             
         occupancy = birth_prob / (birth_prob + death_prob)
 
-        self.states_left = stall_left > 0
-        self.states_right = stall_right > 0
+        self.states_left = xp.flatnonzero(stall_left)
+        self.states_right = xp.flatnonzero(stall_right)
                 
-        rng_left = xp.random.random(self.lattice_size) < occupancy
-        rng_right = xp.random.random(self.lattice_size) < occupancy
+        rng_left = xp.less(xp.random.random(self.lattice_size), occupancy)
+        rng_right = xp.less(xp.random.random(self.lattice_size), occupancy)
         
         self.states_left = xp.where(self.states_left,
                                     self.states_left*rng_left,
@@ -40,17 +40,17 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
                                      self.states_right*rng_right,
                                      -1)
 
-        self.stall_left = (self.states_left == 1)
-        self.stall_right = (self.states_right == 1)
+        self.stall_left = xp.equal(self.states_left, 1)
+        self.stall_right = xp.equal(self.states_right, 1)
                          
 
     def birth(self, unbound_state_id):
     
-        rng_left = xp.random.random(self.lattice_size) < self.birth_prob
-        rng_right = xp.random.random(self.lattice_size) < self.birth_prob
+        rng_left = xp.less(xp.random.random(self.lattice_size), self.birth_prob)
+        rng_right = xp.less(xp.random.random(self.lattice_size), self.birth_prob)
 
-        ids_left = xp.flatnonzero(rng_left * (self.states_left == unbound_state_id))
-        ids_right = xp.flatnonzero(rng_right * (self.states_right == unbound_state_id))
+        ids_left = xp.flatnonzero(rng_left * xp.equal(self.states_left, unbound_state_id))
+        ids_right = xp.flatnonzero(rng_right * xp.equal(self.states_right, unbound_state_id))
         
         self.stall_left[ids_left] = 1
         self.stall_right[ids_right] = 1
@@ -60,11 +60,11 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
         
     def death(self, bound_state_id):
 
-        rng_left = xp.random.random(self.lattice_size) < self.death_prob
-        rng_right = xp.random.random(self.lattice_size) < self.death_prob
+        rng_left = xp.less(xp.random.random(self.lattice_size), self.death_prob)
+        rng_right = xp.less(xp.random.random(self.lattice_size), self.death_prob)
 
-        ids_left = xp.flatnonzero(rng_left * (self.states_left == bound_state_id))
-        ids_right = xp.flatnonzero(rng_right * (self.states_right == bound_state_id))
+        ids_left = xp.flatnonzero(rng_left * xp.equal(self.states_left, bound_state_id))
+        ids_right = xp.flatnonzero(rng_right * xp.equal(self.states_right, bound_state_id))
         
         self.stall_left[ids_left] = 0
         self.stall_right[ids_right] = 0

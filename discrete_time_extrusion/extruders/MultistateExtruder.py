@@ -1,4 +1,4 @@
-from . import SymmetricExtruder
+from . import SimpleExtruder
 
 try:
     import cupy as xp
@@ -11,7 +11,7 @@ except:
     import numpy as xp
     
 
-class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
+class MultistateExtruder(SimpleExtruder.SimpleExtruder):
     
     def __init__(self,
                  number,
@@ -59,12 +59,12 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
             rng = xp.random.random(self.number)
             cumul_prob = xp.cumsum(transition_list, axis=0)
             
-            rng1 = (rng < cumul_prob[0])
-            rng2 = ~rng1 * (rng < cumul_prob[-1])
+            rng1 = xp.less(rng, cumul_prob[0])
+            rng2 = ~rng1 * xp.less(rng, cumul_prob[-1])
             
             product_states = xp.where(rng1, state_list[0], state_list[-1])
         
-            ids = xp.flatnonzero((rng1 + rng2) * (self.states == state_id))
+            ids = xp.flatnonzero(xp.logical_or(rng1, rng2) * xp.equal(self.states, state_id))
             products = product_states[ids]
             
             ids_list.append(ids)
@@ -83,11 +83,10 @@ class MultistateSymmetricExtruder(SymmetricExtruder.SymmetricExtruder):
         for ids, products in zip(ids_list, products_list):
             self.states[ids] = products
             
-        ids_death = ids[products == unbound_state_id]
-        
+        ids_death = ids[xp.equal(products, unbound_state_id)]
         self.unload(ids_death)
 
 
-    def step(self):
+    def step(self, mode, **kwargs):
     
-        super().step(active_state_id=self.state_dict['RN'])
+        super().step(mode, active_state_id=self.state_dict['RN'], **kwargs)

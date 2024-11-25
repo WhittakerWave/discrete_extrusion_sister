@@ -25,11 +25,11 @@ class NullExtruder():
         self.states = xp.zeros(self.number, dtype=xp.int32)
         self.positions = xp.zeros((self.number, 2), dtype=xp.int32) - 1
         
-        self.occupied = xp.zeros(self.lattice_size, dtype=bool)
         self.stalled = xp.zeros((self.number, 2), dtype=bool)
+        self.occupied = xp.zeros(self.lattice_size, dtype=bool)
 
-        self.occupied[0] = self.occupied[-1] = True
-
+        self.update_occupancies()
+        
 
     def step(self, *args, **kwargs):
     
@@ -41,10 +41,20 @@ class NullExtruder():
         for _ in range(N):
             self.step(*args, **kwargs)
             
-            
+
+    def update_occupancies(self):
+        
+        ids = self.positions[xp.greater_equal(self.positions, 0)]
+        
+        self.occupied.fill(False)
+        self.occupied[0] = self.occupied[-1] = True
+
+        self.occupied[ids] = True
+        
+        
     def get_bound_positions(self):
 
-        bound_ids = (self.positions >= 0).all(axis=1)
-        bound_positions = self.positions[bound_ids]
+        ids = xp.greater_equal(self.positions, 0).all(axis=1)
+        bound_positions = self.positions[ids]
 
         return bound_positions.tolist()
