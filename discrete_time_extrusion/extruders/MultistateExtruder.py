@@ -36,52 +36,58 @@ class MultistateExtruder(SimpleExtruder.SimpleExtruder):
 
     def state_transitions(self, unbound_state_id):
         
-        ids_list = []
-        products_list = []
+        ids_array = xp.zeros((len(self.state_dict), self.number), dtype=xp.int32)
+        products_array = xp.zeros((len(self.state_dict), self.number), dtype=xp.int32)
             
-        for state_id in self.state_dict.values():
-            state_list = []
-            transition_list = []
+        for id, state_id in enumerate(self.state_dict.values()):
+            ctr = 0
+            buffer = 1 if state_id == min(self.state_dict.values()) else 2
+            
+            state_array = xp.zeros(buffer, dtype=xp.int32)
+            transition_array = xp.zeros((buffer, self.number), dtype=xp.float32)
             
             for ids, transition_prob in self.transition_dict.items():
                 if state_id == int(ids[0]):
-                    state_list.append(int(ids[1]))
-                    transition_list.append(transition_prob[self.positions].max(axis=1))
+                    state_array[ctr] = int(ids[1])
+                    transition_array[ctr] = transition_prob[self.positions].max(axis=1)
+                    
+                    ctr += 1
                     
             if state_id == max(self.state_dict.values()):
                 death_prob = xp.where(self.stalled,
                                       self.stalled_death_prob[self.positions],
                                       self.death_prob[self.positions])
                                       
-                state_list.append(unbound_state_id)
-                transition_list.append(death_prob.max(axis=1))
+                state_array[-1] = unbound_state_id
+                transition_array[-1] = death_prob.max(axis=1)
 
             rng = xp.random.random(self.number)
-            cumul_prob = xp.cumsum(transition_list, axis=0)
-            
+            cumul_prob = xp.cumsum(transition_array, axis=0)
+
             rng1 = xp.less(rng, cumul_prob[0])
-            rng2 = ~rng1 * xp.less(rng, cumul_prob[-1])
+            rng2 = xp.logical_and(xp.logical_not(rng1), xp.less(rng, cumul_prob[-1]))
             
-            product_states = xp.where(rng1, state_list[0], state_list[-1])
+            product_states = xp.where(rng1, state_array[0], state_array[-1])
+            transitions = xp.logical_and(xp.logical_or(rng1, rng2), xp.equal(self.states, state_id))
         
-            ids = xp.flatnonzero(xp.logical_or(rng1, rng2) * xp.equal(self.states, state_id))
+            ids = xp.flatnonzero(transitions)
             products = product_states[ids]
             
-            ids_list.append(ids)
-            products_list.append(products)
+            ids_array[id] = xp.pad(ids, (0, self.number-len(ids)), constant_values=(0, -1))
+            products_array[id] = xp.pad(products, (0, self.number-len(ids)), constant_values=(0, -1))
             
-        return ids_list, products_list
+        return ids_array, products_array
             
         
     def update_states(self, unbound_state_id, bound_state_id):
         
-        ids_list, products_list = self.state_transitions(unbound_state_id)
-        ids_birth = self.birth(unbound_state_id)
+        ids_array, products_array = self.state_transitions(unbound_state_id)
         
+        ids_birth = self.birth(unbound_state_id)
         self.states[ids_birth] = bound_state_id
         
-        for ids, products in zip(ids_list, products_list):
-            self.states[ids] = products
+        for ids, products in zip(ids_array, products_array):
+            self.states[ids] = xp.where(xp.greater_equal(ids, 0), products, self.states[ids])
             
         ids_death = ids[xp.equal(products, unbound_state_id)]
         self.unload(ids_death)
