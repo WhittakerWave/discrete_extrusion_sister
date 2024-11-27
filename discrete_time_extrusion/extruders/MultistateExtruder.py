@@ -72,8 +72,8 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
             ids = xp.flatnonzero(xp.logical_or(rng1, rng2) * xp.equal(self.states, state_id))
             products = product_states[ids]
             
-            ids_array[id] = xp.pad(ids, (0, self.number-len(ids)), constant_values=(0, -1))
-            products_array[id] = xp.pad(products, (0, self.number-len(ids)), constant_values=(0, -1))
+            ids_array[id] = xp.r_[ids, xp.full(self.number-len(ids), -1, dtype=xp.int32)]
+            products_array[id] = xp.r_[products, xp.full(self.number-len(ids), -1, dtype=xp.int32)]
             
         return ids_array, products_array
             
