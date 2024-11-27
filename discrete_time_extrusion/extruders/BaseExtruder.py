@@ -11,7 +11,7 @@ except:
     import numpy as xp
     
 
-class SimpleExtruder(NullExtruder.NullExtruder):
+class BaseExtruder(NullExtruder.NullExtruder):
     
     def __init__(self,
                  number,

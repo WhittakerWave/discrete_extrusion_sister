@@ -1,4 +1,4 @@
-from . import SimpleExtruder
+from . import BaseExtruder
 
 try:
     import cupy as xp
@@ -11,7 +11,7 @@ except:
     import numpy as xp
     
 
-class MultistateExtruder(SimpleExtruder.SimpleExtruder):
+class MultistateExtruder(BaseExtruder.BaseExtruder):
     
     def __init__(self,
                  number,
@@ -65,12 +65,11 @@ class MultistateExtruder(SimpleExtruder.SimpleExtruder):
             cumul_prob = xp.cumsum(transition_array, axis=0)
 
             rng1 = xp.less(rng, cumul_prob[0])
-            rng2 = xp.logical_and(xp.logical_not(rng1), xp.less(rng, cumul_prob[-1]))
+            rng2 = xp.logical_and(xp.less(rng, cumul_prob[-1]), ~rng1)
             
             product_states = xp.where(rng1, state_array[0], state_array[-1])
-            transitions = xp.logical_and(xp.logical_or(rng1, rng2), xp.equal(self.states, state_id))
         
-            ids = xp.flatnonzero(transitions)
+            ids = xp.flatnonzero(xp.logical_or(rng1, rng2) * xp.equal(self.states, state_id))
             products = product_states[ids]
             
             ids_array[id] = xp.pad(ids, (0, self.number-len(ids)), constant_values=(0, -1))
