@@ -1,15 +1,5 @@
-try:
-    import cupy as xp
-    use_cuda = xp.cuda.is_available()
-    
-    if not use_cuda:
-        raise ImportError
-
-except:
-    import numpy as xp
-    
-
-def make_site_array(type_list,
+def make_site_array(xp,
+                    type_list,
                     site_types,
                     value_dict,
                     at_ids=None,
@@ -33,7 +23,8 @@ def make_site_array(type_list,
     return xp.tile(prop_array, number_of_replica)
 
 
-def make_CTCF_arrays(type_list,
+def make_CTCF_arrays(xp,
+                     type_list,
                      site_types,
                      left_positions,
                      right_positions,
@@ -42,14 +33,14 @@ def make_CTCF_arrays(type_list,
                      velocity_multiplier,
                      **kwargs):
     
-    stall_left_array = make_site_array(type_list, site_types, CTCF_facestall,
+    stall_left_array = make_site_array(xp, type_list, site_types, CTCF_facestall,
                                        at_ids=left_positions, **kwargs)
-    stall_right_array = make_site_array(type_list, site_types, CTCF_facestall,
+    stall_right_array = make_site_array(xp, type_list, site_types, CTCF_facestall,
                                         at_ids=right_positions, **kwargs)
     
-    stall_left_array += make_site_array(type_list, site_types, CTCF_backstall,
+    stall_left_array += make_site_array(xp, type_list, site_types, CTCF_backstall,
                                         at_ids=right_positions, **kwargs)
-    stall_right_array += make_site_array(type_list, site_types, CTCF_backstall,
+    stall_right_array += make_site_array(xp, type_list, site_types, CTCF_backstall,
                                          at_idsids=left_positions, **kwargs)
     
     stall_left_array = 1 - (1-stall_left_array) ** velocity_multiplier
@@ -58,7 +49,8 @@ def make_CTCF_arrays(type_list,
     return [stall_left_array, stall_right_array]
 
 
-def make_CTCF_dynamic_arrays(type_list,
+def make_CTCF_dynamic_arrays(xp,
+                             type_list,
                              site_types,
                              CTCF_on_rate,
                              CTCF_off_rate,
@@ -66,8 +58,8 @@ def make_CTCF_dynamic_arrays(type_list,
                              velocity_multiplier,
                              **kwargs):
     
-    on_rate_array = make_site_array(type_list, site_types, CTCF_on_rate, **kwargs)
-    off_rate_array = make_site_array(type_list, site_types, CTCF_off_rate, **kwargs)
+    on_rate_array = make_site_array(xp, type_list, site_types, CTCF_on_rate, **kwargs)
+    off_rate_array = make_site_array(xp, type_list, site_types, CTCF_off_rate, **kwargs)
     
     birth_array = on_rate_array / (velocity_multiplier * sites_per_monomer)
     death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
@@ -75,7 +67,8 @@ def make_CTCF_dynamic_arrays(type_list,
     return [birth_array, death_array]
     
 
-def make_LEF_arrays(type_list,
+def make_LEF_arrays(xp,
+                    type_list,
                     site_types,
 					LEF_on_rate,
 					LEF_off_rate,
@@ -85,9 +78,9 @@ def make_LEF_arrays(type_list,
                     velocity_multiplier,
                     **kwargs):
     
-    on_rate_array = make_site_array(type_list, site_types, LEF_on_rate, **kwargs)
-    off_rate_array = make_site_array(type_list, site_types, LEF_off_rate, **kwargs)
-    stalled_off_rate_array = make_site_array(type_list, site_types, LEF_stalled_off_rate, **kwargs)
+    on_rate_array = make_site_array(xp, type_list, site_types, LEF_on_rate, **kwargs)
+    off_rate_array = make_site_array(xp, type_list, site_types, LEF_off_rate, **kwargs)
+    stalled_off_rate_array = make_site_array(xp, type_list, site_types, LEF_stalled_off_rate, **kwargs)
     
     birth_array = on_rate_array / (velocity_multiplier * sites_per_monomer)
     death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
@@ -98,7 +91,8 @@ def make_LEF_arrays(type_list,
     return [birth_array, death_array, stalled_death_array, pause_array]
 
 
-def make_LEF_transition_dict(type_list,
+def make_LEF_transition_dict(xp,
+                             type_list,
                              site_types,
                              LEF_states,
                              LEF_transition_rates,
@@ -112,7 +106,7 @@ def make_LEF_transition_dict(type_list,
     transition_dict["LEF_transitions"] = {}
 
     for ids, LEF_rate in LEF_transition_rates.items():
-        rate_array = make_site_array(type_list, site_types, LEF_rate, **kwargs)
+        rate_array = make_site_array(xp, type_list, site_types, LEF_rate, **kwargs)
         transition_dict["LEF_transitions"][ids] = rate_array / (velocity_multiplier * sites_per_monomer)
 
     return transition_dict

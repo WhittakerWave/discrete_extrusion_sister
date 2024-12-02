@@ -1,14 +1,4 @@
 from . import NullExtruder, EngineFactory
-
-try:
-    import cupy as xp
-    use_cuda = xp.cuda.is_available()
-    
-    if not use_cuda:
-        raise ImportError
-
-except:
-    import numpy as xp
     
 
 class BaseExtruder(NullExtruder.NullExtruder):
@@ -20,7 +10,8 @@ class BaseExtruder(NullExtruder.NullExtruder):
                  death_prob,
                  stalled_death_prob,
                  pause_prob,
-                 *args, **kwargs):
+                 *args,
+                 **kwargs):
     
         super().__init__(number, barrier_engine)
 		
@@ -29,38 +20,40 @@ class BaseExtruder(NullExtruder.NullExtruder):
 
         self.pause_prob = pause_prob
         self.stalled_death_prob = stalled_death_prob
-                            
+        
+        self.stepping_engine = EngineFactory.SteppingEngine
+        
                             
     def birth(self, unbound_state_id):
     
         free_sites = self.sites[~self.occupied]
-        binding_sites = xp.random.choice(free_sites, size=self.number, replace=False)
+        binding_sites = self.xp.random.choice(free_sites, size=self.number, replace=False)
 
-        rng = xp.less(xp.random.random(self.number), self.birth_prob[binding_sites])
-        ids = xp.flatnonzero(rng * xp.equal(self.states, unbound_state_id))
+        rng = self.xp.less(self.xp.random.random(self.number), self.birth_prob[binding_sites])
+        ids = self.xp.flatnonzero(rng * self.xp.equal(self.states, unbound_state_id))
                 
         if len(ids) > 0:
             binding_sites = binding_sites[ids]
             self.positions[ids] = binding_sites[:, None]
         
-            rng_stagger = xp.less(xp.random.random(len(ids)), 0.5) * ~self.occupied[binding_sites+1]
+            rng_stagger = self.xp.less(self.xp.random.random(len(ids)), 0.5) * ~self.occupied[binding_sites+1]
 
-            self.positions[ids, 1] = xp.where(rng_stagger,
-                                              self.positions[ids, 1] + 1,
-                                              self.positions[ids, 1])
+            self.positions[ids, 1] = self.xp.where(rng_stagger,
+                                                   self.positions[ids, 1] + 1,
+                                                   self.positions[ids, 1])
                                                            
         return ids
                                                                                 
         
     def death(self, bound_state_id):
     
-        death_prob = xp.where(self.stalled,
-                              self.stalled_death_prob[self.positions],
-                              self.death_prob[self.positions])
-        death_prob = xp.max(death_prob, axis=1)
+        death_prob = self.xp.where(self.stalled,
+                                   self.stalled_death_prob[self.positions],
+                                   self.death_prob[self.positions])
+        death_prob = self.xp.max(death_prob, axis=1)
         
-        rng = xp.less(xp.random.random(self.number), death_prob)
-        ids = xp.flatnonzero(rng * xp.equal(self.states, bound_state_id))
+        rng = self.xp.less(self.xp.random.random(self.number), death_prob)
+        ids = self.xp.flatnonzero(rng * self.xp.equal(self.states, bound_state_id))
         
         return ids
         
@@ -89,4 +82,4 @@ class BaseExtruder(NullExtruder.NullExtruder):
 
         super().step(**kwargs)
 
-        EngineFactory.SteppingEngine(self, mode, active_state_id, **kwargs)
+        self.stepping_engine(self, mode, active_state_id, **kwargs)

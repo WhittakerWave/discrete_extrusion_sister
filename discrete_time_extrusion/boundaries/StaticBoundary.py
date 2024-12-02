@@ -6,7 +6,8 @@ class StaticBoundary(NullBoundary.NullBoundary):
     def __init__(self,
                  stall_left,
                  stall_right,
-                 *args, **kwargs):
+                 *args,
+                 **kwargs):
         
         super().__init__(stall_left, stall_right)
 

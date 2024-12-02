@@ -10,8 +10,26 @@ class Translocator():
                  site_types,
                  ctcf_left_positions,
                  ctcf_right_positions,
+                 device='CPU',
                  **kwargs):
 
+        if device == 'CPU':
+            import numpy as xp
+            
+        elif device == 'GPU':
+            try:
+                import cupy as xp
+                use_cuda = xp.cuda.is_available()
+		
+                if not use_cuda:
+                    raise ImportError("Could not load CUDA environment")
+	
+            except:
+                raise
+                
+        else:
+            raise RuntimeError("Unrecognized device %s - use either 'CPU' or 'GPU'" % device)
+    
         sites_per_replica = kwargs['monomers_per_replica'] * kwargs['sites_per_monomer']
         number_of_LEFs = (kwargs['number_of_replica'] * kwargs['monomers_per_replica']) // kwargs['LEF_separation']
         
@@ -20,11 +38,11 @@ class Translocator():
 
         self.time_unit = 1. / (kwargs['sites_per_monomer'] * kwargs['velocity_multiplier'])
 
-        lef_arrays = arrays.make_LEF_arrays(type_list, site_types, **kwargs)
-        lef_transition_dict = arrays.make_LEF_transition_dict(type_list, site_types, **kwargs)
+        lef_arrays = arrays.make_LEF_arrays(xp, type_list, site_types, **kwargs)
+        lef_transition_dict = arrays.make_LEF_transition_dict(xp, type_list, site_types, **kwargs)
 
-        ctcf_arrays = arrays.make_CTCF_arrays(type_list, site_types, ctcf_left_positions, ctcf_right_positions, **kwargs)
-        ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(type_list, site_types, **kwargs)
+        ctcf_arrays = arrays.make_CTCF_arrays(xp, type_list, site_types, ctcf_left_positions, ctcf_right_positions, **kwargs)
+        ctcf_dynamic_arrays = arrays.make_CTCF_dynamic_arrays(xp, type_list, site_types, **kwargs)
         
         self.barrier_engine = barrier_engine(*ctcf_arrays, *ctcf_dynamic_arrays)
         self.extrusion_engine = extrusion_engine(number_of_LEFs, self.barrier_engine, *lef_arrays, **lef_transition_dict)

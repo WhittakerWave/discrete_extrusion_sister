@@ -1,14 +1,4 @@
 from . import BaseExtruder
-
-try:
-    import cupy as xp
-    use_cuda = xp.cuda.is_available()
-    
-    if not use_cuda:
-        raise ImportError
-
-except:
-    import numpy as xp
     
 
 class MultistateExtruder(BaseExtruder.BaseExtruder):
@@ -36,15 +26,15 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
 
     def state_transitions(self, unbound_state_id):
         
-        ids_array = xp.zeros((len(self.state_dict), self.number), dtype=xp.int32)
-        products_array = xp.zeros((len(self.state_dict), self.number), dtype=xp.int32)
+        ids_array = self.xp.zeros((len(self.state_dict), self.number), dtype=self.xp.int32)
+        products_array = self.xp.zeros((len(self.state_dict), self.number), dtype=self.xp.int32)
             
         for id, state_id in enumerate(self.state_dict.values()):
             ctr = 0
             buffer = 1 if state_id == min(self.state_dict.values()) else 2
             
-            state_array = xp.zeros(buffer, dtype=xp.int32)
-            transition_array = xp.zeros((buffer, self.number), dtype=xp.float32)
+            state_array = self.xp.zeros(buffer, dtype=self.xp.int32)
+            transition_array = self.xp.zeros((buffer, self.number), dtype=self.xp.float32)
             
             for ids, transition_prob in self.transition_dict.items():
                 if state_id == int(ids[0]):
@@ -54,26 +44,26 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
                     ctr += 1
                     
             if state_id == max(self.state_dict.values()):
-                death_prob = xp.where(self.stalled,
-                                      self.stalled_death_prob[self.positions],
-                                      self.death_prob[self.positions])
+                death_prob = self.xp.where(self.stalled,
+                                           self.stalled_death_prob[self.positions],
+                                           self.death_prob[self.positions])
                                       
                 state_array[-1] = unbound_state_id
                 transition_array[-1] = death_prob.max(axis=1)
 
-            rng = xp.random.random(self.number)
-            cumul_prob = xp.cumsum(transition_array, axis=0)
+            rng = self.xp.random.random(self.number)
+            cumul_prob = self.xp.cumsum(transition_array, axis=0)
 
-            rng1 = xp.less(rng, cumul_prob[0])
-            rng2 = xp.logical_and(xp.less(rng, cumul_prob[-1]), ~rng1)
+            rng1 = self.xp.less(rng, cumul_prob[0])
+            rng2 = self.xp.logical_and(self.xp.less(rng, cumul_prob[-1]), ~rng1)
             
-            product_states = xp.where(rng1, state_array[0], state_array[-1])
+            product_states = self.xp.where(rng1, state_array[0], state_array[-1])
         
-            ids = xp.flatnonzero(xp.logical_or(rng1, rng2) * xp.equal(self.states, state_id))
+            ids = self.xp.flatnonzero(self.xp.logical_or(rng1, rng2) * self.xp.equal(self.states, state_id))
             products = product_states[ids]
             
-            ids_array[id] = xp.r_[ids, xp.full(self.number-len(ids), -1, dtype=xp.int32)]
-            products_array[id] = xp.r_[products, xp.full(self.number-len(ids), -1, dtype=xp.int32)]
+            ids_array[id] = self.xp.r_[ids, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
+            products_array[id] = self.xp.r_[products, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
             
         return ids_array, products_array
             
@@ -86,9 +76,9 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
         self.states[ids_birth] = bound_state_id
         
         for ids, products in zip(ids_array, products_array):
-            self.states[ids] = xp.where(xp.greater_equal(ids, 0), products, self.states[ids])
+            self.states[ids] = self.xp.where(self.xp.greater_equal(ids, 0), products, self.states[ids])
             
-        ids_death = ids[xp.equal(products, unbound_state_id)]
+        ids_death = ids[self.xp.equal(products, unbound_state_id)]
         self.unload(ids_death)
 
 

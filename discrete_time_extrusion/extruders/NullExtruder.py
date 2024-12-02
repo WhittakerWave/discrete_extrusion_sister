@@ -1,32 +1,24 @@
-try:
-    import cupy as xp
-    use_cuda = xp.cuda.is_available()
-    
-    if not use_cuda:
-        raise ImportError
-
-except:
-    import numpy as xp
-
-
 class NullExtruder():
     
     def __init__(self,
                  number,
                  barrier_engine,
-                 *args, **kwargs):
+                 *args,
+                 **kwargs):
     
         self.number = number
+        
+        self.xp = barrier_engine.xp
         self.barrier_engine = barrier_engine
         
         self.lattice_size = barrier_engine.lattice_size
-        self.sites = xp.arange(self.lattice_size, dtype=xp.int32)
+        self.sites = self.xp.arange(self.lattice_size, dtype=self.xp.int32)
 
-        self.states = xp.zeros(self.number, dtype=xp.int32)
-        self.positions = xp.zeros((self.number, 2), dtype=xp.int32) - 1
+        self.states = self.xp.zeros(self.number, dtype=self.xp.int32)
+        self.positions = self.xp.zeros((self.number, 2), dtype=self.xp.int32) - 1
         
-        self.stalled = xp.zeros((self.number, 2), dtype=bool)
-        self.occupied = xp.zeros(self.lattice_size, dtype=bool)
+        self.stalled = self.xp.zeros((self.number, 2), dtype=bool)
+        self.occupied = self.xp.zeros(self.lattice_size, dtype=bool)
 
         self.update_occupancies()
         
@@ -44,7 +36,7 @@ class NullExtruder():
 
     def update_occupancies(self):
         
-        ids = self.positions[xp.greater_equal(self.positions, 0)]
+        ids = self.positions[self.xp.greater_equal(self.positions, 0)]
         
         self.occupied.fill(False)
         self.occupied[0] = self.occupied[-1] = True
@@ -54,7 +46,7 @@ class NullExtruder():
         
     def get_bound_positions(self):
 
-        ids = xp.greater_equal(self.positions, 0).all(axis=1)
+        ids = self.xp.greater_equal(self.positions, 0).all(axis=1)
         bound_positions = self.positions[ids]
 
         return bound_positions.tolist()
