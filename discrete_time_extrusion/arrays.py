@@ -14,11 +14,16 @@ def make_site_array(xp,
     for i, name in enumerate(type_list):
         prop_array[site_types == i] = value_dict[name]
         
-    if isinstance(at_ids, xp.ndarray):
+    try:
+        ids = xp.array(at_ids, dtype=xp.uint32)
+        
         mask = xp.zeros(len(site_types), dtype=bool)
-        mask[at_ids] = True
+        mask[ids] = True
         
         prop_array[~mask] = 0
+        
+    except:
+        pass
         
     return xp.tile(prop_array, number_of_replica)
 
@@ -86,7 +91,7 @@ def make_LEF_arrays(xp,
     death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
     stalled_death_array = stalled_off_rate_array / (velocity_multiplier * sites_per_monomer)
 
-    pause_array = make_site_array(type_list, site_types, LEF_pause, **kwargs)
+    pause_array = make_site_array(xp, type_list, site_types, LEF_pause, **kwargs)
 
     return [birth_array, death_array, stalled_death_array, pause_array]
 

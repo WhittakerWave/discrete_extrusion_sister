@@ -3,13 +3,13 @@ class NullExtruder():
     def __init__(self,
                  number,
                  barrier_engine,
-                 *args,
-                 **kwargs):
-    
+                 *args, **kwargs):
+            
         self.number = number
+        self.barrier_engine = barrier_engine
         
         self.xp = barrier_engine.xp
-        self.barrier_engine = barrier_engine
+        self.get_list = barrier_engine.get_list
         
         self.lattice_size = barrier_engine.lattice_size
         self.sites = self.xp.arange(self.lattice_size, dtype=self.xp.int32)
@@ -17,7 +17,7 @@ class NullExtruder():
         self.states = self.xp.zeros(self.number, dtype=self.xp.int32)
         self.positions = self.xp.zeros((self.number, 2), dtype=self.xp.int32) - 1
         
-        self.stalled = self.xp.zeros((self.number, 2), dtype=bool)
+        self.stalled = self.xp.zeros((self.number, 2), dtype=self.xp.uint32)
         self.occupied = self.xp.zeros(self.lattice_size, dtype=bool)
 
         self.update_occupancies()
@@ -43,10 +43,20 @@ class NullExtruder():
 
         self.occupied[ids] = True
         
+
+    def get_states(self):
+
+        return self.get_list(self.states)
+        
+        
+    def get_positions(self):
+
+        return self.get_list(self.positions)
+        
         
     def get_bound_positions(self):
 
         ids = self.xp.greater_equal(self.positions, 0).all(axis=1)
         bound_positions = self.positions[ids]
 
-        return bound_positions.tolist()
+        return self.get_list(bound_positions)

@@ -57,7 +57,7 @@ def _symmetric_step_gpu():
 			const float* stall_right,
 			const float* pause_prob,
 			int* positions,
-			bool* stalled) {
+			unsigned int* stalled) {
 
 		unsigned int i = (unsigned int) (blockDim.x * blockIdx.x + threadIdx.x);
 

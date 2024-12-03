@@ -3,8 +3,7 @@ class NullBoundary():
     def __init__(self,
                  stall_left,
                  stall_right,
-                 *args,
-                 **kwargs):
+                 *args, **kwargs):
 
         try:
             import cupy as cp
@@ -19,8 +18,10 @@ class NullBoundary():
         
         self.stall_left = self.xp.zeros_like(stall_left)
         self.stall_right = self.xp.zeros_like(stall_right)
+        
+        self.get_list = lambda x: x.get().tolist() if self.xp.__name__ == 'cupy' else x.tolist()
 
-                                
+
     def step(self, *args, **kwargs):
     
         pass
@@ -31,4 +32,4 @@ class NullBoundary():
         bound_left_positions = self.xp.flatnonzero(self.stall_left)
         bound_right_positions = self.xp.flatnonzero(self.stall_right)
     
-        return bound_left_positions.tolist() + bound_right_positions.tolist()
+        return self.get_list(bound_left_positions) + self.get_list(bound_right_positions)

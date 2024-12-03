@@ -10,10 +10,10 @@ class BaseExtruder(NullExtruder.NullExtruder):
                  death_prob,
                  stalled_death_prob,
                  pause_prob,
-                 *args,
-                 **kwargs):
+                 *args, **kwargs):
     
-        super().__init__(number, barrier_engine)
+        super().__init__(number,
+                         barrier_engine)
 		
         self.birth_prob = birth_prob
         self.death_prob = death_prob

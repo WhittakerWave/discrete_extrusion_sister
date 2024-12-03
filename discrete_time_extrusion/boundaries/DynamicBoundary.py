@@ -8,8 +8,7 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
                  stall_right,
                  birth_prob,
                  death_prob,
-                 *args,
-                 **kwargs):
+                 *args, **kwargs):
         
         super().__init__(stall_left, stall_right)
         
@@ -18,8 +17,8 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
             
         occupancy = birth_prob / (birth_prob + death_prob)
 
-        self.states_left = self.xp.flatnonzero(stall_left)
-        self.states_right = self.xp.flatnonzero(stall_right)
+        self.states_left = self.xp.greater(stall_left, 0)
+        self.states_right = self.xp.greater(stall_right, 0)
                 
         rng_left = self.xp.less(self.xp.random.random(self.lattice_size), occupancy)
         rng_right = self.xp.less(self.xp.random.random(self.lattice_size), occupancy)
@@ -31,8 +30,8 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
                                           self.states_right*rng_right,
                                           -1)
 
-        self.stall_left = self.xp.equal(self.states_left, 1)
-        self.stall_right = self.xp.equal(self.states_right, 1)
+        self.stall_left = self.xp.equal(self.states_left, 1).astype(self.xp.float32)
+        self.stall_right = self.xp.equal(self.states_right, 1).astype(self.xp.float32)
                          
 
     def birth(self, unbound_state_id):
@@ -65,17 +64,17 @@ class DynamicBoundary(StaticBoundary.StaticBoundary):
     
     def step(self, extrusion_engine, unbound_state_id=0, bound_state_id=1):
     
-        ids_birth = self.birth(unbound_state_id)
-        ids_death = self.death(bound_state_id)
+        ids_birth_left, ids_birth_right = self.birth(unbound_state_id)
+        ids_death_left, ids_death_right = self.death(bound_state_id)
 
-        self.states_left[ids_birth[0]] = bound_state_id
-        self.states_left[ids_death[0]] = unbound_state_id
+        self.states_left[ids_birth_left] = bound_state_id
+        self.states_left[ids_death_left] = unbound_state_id
 
-        self.states_right[ids_birth[1]] = bound_state_id
-        self.states_right[ids_death[1]] = unbound_state_id
+        self.states_right[ids_birth_right] = bound_state_id
+        self.states_right[ids_death_right] = unbound_state_id
 
-        lef_ids_left = self.xp.flatnonzero(self.xp.in1d(extrusion_engine.positions[:, 0], ids_death[0]))
-        lef_ids_right = self.xp.flatnonzero(self.xp.in1d(extrusion_engine.positions[:, 1], ids_death[1]))
+        lef_ids_left = self.xp.in1d(extrusion_engine.positions[:, 0], ids_death_left)
+        lef_ids_right = self.xp.in1d(extrusion_engine.positions[:, 1], ids_death_right)
 
-        extrusion_engine.stalled[lef_ids_left, 0] = 0
-        extrusion_engine.stalled[lef_ids_right, 1] = 0
+        extrusion_engine.stalled[:, 0] = self.xp.where(lef_ids_left, 0, extrusion_engine.stalled[:, 0])
+        extrusion_engine.stalled[:, 1] = self.xp.where(lef_ids_right, 0, extrusion_engine.stalled[:, 1])

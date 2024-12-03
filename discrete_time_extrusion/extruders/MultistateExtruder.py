@@ -10,8 +10,7 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
                  death_prob,
                  stalled_death_prob,
                  pause_prob,
-                 *args,
-                 **transition_dict):
+                 *args, **kwargs):
     
         super().__init__(number,
                          barrier_engine,
@@ -20,8 +19,8 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
                          stalled_death_prob,
                          pause_prob)
         
-        self.state_dict = transition_dict["LEF_states"]
-        self.transition_dict = transition_dict["LEF_transitions"]
+        self.state_dict = kwargs["LEF_states"]
+        self.transition_dict = kwargs["LEF_transitions"]
         
 
     def state_transitions(self, unbound_state_id):
@@ -29,7 +28,7 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
         ids_array = self.xp.zeros((len(self.state_dict), self.number), dtype=self.xp.int32)
         products_array = self.xp.zeros((len(self.state_dict), self.number), dtype=self.xp.int32)
             
-        for id, state_id in enumerate(self.state_dict.values()):
+        for i, state_id in enumerate(self.state_dict.values()):
             ctr = 0
             buffer = 1 if state_id == min(self.state_dict.values()) else 2
             
@@ -58,12 +57,13 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
             rng2 = self.xp.logical_and(self.xp.less(rng, cumul_prob[-1]), ~rng1)
             
             product_states = self.xp.where(rng1, state_array[0], state_array[-1])
+            transition_mask = self.xp.logical_or(rng1, rng2) * self.xp.equal(self.states, state_id)
         
-            ids = self.xp.flatnonzero(self.xp.logical_or(rng1, rng2) * self.xp.equal(self.states, state_id))
+            ids = self.xp.flatnonzero(transition_mask)
             products = product_states[ids]
             
-            ids_array[id] = self.xp.r_[ids, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
-            products_array[id] = self.xp.r_[products, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
+            ids_array[i] = self.xp.r_[ids, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
+            products_array[i] = self.xp.r_[products, self.xp.full(self.number-len(ids), -1, dtype=self.xp.int32)]
             
         return ids_array, products_array
             
