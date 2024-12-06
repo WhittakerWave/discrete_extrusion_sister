@@ -53,22 +53,22 @@ class Translocator():
         self.params = kwargs
                 
 
-    def run(self, N):
+    def run(self, N, **kwargs):
             
-        self.extrusion_engine.steps(N, self.params['mode'])
+        self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
         
         
-    def run_trajectory(self, period=None, steps=None, prune_unbound_LEFs=True):
+    def run_trajectory(self, period=None, steps=None, prune_unbound_LEFs=True, **kwargs):
 
         self.clear_trajectory()
 
         steps = int(steps) if steps else self.params['steps']
         period = int(period) if period else self.params['sites_per_monomer']
         
-        self.run(self.params['dummy_steps']*period)
+        self.run(self.params['dummy_steps']*period, **kwargs)
     
         for _ in range(steps):
-            self.run(period)
+            self.run(period, **kwargs)
             
             LEF_states = self.extrusion_engine.get_states()
             CTCF_positions = self.barrier_engine.get_bound_positions()

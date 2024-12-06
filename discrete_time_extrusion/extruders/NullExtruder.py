@@ -12,13 +12,14 @@ class NullExtruder():
         self.get_list = barrier_engine.get_list
         
         self.lattice_size = barrier_engine.lattice_size
+        self.occupied = self.xp.zeros(self.lattice_size, dtype=bool)
         self.sites = self.xp.arange(self.lattice_size, dtype=self.xp.int32)
-
+        
         self.states = self.xp.zeros(self.number, dtype=self.xp.int32)
-        self.positions = self.xp.zeros((self.number, 2), dtype=self.xp.int32) - 1
+        self.directions = self.xp.zeros(self.number, dtype=self.xp.uint32)
         
         self.stalled = self.xp.zeros((self.number, 2), dtype=self.xp.uint32)
-        self.occupied = self.xp.zeros(self.lattice_size, dtype=bool)
+        self.positions = self.xp.zeros((self.number, 2), dtype=self.xp.int32) - 1
 
         self.update_occupancies()
         
@@ -36,11 +37,10 @@ class NullExtruder():
 
     def update_occupancies(self):
         
-        ids = self.positions[self.xp.greater_equal(self.positions, 0)]
-        
         self.occupied.fill(False)
         self.occupied[0] = self.occupied[-1] = True
-
+        
+        ids = self.positions[self.xp.greater_equal(self.positions, 0)]
         self.occupied[ids] = True
         
 

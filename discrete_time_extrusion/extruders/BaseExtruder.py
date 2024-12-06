@@ -36,11 +36,13 @@ class BaseExtruder(NullExtruder.NullExtruder):
             binding_sites = binding_sites[ids]
             self.positions[ids] = binding_sites[:, None]
         
+            rng_dir = self.xp.less(self.xp.random.random(len(ids)), 0.5)
             rng_stagger = self.xp.less(self.xp.random.random(len(ids)), 0.5) * ~self.occupied[binding_sites+1]
 
             self.positions[ids, 1] = self.xp.where(rng_stagger,
                                                    self.positions[ids, 1] + 1,
                                                    self.positions[ids, 1])
+            self.directions[ids] = rng_dir.astype(self.xp.uint32)
                                                            
         return ids
                                                                                 

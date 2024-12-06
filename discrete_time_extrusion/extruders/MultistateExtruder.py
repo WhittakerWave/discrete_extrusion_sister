@@ -71,12 +71,17 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
     def update_states(self, unbound_state_id, bound_state_id):
         
         ids_array, products_array = self.state_transitions(unbound_state_id)
-        
+        rng = self.xp.less(self.xp.random.random(self.number), 0.5).astype(self.xp.uint32)
+
         ids_birth = self.birth(unbound_state_id)
         self.states[ids_birth] = bound_state_id
-        
+	
         for ids, products in zip(ids_array, products_array):
-            self.states[ids] = self.xp.where(self.xp.greater_equal(ids, 0), products, self.states[ids])
+            is_product = self.xp.greater_equal(ids, 0)
+            is_active = self.xp.equal(products, self.state_dict['RN'])
+                        
+            self.states[ids] = self.xp.where(is_product, products, self.states[ids])
+            self.directions[ids] = self.xp.where(is_product*is_active, rng, self.directions[ids])
             
         ids_death = ids[self.xp.equal(products, unbound_state_id)]
         self.unload(ids_death)
