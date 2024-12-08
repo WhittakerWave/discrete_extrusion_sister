@@ -9,7 +9,7 @@ try:
     symmetric_step_cuda = cp.RawKernel(_symmetric_step_gpu(), '_symmetric_step_gpu')
     asymmetric_step_cuda = cp.RawKernel(_asymmetric_step_gpu(), '_asymmetric_step_gpu')
     
-    cuda_engines = {'symmetric': symmetric_step_cuda,
+    cuda_engines = {'symmetric' : symmetric_step_cuda,
                     'asymmetric' : asymmetric_step_cuda}
 
 except:
@@ -22,7 +22,7 @@ try:
     symmetric_step_numba = nb.njit(fastmath=True)(_symmetric_step_cpu)
     asymmetric_step_numba = nb.njit(fastmath=True)(_asymmetric_step_cpu)
     
-    numba_engines = {'symmetric': symmetric_step_numba,
+    numba_engines = {'symmetric' : symmetric_step_numba,
                      'asymmetric' : asymmetric_step_numba}
 
 except ImportError:
@@ -31,7 +31,7 @@ except ImportError:
     symmetric_step = _symmetric_step_cpu
     asymmetric_step = _asymmetric_step_cpu
     
-    python_engines = {'symmetric': symmetric_step,
+    python_engines = {'symmetric' : symmetric_step,
                       'asymmetric' : asymmetric_step}
 
 	
