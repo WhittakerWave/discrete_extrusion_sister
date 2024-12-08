@@ -41,32 +41,32 @@ def SteppingEngine(sim, mode, active_state_id, threads_per_block=256, **kwargs):
 		rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)
 		
 		args = tuple([active_state_id,
-			          rngs,
-			          sim.number,
-			          0, sim.lattice_size,
-			          sim.states,
-			          sim.occupied,
-			          sim.barrier_engine.stall_left,
-			          sim.barrier_engine.stall_right,
-			          sim.pause_prob,
-			          sim.positions,
-			          sim.stalled])
+			      rngs,
+			      sim.number,
+			      0, sim.lattice_size,
+			      sim.states,
+			      sim.occupied,
+			      sim.barrier_engine.stall_left,
+			      sim.barrier_engine.stall_right,
+			      sim.pause_prob,
+			      sim.positions,
+			      sim.stalled])
 
 	elif mode == "asymmetric":
 		rngs = sim.xp.random.random((sim.number, 2)).astype(sim.xp.float32)
 		
 		args = tuple([active_state_id,
-			          rngs,
-			          sim.number,
-			          0, sim.lattice_size,
-			          sim.states,
-			          sim.occupied,
-			          sim.directions,
-			          sim.barrier_engine.stall_left,
-			          sim.barrier_engine.stall_right,
-			          sim.pause_prob,
-			          sim.positions,
-			          sim.stalled])
+			      rngs,
+			      sim.number,
+			      0, sim.lattice_size,
+			      sim.states,
+			      sim.occupied,
+			      sim.directions,
+			      sim.barrier_engine.stall_left,
+			      sim.barrier_engine.stall_right,
+			      sim.pause_prob,
+			      sim.positions,
+			      sim.stalled])
 
 	else:
 		raise RuntimeError("Unsupported mode '%s'" % mode)
