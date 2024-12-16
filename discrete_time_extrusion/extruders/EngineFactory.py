@@ -6,8 +6,8 @@ from .engines.AsymmetricEngines import _asymmetric_step_cpu, _asymmetric_step_gp
 try:
     import cupy as cp
     
-    symmetric_step_cuda = cp.RawKernel(_symmetric_step_gpu(), '_symmetric_step_gpu')
-    asymmetric_step_cuda = cp.RawKernel(_asymmetric_step_gpu(), '_asymmetric_step_gpu')
+    symmetric_step_cuda = cp.RawKernel(_symmetric_step_gpu(), '_symmetric_step_gpu', options=('--use_fast_math',))
+    asymmetric_step_cuda = cp.RawKernel(_asymmetric_step_gpu(), '_asymmetric_step_gpu', options=('--use_fast_math',))
     
     cuda_engines = {'symmetric' : symmetric_step_cuda,
                     'asymmetric' : asymmetric_step_cuda}
