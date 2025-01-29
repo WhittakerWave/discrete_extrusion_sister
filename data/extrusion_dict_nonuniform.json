@@ -28,17 +28,17 @@
         "weak_CTCF": 0.0012165450121654502
     },
     "LEF_diffusion_rate": {
-        "strong_CTCF": 0.32,
-        "weak_CTCF": 0.32
+        "strong_CTCF": 0.16,
+        "weak_CTCF": 0.16
     },
     "LEF_pause": {
         "strong_CTCF": 0,
         "weak_CTCF": 0
     },
-	"LEF_states": {},
-	"LEF_transition_rates": {},
+    "LEF_states": {},
+    "LEF_transition_rates": {},
     "LEF_separation": 30,
-	"mode": "symmetric",
+    "mode": "symmetric",
     "sites_per_monomer": 1,
     "monomers_per_replica": 1000,
     "number_of_replica": 10,
