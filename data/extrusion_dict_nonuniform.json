@@ -27,6 +27,10 @@
         "strong_CTCF": 0.0012165450121654502,
         "weak_CTCF": 0.0012165450121654502
     },
+	"LEF_diffusion_rate": {
+		"strong_CTCF": 0.32,
+		"weak_CTCF": 0.32
+	},
     "LEF_pause": {
         "strong_CTCF": 0,
         "weak_CTCF": 0

@@ -20,6 +20,9 @@
     "LEF_stalled_off_rate": {
         "A": 0.009176225234619396
     },
+	"LEF_diffusion_rate": {
+		"A": 0.32
+	},
     "LEF_pause": {
         "A": 0
     },

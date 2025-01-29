@@ -9,6 +9,7 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
                  birth_prob,
                  death_prob,
                  stalled_death_prob,
+                 diffusion_prob,
                  pause_prob,
                  *args, **kwargs):
     
@@ -17,6 +18,7 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
                          birth_prob,
                          death_prob,
                          stalled_death_prob,
+                         diffusion_prob,
                          pause_prob)
         
         self.state_dict = kwargs["LEF_states"]

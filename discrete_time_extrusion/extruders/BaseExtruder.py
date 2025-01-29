@@ -9,6 +9,7 @@ class BaseExtruder(NullExtruder.NullExtruder):
                  birth_prob,
                  death_prob,
                  stalled_death_prob,
+                 diffusion_prob,
                  pause_prob,
                  *args, **kwargs):
     
@@ -18,9 +19,10 @@ class BaseExtruder(NullExtruder.NullExtruder):
         self.birth_prob = birth_prob
         self.death_prob = death_prob
 
-        self.pause_prob = pause_prob
         self.stalled_death_prob = stalled_death_prob
-        
+        self.diffusion_prob = diffusion_prob
+        self.pause_prob = pause_prob
+
         self.stepping_engine = EngineFactory.SteppingEngine
         
                             
@@ -75,7 +77,7 @@ class BaseExtruder(NullExtruder.NullExtruder):
         self.states[ids_death] = unbound_state_id
 
         self.unload(ids_death)
-        
+
 
     def step(self, mode, unbound_state_id=0, bound_state_id=1, active_state_id=1, **kwargs):
     
@@ -84,4 +86,4 @@ class BaseExtruder(NullExtruder.NullExtruder):
 
         super().step(**kwargs)
 
-        self.stepping_engine(self, mode, active_state_id, **kwargs)
+        self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)

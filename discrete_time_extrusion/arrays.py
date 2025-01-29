@@ -78,6 +78,7 @@ def make_LEF_arrays(xp,
 					LEF_on_rate,
 					LEF_off_rate,
 					LEF_stalled_off_rate,
+					LEF_diffusion_rate,
                     LEF_pause,
                     sites_per_monomer,
                     velocity_multiplier,
@@ -85,15 +86,19 @@ def make_LEF_arrays(xp,
     
     on_rate_array = make_site_array(xp, type_list, site_types, LEF_on_rate, **kwargs)
     off_rate_array = make_site_array(xp, type_list, site_types, LEF_off_rate, **kwargs)
-    stalled_off_rate_array = make_site_array(xp, type_list, site_types, LEF_stalled_off_rate, **kwargs)
     
+    stalled_off_rate_array = make_site_array(xp, type_list, site_types, LEF_stalled_off_rate, **kwargs)
+    diffusion_rate_array = make_site_array(xp, type_list, site_types, LEF_diffusion_rate, **kwargs)
+
     birth_array = on_rate_array / (velocity_multiplier * sites_per_monomer)
     death_array = off_rate_array / (velocity_multiplier * sites_per_monomer)
+    
     stalled_death_array = stalled_off_rate_array / (velocity_multiplier * sites_per_monomer)
-
+    diffusion_array = diffusion_rate_array / (velocity_multiplier * sites_per_monomer)
+    
     pause_array = make_site_array(xp, type_list, site_types, LEF_pause, **kwargs)
 
-    return [birth_array, death_array, stalled_death_array, pause_array]
+    return [birth_array, death_array, stalled_death_array, diffusion_array, pause_array]
 
 
 def make_LEF_transition_dict(xp,
