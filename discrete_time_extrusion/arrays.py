@@ -46,7 +46,7 @@ def make_CTCF_arrays(xp,
     stall_left_array += make_site_array(xp, type_list, site_types, CTCF_backstall,
                                         at_ids=right_positions, **kwargs)
     stall_right_array += make_site_array(xp, type_list, site_types, CTCF_backstall,
-                                         at_idsids=left_positions, **kwargs)
+                                         at_ids=left_positions, **kwargs)
     
     stall_left_array = 1 - (1-stall_left_array) ** velocity_multiplier
     stall_right_array = 1 - (1-stall_right_array) ** velocity_multiplier
