@@ -82,7 +82,7 @@ class MultistateExtruder(BaseExtruder.BaseExtruder):
             is_product = self.xp.greater_equal(ids, 0)
             is_active = self.xp.equal(products, self.state_dict['RN'])
                         
-            self.states[ids] = self.xp.where(is_product, products, self.states[ids])
+            self.states[ids[is_product]] = products[is_product]
             self.directions[ids] = self.xp.where(is_product*is_active, rng, self.directions[ids])
             
         ids_death = ids[self.xp.equal(products, unbound_state_id)]
