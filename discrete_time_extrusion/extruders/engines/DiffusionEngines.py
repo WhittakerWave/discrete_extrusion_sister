@@ -60,7 +60,7 @@ def _diffusion_step_gpu():
 
 		if (stall[i].x == 0) {
 			if (rng[i].w < diffuse_prob[cur1]) {
-				if (rng[i].x < 0.5)) {
+				if (rng[i].x < 0.5) {
 					if ( (!occupied[cur1-1]) && (cur1>N_min+2 ? !occupied[cur1-2] : true) )
 						position[i].x = (int) cur1-1;
 				}
@@ -73,7 +73,7 @@ def _diffusion_step_gpu():
 		
 		if (stall[i].y == 0) {
 			if (rng[i].y < diffuse_prob[cur2]) {
-				if (rng[i].z < 0.5)) {
+				if (rng[i].z < 0.5) {
 					if ( (!occupied[cur2-1]) && (cur2>N_min+2 ? !occupied[cur2-2] : true) )
 						position[i].y = (int) cur2-1;
 				}
