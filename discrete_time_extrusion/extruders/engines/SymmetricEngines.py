@@ -26,14 +26,14 @@ def _symmetric_step_cpu(active_state_id,
 				stalled[i, 1] = True
 
 			if not stalled[i, 0]:
-				if (not occupied[cur1-1] and (not occupied[cur1-2] if cur1>N_min+2 else True)):
+				if not occupied[cur1-1]:
 					pause1 = pause_prob[cur1]
 					
 					if rngs[i, 2] > pause1:
 						positions[i, 0] = cur1 - 1
 						
 			if not stalled[i, 1]:
-				if (not occupied[cur2+1] and (not occupied[cur2+2] if cur2<N_max-2 else True)):
+				if not occupied[cur2+1]:
 					pause2 = pause_prob[cur2]
 					
 					if rngs[i, 3] > pause2:
@@ -85,7 +85,7 @@ def _symmetric_step_gpu():
 			stall[i].y = 1;
 						
 		if (stall[i].x == 0) {
-			if ( (!occupied[cur1-1]) && (cur1>N_min+2 ? !occupied[cur1-2] : true) ) {
+			if (!occupied[cur1-1]) {
 				float pause1 = pause_prob[cur1];
 				
 				if (rng[i].y > pause1)
@@ -94,7 +94,7 @@ def _symmetric_step_gpu():
 		}
 					
 		if (stall[i].y == 0) {
-			if ( (!occupied[cur2+1]) && (cur2<N_max-2 ? !occupied[cur2+2] : true) ) {
+			if (!occupied[cur2+1])
 				float pause2 = pause_prob[cur2];
 				
 				if (rng[i].z > pause2)
