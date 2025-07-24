@@ -17,11 +17,11 @@ def _diffusion_step_cpu(unbound_state_id,
 				if not stalled[i, j]:
 					if rngs[i, 2*j] < diffuse_prob[cur]:
 						if rngs[i, 2*j+1] < 0.5:
-							if (not occupied[cur-1] and (not occupied[cur-2] if cur>N_min+2 else True)):
+							if not occupied[cur-1]:
 								positions[i, j] = cur - 1
 								
 						else:
-							if (not occupied[cur+1] and (not occupied[cur+2] if cur<N_max-2 else True)):
+							if not occupied[cur+1]:
 								positions[i, j] = cur + 1
 
 
@@ -61,11 +61,11 @@ def _diffusion_step_gpu():
 		if (stall[i].x == 0) {
 			if (rng[i].w < diffuse_prob[cur1]) {
 				if (rng[i].x < 0.5) {
-					if ( (!occupied[cur1-1]) && (cur1>N_min+2 ? !occupied[cur1-2] : true) )
+					if (!occupied[cur1-1])
 						position[i].x = (int) cur1-1;
 				}
 				else {
-					if ( (!occupied[cur1+1]) && (cur1<N_max-2 ? !occupied[cur1+2] : true) )
+					if (!occupied[cur1+1])
 						position[i].x = (int) cur1+1;
 				}
 			}
@@ -74,11 +74,11 @@ def _diffusion_step_gpu():
 		if (stall[i].y == 0) {
 			if (rng[i].y < diffuse_prob[cur2]) {
 				if (rng[i].z < 0.5) {
-					if ( (!occupied[cur2-1]) && (cur2>N_min+2 ? !occupied[cur2-2] : true) )
+					if (!occupied[cur2-1])
 						position[i].y = (int) cur2-1;
 				}
 				else {
-					if ( (!occupied[cur2+1]) && (cur2<N_max-2 ? !occupied[cur2+2] : true) )
+					if (!occupied[cur2+1])
 						position[i].y = (int) cur2+1;
 				}
 			}
