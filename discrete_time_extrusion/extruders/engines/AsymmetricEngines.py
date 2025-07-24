@@ -26,12 +26,12 @@ def _asymmetric_step_cpu(active_state_id,
 				pause = pause_prob[cur]
 
 				if leg_id == 0:
-					if (not occupied[cur-1] and (not occupied[cur-2] if cur>N_min+2 else True)):
+					if not occupied[cur-1]:
 						if rngs[i, 1] > pause:
 							positions[i, leg_id] = cur - 1
 
 				elif leg_id == 1:
-					if (not occupied[cur+1] and (not occupied[cur+2] if cur<N_max-2 else True)):
+					if not occupied[cur+1]:
 						if rngs[i, 1] > pause:
 							positions[i, leg_id] = cur + 1
 
@@ -81,7 +81,7 @@ def _asymmetric_step_gpu():
 		
 		if (leg_id == 0) {
 			if (stall[i].x == 0) {
-				if ( (!occupied[cur-1]) && (cur>N_min+2 ? !occupied[cur-2] : true) ) {
+				if (!occupied[cur-1]) {
 					if (rng[i].y > pause_prob[cur])
 						position[i].x = (int) cur-1;
 				}
@@ -90,7 +90,7 @@ def _asymmetric_step_gpu():
 					
 		else if (leg_id == 1) {
 			if (stall[i].y == 0) {
-				if ( (!occupied[cur+1]) && (cur<N_max-2 ? !occupied[cur+2] : true) ) {
+				if (!occupied[cur+1]) {
 					if (rng[i].y > pause_prob[cur])
 						position[i].y = (int) cur+1;
 				}
