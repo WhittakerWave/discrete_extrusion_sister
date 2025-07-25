@@ -34,11 +34,29 @@ class NullExtruder():
         for _ in range(N):
             self.step(*args, **kwargs)
             
+            
+    def resolve_overlaps(self):
+		
+        leg_distance = self.xp.roll(self.positions, 1, axis=1) - self.positions
+        is_loop = self.xp.not_equal(leg_distance, 0)
+		
+        ids = self.positions[is_loop]
+        _, first, counts = self.xp.unique(ids, return_index=True, return_counts=True)
+        
+        first_dupl_ids = first[self.xp.greater(counts, 1)]
+        ids[first_dupl_ids] = self.xp.where(self.xp.mod(first_dupl_ids, 2),
+                                            ids[first_dupl_ids]-1,
+                                            ids[first_dupl_ids]+1)
+		
+        self.positions[is_loop] = ids
+        
 
     def update_occupancies(self):
         
         self.occupied.fill(False)
         self.occupied[0] = self.occupied[-1] = True
+        
+        self.resolve_overlaps()
         
         ids = self.positions[self.xp.greater_equal(self.positions, 0)]
         self.occupied[ids] = True
