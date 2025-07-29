@@ -94,7 +94,7 @@ def _symmetric_step_gpu():
 		}
 					
 		if (stall[i].y == 0) {
-			if (!occupied[cur2+1])
+			if (!occupied[cur2+1]) {
 				float pause2 = pause_prob[cur2];
 				
 				if (rng[i].z > pause2)
