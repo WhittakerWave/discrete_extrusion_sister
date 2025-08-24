@@ -43,11 +43,11 @@ class Translocator_Sister():
         self.barrier_engine = barrier_engine(*ctcf_arrays, *ctcf_dynamic_arrays)
 
         number_of_sisters = kwargs['num_of_sisters']
-        # ✅ Pass kwargs (including num_sisters) to extrusion engine
         self.extrusion_engine = extrusion_engine(
                                number_of_LEFs, 
+                               number_of_sisters,
                                self.barrier_engine, 
-                               *lef_arrays, **lef_transition_dict, **kwargs)
+                               *lef_arrays, **lef_transition_dict)
                 
         kwargs['steps'] = int(kwargs['steps'] / self.time_unit)
         kwargs['dummy_steps'] = int(kwargs['dummy_steps'] / self.time_unit)

@@ -3,7 +3,10 @@ import warnings
 from .engines.DiffusionEngines import _diffusion_step_cpu, _diffusion_step_gpu
 from .engines.SymmetricEngines import _symmetric_step_cpu, _symmetric_step_gpu
 from .engines.AsymmetricEngines import _asymmetric_step_cpu, _asymmetric_step_gpu
-	
+
+# Import your sister stepping function
+from .engines.SymmetricEngines_Sisters import symmetric_sister_step_cpu
+
 try:
     import cupy as cp
     
@@ -25,10 +28,14 @@ try:
     diffusion_step_numba = nb.njit(fastmath=True)(_diffusion_step_cpu)
     symmetric_step_numba = nb.njit(fastmath=True)(_symmetric_step_cpu)
     asymmetric_step_numba = nb.njit(fastmath=True)(_asymmetric_step_cpu)
+
+	# Add sister stepping engine for numba
+    symmetric_sister_step_numba = nb.njit(fastmath=True)(symmetric_sister_step_cpu)
     
     numba_engines = {'diffusion' : diffusion_step_numba,
                      'symmetric' : symmetric_step_numba,
-                     'asymmetric' : asymmetric_step_numba}
+                     'asymmetric' : asymmetric_step_numba,
+                     'symmetric_sister' : symmetric_sister_step_numba}
 
 except ImportError:
     use_numba = False
@@ -39,7 +46,8 @@ except ImportError:
     
     python_engines = {'diffusion' : diffusion_step,
                       'symmetric' : symmetric_step,
-                      'asymmetric' : asymmetric_step}
+                      'asymmetric' : asymmetric_step,
+					  'symmetric_sister' : symmetric_sister_step_cpu}
 
 	
 def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_block=256, **kwargs):
@@ -55,11 +63,33 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 			                sim.stalled,
 			                sim.diffusion_prob,
 			                sim.positions])
-			      
+
+	# Check if this is a sister-aware simulation
+	has_sisters = hasattr(sim, 'num_sisters') and sim.num_sisters > 0
+	      
 	if mode == "symmetric":
 		rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)
 		
-		args = tuple([active_state_id,
+		if has_sisters:
+			# Use sister-aware stepping engine
+			args = tuple([active_state_id,
+                          rngs,
+                          sim.number,
+                          0, sim.lattice_size,
+                          sim.states,
+                          sim.occupied,
+                          sim.barrier_engine.stall_left,
+                          sim.barrier_engine.stall_right,
+                          sim.pause_prob,
+                          sim.positions,
+                          sim.stalled,
+                          sim.sister_positions,
+                          sim.num_sisters,
+                          sim.coupled_to_extruder,
+                          sim.coupled_to_sister])
+			mode_key = "symmetric_sister"
+		else: 
+			args = tuple([active_state_id,
 			      rngs,
 			      sim.number,
 			      0, sim.lattice_size,
@@ -70,6 +100,7 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 			      sim.pause_prob,
 			      sim.positions,
 			      sim.stalled])
+			mode_key = "symmetric"
 
 	elif mode == "asymmetric":
 		rngs = sim.xp.random.random((sim.number, 2)).astype(sim.xp.float32)
@@ -86,6 +117,7 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 			      sim.pause_prob,
 			      sim.positions,
 			      sim.stalled])
+		mode_key = "asymmetric"
 
 	else:
 		raise RuntimeError("Unsupported mode '%s'" % mode)
@@ -94,7 +126,7 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 		num_blocks = (sim.number+threads_per_block-1) // threads_per_block
 		warnings.warn("Running lattice extrusion on the GPU")
 		
-		cuda_engines[mode]((num_blocks,), (threads_per_block,), args)
+		cuda_engines[mode_key]((num_blocks,), (threads_per_block,), args)
 		sim.update_occupancies()
 		
 		cuda_engines['diffusion']((num_blocks,), (threads_per_block,), args_diffusion)
@@ -103,7 +135,7 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 		if use_numba:
 			warnings.warn("Running lattice extrusion on the CPU using Numba")
 			
-			numba_engines[mode](*args)
+			numba_engines[mode_key](*args)
 			sim.update_occupancies()
 
 			numba_engines['diffusion'](*args_diffusion)
@@ -111,7 +143,7 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 		else:
 			warnings.warn("Running lattice extrusion on the CPU using pure Python backend")
 			
-			python_engines[mode](*args)
+			python_engines[mode_key](*args)
 			sim.update_occupancies()
 
 			python_engines['diffusion'](*args_diffusion)

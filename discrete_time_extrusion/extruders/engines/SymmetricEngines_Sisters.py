@@ -1,67 +1,61 @@
 
+import numpy as np
+
 def symmetric_sister_step_cpu(active_state_id,
-                        rngs,
-                        N,
-                        N_min,
-                        N_max,
-                        states,
-                        occupied,
-                        stall_left,
-                        stall_right,
-                        pause_prob,
-                        positions,
-                        stalled,
-                        is_sister=None,
-                        sister_coupled=None,
-                        coupled_to_extruder=None,
-                        coupled_to_sister=None,
-                        **kwargs):
+                              rngs,
+                              N,  # Number of extruders
+                              N_min,
+                              N_max,
+                              states,  # Extruder states
+                              occupied,
+                              stall_left,
+                              stall_right,
+                              pause_prob,
+                              positions,  # Extruder positions
+                              stalled,
+                              sister_positions=None,  # Separate sister position array
+                              num_sisters=0,
+                              coupled_to_extruder=None,
+                              coupled_to_sister=None,
+                              **kwargs):
+    """
+    Sister-aware stepping function that handles extruders and sisters separately
+    """
     
     # Default values if sister parameters not provided
-    if is_sister is None:
-        is_sister = np.zeros(N, dtype=bool)
-    if sister_coupled is None:
-        sister_coupled = np.zeros(N, dtype=bool)
     if coupled_to_extruder is None:
         coupled_to_extruder = {}
     if coupled_to_sister is None:
         coupled_to_sister = {}
+    if sister_positions is None:
+        sister_positions = np.array([])
     
-    # Track which particles have already been processed (to avoid double-processing coupled pairs)
-    processed = np.zeros(N, dtype=bool)
+    # Track which extruders have been processed
+    processed_extruders = np.zeros(N, dtype=bool)
     
-    for i in range(N):
-        if states[i] == active_state_id and not processed[i]:
+    # Process extruders
+    for extruder_id in range(N):
+        if states[extruder_id] == active_state_id and not processed_extruders[extruder_id]:
             
-            if is_sister[i]:
-                # This is a sister particle
-                if sister_coupled[i]:
-                    # Sister is coupled to an extruder - they move together
-                    extruder_id = coupled_to_extruder[i]
-                    process_coupled_movement(i, extruder_id, rngs, positions, stalled, 
-                                           occupied, pause_prob, stall_left, stall_right,
-                                           is_sister, processed)
-                else:
-                    # Uncoupled sister don't move 
-                    process_sister_movement(i, rngs, positions, stalled, occupied, 
-                                          pause_prob, processed)
-            
+            if extruder_id in coupled_to_sister:
+                # This extruder is coupled to sister(s) - move together
+                sister_ids = coupled_to_sister[extruder_id]
+                process_coupled_extruder_movement(extruder_id, sister_ids, rngs, 
+                                                 positions, sister_positions,
+                                                 stalled, occupied, pause_prob,
+                                                 stall_left, stall_right, 
+                                                 processed_extruders)
             else:
-                # This is an extruder particle
-                if i in coupled_to_sister:
-                    # Extruder is coupled to a sister - they move together
-                    sister_id = coupled_to_sister[i]
-                    process_coupled_movement(sister_id, i, rngs, positions, stalled,
-                                           occupied, pause_prob, stall_left, stall_right,
-                                           is_sister, processed)
-                else:
-                   # uncoupled extruder move independently 
-                    process_extruder_movement(i, rngs, positions, stalled, occupied,
-                                            pause_prob, stall_left, stall_right, processed)
+                # Uncoupled extruder - move independently
+                process_extruder_movement(extruder_id, rngs, positions, stalled, 
+                                        occupied, pause_prob, stall_left, 
+                                        stall_right, processed_extruders)
+    
+    # Note: Uncoupled sisters don't move, so no separate processing needed
 
-
+# Uncoupled extruder - move independently 
 def process_extruder_movement(extruder_id, rngs, positions, stalled, occupied, 
-                            pause_prob, stall_left, stall_right, processed):
+                             pause_prob, stall_left, stall_right, processed_extruders):
     """Handle movement for uncoupled extruder (two legs) - original logic"""
     cur1 = positions[extruder_id, 0]
     cur2 = positions[extruder_id, 1]
@@ -89,64 +83,69 @@ def process_extruder_movement(extruder_id, rngs, positions, stalled, occupied,
             if rngs[extruder_id, 3] > pause2:
                 positions[extruder_id, 1] = cur2 + 1
     
-    processed[extruder_id] = True
+    processed_extruders[extruder_id] = True
+
+
+def process_coupled_extruder_movement(extruder_id, sister_ids, rngs, positions, 
+                                     sister_positions, stalled, occupied, pause_prob,
+                                     stall_left, stall_right, processed_extruders):
+    """Handle coordinated movement for extruder coupled to sister(s)"""
     
-
-def process_sister_movement(sister_id, rngs, positions, stalled, occupied, pause_prob, processed):
-    """Handle movement for uncoupled sister (not coupled to extruders) - sisters remain fixed when uncoupled"""
-    # Uncoupled sisters do NOT move - they remain at their current position
-    # This is the key difference: sisters only move when coupled to extruders
-    processed[sister_id] = True
-
-
-def process_coupled_movement(sister_id, extruder_id, rngs, positions, stalled, occupied,
-                           pause_prob, stall_left, stall_right, is_sister, processed):
-    """Handle coordinated movement for coupled sister-extruder"""
-    
-    # Get current positions
-    sister_pos = positions[sister_id, 0]
-    extruder_pos1 = positions[extruder_id, 0]
-    extruder_pos2 = positions[extruder_id, 1]
+    cur1 = positions[extruder_id, 0]
+    cur2 = positions[extruder_id, 1]
     
     # Check extruder stalling
-    stall1 = stall_left[extruder_pos1]
-    stall2 = stall_right[extruder_pos2]
+    stall1 = stall_left[cur1]
+    stall2 = stall_right[cur2]
     
     if rngs[extruder_id, 0] < stall1:
         stalled[extruder_id, 0] = True
     if rngs[extruder_id, 1] < stall2:
         stalled[extruder_id, 1] = True
     
-    # Determine which extruder leg the sister is coupled to
-    sister_coupled_to_leg1 = (sister_pos == extruder_pos1)
-    sister_coupled_to_leg2 = (sister_pos == extruder_pos2)
-    
-    # Leg 1 movement (leftward) - includes sister if coupled to leg 1
-    if not stalled[extruder_id, 0]:
-        target_pos = extruder_pos1 - 1
-        if not occupied[target_pos]:
-            extruder_wants_move = rngs[extruder_id, 2] > pause_prob[extruder_pos1]
-            
-            if sister_coupled_to_leg1:
-                # Sister must also agree to move
-                if extruder_wants_move:
-                    positions[extruder_id, 0] = target_pos
-                    # Sister moves with leg 1
-                    positions[sister_id, 0] = target_pos  
-    
-    # Leg 2 movement (rightward) - includes sister if coupled to leg 2  
-    if not stalled[extruder_id, 1]:
-        target_pos = extruder_pos2 + 1
-        if not occupied[target_pos]:
-            extruder_wants_move = rngs[extruder_id, 3] > pause_prob[extruder_pos2]
-            
-            if sister_coupled_to_leg2:
-                # Sister must also agree to move
-                if extruder_wants_move: 
-                    positions[extruder_id, 1] = target_pos
-                    positions[sister_id, 0] = target_pos  # Sister moves with leg 2
+    # Process each coupled sister
+    for sister_id in sister_ids:
+        sister_pos = sister_positions[sister_id]
         
-    # Mark both as processed
-    processed[sister_id] = True
-    processed[extruder_id] = True
+        # Determine which extruder leg the sister is coupled to
+        sister_coupled_to_leg1 = (sister_pos == cur1)
+        sister_coupled_to_leg2 = (sister_pos == cur2)
+        
+        # Leg 1 movement (leftward) - includes sister if coupled to leg 1
+        if not stalled[extruder_id, 0] and sister_coupled_to_leg1:
+            target_pos = cur1 - 1
+            if not occupied[target_pos]:
+                if rngs[extruder_id, 2] > pause_prob[cur1]:
+                    positions[extruder_id, 0] = target_pos
+                    sister_positions[sister_id] = target_pos  # Sister moves with leg 1
+        
+        # Leg 2 movement (rightward) - includes sister if coupled to leg 2
+        elif not stalled[extruder_id, 1] and sister_coupled_to_leg2:
+            target_pos = cur2 + 1
+            if not occupied[target_pos]:
+                if rngs[extruder_id, 3] > pause_prob[cur2]:
+                    positions[extruder_id, 1] = target_pos
+                    sister_positions[sister_id] = target_pos  # Sister moves with leg 2
+    
+    # Handle uncoupled leg movement (if extruder has legs not coupled to sisters)
+    # Leg 1 movement (if no sister coupled to leg 1)
+    if not stalled[extruder_id, 0]:
+        leg1_has_sister = any(sister_positions[sid] == cur1 for sid in sister_ids)
+        if not leg1_has_sister:
+            target_pos = cur1 - 1
+            if not occupied[target_pos]:
+                if rngs[extruder_id, 2] > pause_prob[cur1]:
+                    positions[extruder_id, 0] = target_pos
+    
+    # Leg 2 movement (if no sister coupled to leg 2)
+    if not stalled[extruder_id, 1]:
+        leg2_has_sister = any(sister_positions[sid] == cur2 for sid in sister_ids)
+        if not leg2_has_sister:
+            target_pos = cur2 + 1
+            if not occupied[target_pos]:
+                if rngs[extruder_id, 3] > pause_prob[cur2]:
+                    positions[extruder_id, 1] = target_pos
+    
+    processed_extruders[extruder_id] = True
+
 

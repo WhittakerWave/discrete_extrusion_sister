@@ -32,7 +32,7 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_Sister
 from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S68.json", 'r') as dict_file:
+with open("data/extrusion_dict_test.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -48,14 +48,14 @@ site_types = np.repeat(monomer_types, sites_per_monomer)
 LEF_off_rate = paramdict['LEF_off_rate']
 CTCF_facestall = paramdict['CTCF_facestall']
 print(LEF_off_rate['A'], CTCF_facestall['A'])
-    
+
 # anchor_positions = np.genfromtxt(f'{path}/anchor_{N_sister_RAD21}_{iteration}.txt')
 anchor_positions = []
 # Create some CTCF boundary sites
 ctcf_left_positions = anchor_positions
 ctcf_right_positions = anchor_positions
 
-translocator1 = Translocator(BaseExtruder,
+translocator1 = Translocator_Sister(BaseExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
@@ -63,7 +63,7 @@ translocator1 = Translocator(BaseExtruder,
                             ctcf_right_positions, 
                             **paramdict)
 
-translocator1.run(100)
+translocator1.run(10000)
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 translocator1.extrusion_engine._initialize_sisters()
 
