@@ -52,13 +52,13 @@
             "A": 0.0146615640996053
         }
     },
-    "LEF_separation": 4,
+    "LEF_separation": 40,
     "mode": "symmetric",
     "sites_per_monomer": 1,
-    "monomers_per_replica": 320,
-    "num_of_sisters": 10,
+    "monomers_per_replica": 32000,
+    "num_of_sisters": 7000,
     "number_of_replica": 1,
     "steps": 500,
     "dummy_steps": 0,
-    "velocity_multiplier": 20.7730197243920394
+    "velocity_multiplier": 0.7730197243920394
 }

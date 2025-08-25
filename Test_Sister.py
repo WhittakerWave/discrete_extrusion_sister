@@ -63,7 +63,7 @@ translocator1 = Translocator_Sister(BaseExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps=10000, prune_unbound_LEFs=True, track_sisters=True)
+translocator1.run_trajectory(steps=500, prune_unbound_LEFs=True, track_sisters=True)
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 translocator1.extrusion_engine._initialize_sisters()
 

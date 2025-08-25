@@ -101,7 +101,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                             if extruder_id not in self.coupled_to_sister:
                                 self.coupled_to_sister[extruder_id] = []
                             self.coupled_to_sister[extruder_id].append(sister_id)  
-                            print(f"Sister {sister_id} coupled to extruder {extruder_id} at position {sister_pos}")
+                            # print(f"Sister {sister_id} coupled to extruder {extruder_id} at position {sister_pos}")
                             break
     
     def _check_extruder_deaths(self):
@@ -167,7 +167,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                     if sister_id in self.coupled_to_extruder:         
                         del self.coupled_to_extruder[sister_id]
                 del self.coupled_to_sister[extruder_id]
-                print(f"Uncoupled {len(sister_list)} sisters from dead extruder {extruder_id}")
+                # print(f"Uncoupled {len(sister_list)} sisters from dead extruder {extruder_id}")
         # Standard unload for extruders only
         self.stalled[ids_death] = False
         self.positions[ids_death] = -1
