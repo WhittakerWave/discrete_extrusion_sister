@@ -77,7 +77,7 @@ class Translocator_Sister():
         self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
         
     
-    def run_trajectory(self, period=None, steps=None, prune_unbound_LEFs=True, track_sisters=False, **kwargs):
+    def run_trajectory(self, period=None, steps=None, prune_unbound_LEFs=True, track_sisters=False, sample_interval=1, **kwargs):
         self.clear_trajectory()
         steps = int(steps) if steps else self.params['steps']
         period = int(period) if period else self.params['sites_per_monomer']
@@ -86,32 +86,36 @@ class Translocator_Sister():
     
         for step_idx in range(steps):
             self.run(period, **kwargs)
-        
-            LEF_states = self.extrusion_engine.get_states()
-            CTCF_positions = self.barrier_engine.get_bound_positions()
-        
-            if prune_unbound_LEFs:
-                LEF_positions = self.extrusion_engine.get_bound_positions()
-            else:
-                LEF_positions = self.extrusion_engine.get_positions()
+
+            # Only save data at sampling intervals
+            if step_idx % sample_interval == 0:
+                LEF_states = self.extrusion_engine.get_states()
+                CTCF_positions = self.barrier_engine.get_bound_positions()
+                
+                if prune_unbound_LEFs:
+                    LEF_positions = self.extrusion_engine.get_bound_positions()
+                else:
+                    LEF_positions = self.extrusion_engine.get_positions()
             
-            self.state_trajectory.append(LEF_states)
-            self.lef_trajectory.append(LEF_positions)
-            self.ctcf_trajectory.append(CTCF_positions)
+                self.state_trajectory.append(LEF_states)
+                self.lef_trajectory.append(LEF_positions)
+                self.ctcf_trajectory.append(CTCF_positions)
         
-            # ✅ Track sister trajectories if requested - call methods on extrusion_engine
-            if track_sisters:
-                # Check if extrusion engine has sister functionality
-                if hasattr(self.extrusion_engine, 'sister_positions') and hasattr(self.extrusion_engine, 'get_coupling_status'):
-                    sister_positions = self.extrusion_engine.sister_positions.copy()  # Make a copy for trajectory
-                    coupling_status = self.extrusion_engine.get_coupling_status()
+                # Track sister trajectories if requested - call methods on extrusion_engine
+                if track_sisters:
+                    # Check if extrusion engine has sister functionality
+                    if hasattr(self.extrusion_engine, 'sister_positions') and hasattr(self.extrusion_engine, 'get_coupling_status'):
+                        sister_positions = self.extrusion_engine.sister_positions.copy()  # Make a copy for trajectory
+                        coupling_status = self.extrusion_engine.get_coupling_status()
                 
-                    self.sister_trajectory.append(sister_positions)
-                    self.coupling_trajectory.append(coupling_status)
-                
-                    # Debug print to verify data
-                    print(f"Step {step_idx}: Sisters at positions {sister_positions}")
-                    print(f"Step {step_idx}: Coupling status - {len(coupling_status['coupled_pairs'])} coupled, {len(coupling_status['uncoupled_sisters'])} uncoupled")
+                        self.sister_trajectory.append(sister_positions)
+                        self.coupling_trajectory.append(coupling_status)
+                        
+                        if step_idx % (sample_interval * 1000) == 0:
+                            print(f"Step {step_idx}: Saved trajectory point {len(self.sister_trajectory)}")
+                        # Debug print to verify data
+                        # print(f"Step {step_idx}: Sisters at positions {sister_positions}")
+                        # print(f"Step {step_idx}: Coupling status - {len(coupling_status['coupled_pairs'])} coupled, {len(coupling_status['uncoupled_sisters'])} uncoupled")
                 else:
                     print(f"Warning: Extrusion engine doesn't have sister functionality")
                     # Initialize empty sister trajectories if not already done
