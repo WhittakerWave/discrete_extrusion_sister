@@ -21,7 +21,6 @@ import discrete_time_extrusion
 # import polychrom_hoomd.extrude as extrude
 # from polykit.analysis import polymer_analyses, contact_maps
 # from polykit.generators.initial_conformations import grow_cubic
-
 # import gsd.hoomd
 
 from discrete_time_extrusion.Translocator import Translocator
@@ -30,7 +29,7 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 # from discrete_time_extrusion.boundaries.DynamicBoundary import DynamicBoundary
 # from discrete_time_extrusion.extruders.MultistateExtruder import MultistateExtruder
 from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_Sister
-from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
+# from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
 with open("data/extrusion_dict_test.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
@@ -63,7 +62,8 @@ translocator1 = Translocator_Sister(BaseExtruder_Sister,
                             ctcf_right_positions, 
                             **paramdict)
 
-translocator1.run(10000)
+# translocator1.run(10000)
+translocator1.run_trajectory(steps=10000, prune_unbound_LEFs=True, track_sisters=True)
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 translocator1.extrusion_engine._initialize_sisters()
 
