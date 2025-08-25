@@ -27,11 +27,11 @@ from discrete_time_extrusion.Translocator import Translocator
 from discrete_time_extrusion.Translocator_Sister import Translocator_Sister
 from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 # from discrete_time_extrusion.boundaries.DynamicBoundary import DynamicBoundary
-# from discrete_time_extrusion.extruders.MultistateExtruder import MultistateExtruder
 from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_Sister
+from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 # from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_test.json", 'r') as dict_file:
+with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S68.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -54,7 +54,7 @@ anchor_positions = []
 ctcf_left_positions = anchor_positions
 ctcf_right_positions = anchor_positions
 
-translocator1 = Translocator_Sister(BaseExtruder_Sister,
+translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
