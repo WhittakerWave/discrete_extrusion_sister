@@ -63,7 +63,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps=50000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=2500)
+translocator1.run_trajectory(steps=50000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=50)
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 import pickle

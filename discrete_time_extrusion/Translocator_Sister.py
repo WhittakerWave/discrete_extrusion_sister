@@ -111,7 +111,7 @@ class Translocator_Sister():
                         self.sister_trajectory.append(sister_positions)
                         self.coupling_trajectory.append(coupling_status)
                         
-                        if step_idx % (sample_interval * 1000) == 0:
+                        if step_idx % (sample_interval * 50) == 0:
                             print(f"Step {step_idx}: Saved trajectory point {len(self.sister_trajectory)}")
                         # Debug print to verify data
                         # print(f"Step {step_idx}: Sisters at positions {sister_positions}")

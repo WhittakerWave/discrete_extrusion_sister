@@ -94,9 +94,9 @@ def plot_clustering_analysis(results, sister_array):
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     
     # 1. Unique positions over time
-    axes[0,0].plot(time_points, results['unique_positions'], 'b-', linewidth=2)
-    axes[0,0].set_title('Unique Positions Over Time')
-    axes[0,0].set_xlabel('Time Step')
+    axes[0,0].plot([t * 50 for t in time_points], results['unique_positions'], 'b-', linewidth=2)
+    axes[0,0].set_title('Number of unique sisters')
+    axes[0,0].set_xlabel('Time Step [Extrusion Timestep Units]')
     axes[0,0].set_ylabel('Number of Unique Positions')
     axes[0,0].grid(True, alpha=0.3)
     
@@ -145,7 +145,6 @@ def summarize_clustering_stats(results):
     ripley_k = np.array(results['ripley_k'])
     
     print("=== CLUSTERING ANALYSIS SUMMARY ===")
-    print(f"Unique Positions:")
     print(f"  Mean: {np.mean(unique_pos):.2f}")
     print(f"  Std:  {np.std(unique_pos):.2f}")
     print(f"  Range: {np.min(unique_pos)} - {np.max(unique_pos)}")
@@ -214,4 +213,4 @@ def quick_clustering_check(filename='sister_trajectory.pkl'):
     return sister_array
 
 
-results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory_test.pkl')
+results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory.pkl')
