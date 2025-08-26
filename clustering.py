@@ -185,7 +185,7 @@ def run_clustering_analysis(filename):
     return results, sister_array, fig
 
 # Alternative: Simple unique position analysis
-def quick_clustering_check(filename='sister_trajectory.pkl'):
+def quick_clustering_check(filename):
     """Quick check of clustering by counting unique positions"""
     
     with open(filename, 'rb') as f:
@@ -213,4 +213,4 @@ def quick_clustering_check(filename='sister_trajectory.pkl'):
     return sister_array
 
 
-results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory.pkl')
+results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory_500_65000steps_dW.pkl')

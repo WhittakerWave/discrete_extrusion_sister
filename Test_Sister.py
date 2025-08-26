@@ -31,7 +31,7 @@ from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_S
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 # from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S61.json", 'r') as dict_file:
+with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S6.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
