@@ -31,7 +31,7 @@ from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_S
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 # from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S3.json", 'r') as dict_file:
+with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S61.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -63,7 +63,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps=50000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=50)
+translocator1.run_trajectory(steps=65000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=50)
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 import pickle
