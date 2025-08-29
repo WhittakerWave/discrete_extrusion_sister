@@ -1,6 +1,5 @@
 
 
-
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,7 +29,7 @@ def plot_cluster_size_distribution(filenames, labels, bins='auto'):
     
     plt.xlabel('Cluster Size [Number of sisters in one lattice]', fontsize=20)
     plt.ylabel('Number of Clusters', fontsize=20)
-    plt.title('Cluster Size Distribution at 65000 steps', fontsize=20)
+    plt.title('Cluster Size Distribution at 65000 steps, dynamical CTCF with tau 100s', fontsize=20)
     plt.legend(fontsize=18)
     plt.tick_params(axis='both', labelsize=18)
     plt.grid(True, alpha=0.3)
@@ -38,9 +37,9 @@ def plot_cluster_size_distribution(filenames, labels, bins='auto'):
     plt.show()
 
 filenames = [
-    'sister_trajectory_500_65000steps_dW.pkl',
-    'sister_trajectory_500_65000steps_dN.pkl',
-    'sister_trajectory_500_65000steps_WT.pkl'
+    'sister_trajectory_500_65000steps_dW_CTCF_dynamic.pkl',
+    'sister_trajectory_500_65000steps_dN_CTCF_dynamic.pkl',
+    'sister_trajectory_500_65000steps_WT_CTCF_dynamic.pkl'
 ]
 labels = ['dW99%', 'dN75%', 'WT']
 

@@ -213,4 +213,4 @@ def quick_clustering_check(filename):
     return sister_array
 
 
-results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory_500_65000steps_dW.pkl')
+results, sister_array, fig = run_clustering_analysis(filename = 'sister_trajectory_500_65000steps_dW_CTCF.pkl')

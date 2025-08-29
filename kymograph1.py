@@ -302,6 +302,6 @@ def plot_single_cluster_detailed(filename='sister_trajectory.pkl', cluster_index
 # Main execution
 if __name__ == "__main__":
     # Run complete cluster transition analysis
-    fig1, fig2, fig3, clusters = analyze_cluster_transitions('sister_trajectory_500_65000steps_dW.pkl', sample_interval=50)
+    fig1, fig2, fig3, clusters = analyze_cluster_transitions('sister_trajectory_500_65000steps_WT_CTCF_dynamic.pkl', sample_interval=50)
 
     

@@ -26,12 +26,13 @@ import discrete_time_extrusion
 from discrete_time_extrusion.Translocator import Translocator
 from discrete_time_extrusion.Translocator_Sister import Translocator_Sister
 from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
-# from discrete_time_extrusion.boundaries.DynamicBoundary import DynamicBoundary
+from discrete_time_extrusion.boundaries.DynamicBoundary import DynamicBoundary
 from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_Sister
+from discrete_time_extrusion.extruders.MultistateExtruder import MultistateExtruder
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 # from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S6.json", 'r') as dict_file:
+with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S3.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -51,8 +52,27 @@ print(LEF_off_rate['A'], CTCF_facestall['A'])
 # anchor_positions = np.genfromtxt(f'{path}/anchor_{N_sister_RAD21}_{iteration}.txt')
 anchor_positions = []
 # Create some CTCF boundary sites
-ctcf_left_positions = anchor_positions
-ctcf_right_positions = anchor_positions
+# ctcf_left_positions = anchor_positions
+# ctcf_right_positions = anchor_positions
+
+number_of_ctcf = 254
+# ctcf_left_positions = np.random.choice(monomers_per_replica, size=number_of_ctcf, replace=False)
+# ctcf_right_positions =  ctcf_left_positions.copy()
+# np.save('ctcf_left_positions.npy', ctcf_left_positions)
+ctcf_left_positions = np.load('ctcf_left_positions.npy')
+ctcf_right_positions =  ctcf_left_positions.copy()
+
+import time
+
+start = time.time()
+
+# translocator1 = Translocator(MultistateExtruder,
+#                            DynamicBoundary,
+#                            type_list,
+#                            site_types,
+#                            ctcf_left_positions,
+#                            ctcf_right_positions,
+#                            **paramdict)
 
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
@@ -63,7 +83,10 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps=65000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=50)
+translocator1.run_trajectory(steps=500, prune_unbound_LEFs=True, track_sisters=True, sample_interval=500)
+
+end = time.time()
+print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 import pickle

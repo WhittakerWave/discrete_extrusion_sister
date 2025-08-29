@@ -27,15 +27,34 @@ def extract_unique_positions(filename):
 def plot_unique_positions_across_files(filenames, labels=None):
     """Plot unique positions for multiple trajectory files"""
     plt.figure(figsize=(8, 6))
-    
+
+    # Define consistent colors for WT, dN75%, dW
+    base_labels = ['WT', 'dN75%', 'dW']
+    color_map = {
+        'WT': '#1f77b4',      # blue
+        'dN75%': '#ff7f0e',   # orange
+        'dW': '#2ca02c'       # green
+    }
+
     for i, filename in enumerate(filenames):
         unique_positions, _ = extract_unique_positions(filename)
         if unique_positions is None:
             continue
-        time_steps = np.arange(len(unique_positions)) * 50  # assuming timestep units
 
+        time_steps = np.arange(len(unique_positions)) * 50  # assuming timestep units
         label = labels[i] if labels else f"Dataset {i+1}"
-        plt.plot(time_steps, unique_positions, linewidth=2, label=label)
+
+        # Determine base label (without CTCF) for color mapping
+        for base in base_labels:
+            if base in label:
+                color = color_map[base]
+                break
+        else:
+            color = 'black'  # fallback color if no match
+
+        linestyle = '--' if 'CTCF' in label else '-'
+
+        plt.plot(time_steps, unique_positions, linewidth=2, label=label, linestyle=linestyle, color=color)
     
     plt.title("Number of Unique Sisters Over Time", fontsize=20)
     plt.xlabel("Time Step [Extrusion Timestep Units]", fontsize=20)

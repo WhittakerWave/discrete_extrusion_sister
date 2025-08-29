@@ -53,7 +53,7 @@ class Translocator_Sister():
         kwargs['dummy_steps'] = int(kwargs['dummy_steps'] / self.time_unit)
         self.params = kwargs
     
-    # ✅ Add sister helper methods
+    # Add sister helper methods
     def get_sister_positions(self):
         """Get current sister positions"""
         if hasattr(self.extrusion_engine, 'is_sister'):
@@ -111,7 +111,7 @@ class Translocator_Sister():
                         self.sister_trajectory.append(sister_positions)
                         self.coupling_trajectory.append(coupling_status)
                         
-                        if step_idx % (sample_interval * 50) == 0:
+                        if step_idx % sample_interval  == 0:
                             print(f"Step {step_idx}: Saved trajectory point {len(self.sister_trajectory)}")
                         # Debug print to verify data
                         # print(f"Step {step_idx}: Sisters at positions {sister_positions}")
