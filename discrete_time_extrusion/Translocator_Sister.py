@@ -105,7 +105,8 @@ class Translocator_Sister():
                 if track_sisters:
                     # Check if extrusion engine has sister functionality
                     if hasattr(self.extrusion_engine, 'sister_positions') and hasattr(self.extrusion_engine, 'get_coupling_status'):
-                        sister_positions = self.extrusion_engine.sister_positions.copy()  # Make a copy for trajectory
+                        # Make a copy for trajectory
+                        sister_positions = self.extrusion_engine.sister_positions.copy()  
                         coupling_status = self.extrusion_engine.get_coupling_status()
                 
                         self.sister_trajectory.append(sister_positions)

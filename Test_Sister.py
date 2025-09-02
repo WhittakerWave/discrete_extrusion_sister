@@ -28,11 +28,12 @@ from discrete_time_extrusion.Translocator_Sister import Translocator_Sister
 from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.boundaries.DynamicBoundary import DynamicBoundary
 from discrete_time_extrusion.extruders.BaseExtruder_Sister import BaseExtruder_Sister
+from discrete_time_extrusion.extruders.BaseExtruder_Sister_Slow import BaseExtruder_Sister_Slow
 from discrete_time_extrusion.extruders.MultistateExtruder import MultistateExtruder
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 # from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S3.json", 'r') as dict_file:
+with open("data/extrusion_dict_test.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -74,7 +75,7 @@ start = time.time()
 #                            ctcf_right_positions,
 #                            **paramdict)
 
-translocator1 = Translocator_Sister(MultistateExtruder_Sister,
+translocator1 = Translocator_Sister(BaseExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
@@ -83,7 +84,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps=500, prune_unbound_LEFs=True, track_sisters=True, sample_interval=500)
+translocator1.run_trajectory(steps=2000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=1)
 
 end = time.time()
 print(f"Run time: {end - start:.2f} seconds")

@@ -17,7 +17,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     
         self.number = number
         self.num_sisters = number_of_sisters
-        
+
         # Initialize sister attributes BEFORE calling super().__init__
         # This prevents AttributeError in update_occupancies()
         self.sister_positions = None
@@ -25,11 +25,11 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.extruder_sister_counts = None  # Array: extruder_id -> number of coupled sisters
         
         # Maintain backward compatibility with dictionary format
-        self.coupled_to_extruder = {}       # sister_id -> extruder_id (many:1)
-        self.coupled_to_sister = {}         # extruder_id -> [sister_ids] (1:many)
+        self.coupled_to_extruder = {}       # sister_id -> extruder_id [many:1]
+        self.coupled_to_sister = {}         # extruder_id -> [sister_ids] [1:many]
         
         # Pre-computed position lookup for faster coupling checks
-        self._position_to_extruders = {}   # Cache for position -> extruder mapping
+        self._position_to_extruders = {}    # Cache for position -> extruder mapping
         self._position_cache_valid = False
 
         super().__init__(number, barrier_engine)
@@ -78,11 +78,13 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         print(f"Initialized {self.num_sisters} sisters at positions: {self.sister_positions}")
     
     def _update_position_cache(self):
+        ### Build the extruder two leg postions -- id map 
+        ### Position to extruder lef and right legs (both are indexed by the extruder ID)
         print(f"=== DEBUG _update_position_cache ===")
         self._position_to_extruders = {}
         active_extruders = []
         for extruder_id in range(self.number):
-            if self.states[extruder_id] != 0:  # Active extruder
+            if self.states[extruder_id] != 0:  # Extruder is on chromosome -- active 
                 active_extruders.append(extruder_id)
                 pos1 = int(self.positions[extruder_id, 0])
                 pos2 = int(self.positions[extruder_id, 1])
@@ -92,7 +94,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                     self._position_to_extruders[pos1] = []
                 if pos2 not in self._position_to_extruders:
                     self._position_to_extruders[pos2] = []
-                
+
                 self._position_to_extruders[pos1].append(extruder_id)
                 self._position_to_extruders[pos2].append(extruder_id)
     
@@ -100,17 +102,36 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         print(f"Position cache built: {self._position_to_extruders}")
         self._position_cache_valid = True
         print("=== END DEBUG ===\n")
-    
+   
+    def _sync_coupling_dicts(self):
+        """Sync array-based coupling data to dictionary format for backward compatibility"""
+        self.coupled_to_extruder.clear()
+        self.coupled_to_sister.clear()
+        
+        # Only sync if sisters are initialized
+        if self.sister_coupled_to is not None:
+            coupled_mask = self.sister_coupled_to != -1
+            coupled_sisters = self.xp.where(coupled_mask)[0]
+            
+            for sister_id in coupled_sisters:
+                extruder_id = int(self.sister_coupled_to[sister_id])
+                self.coupled_to_extruder[int(sister_id)] = extruder_id
+                
+                if extruder_id not in self.coupled_to_sister:
+                    self.coupled_to_sister[extruder_id] = []
+                self.coupled_to_sister[extruder_id].append(int(sister_id))
+
     def check_sister_coupling(self):
         """Optimized coupling check with immediate dict sync and safe caching"""
         print(f"=== DEBUG check_sister_coupling ===")
+        
         if self.sister_positions is None or self.sister_coupled_to is None:
             return
         
         print(f"Sister positions: {self.sister_positions}")
         print(f"Sister coupled_to before: {self.sister_coupled_to}")
         print(f"Coupled_to_extruder dict before: {self.coupled_to_extruder}")
-        ## Update position cache if invalid
+        ## Update position cache for extruders if invalid
         # if not self._position_cache_valid:
         self._update_position_cache()
         print(f"After _update_position_cache: {len(self._position_to_extruders)} positions")
@@ -120,7 +141,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         ## Second pass: find new couplings
         uncoupled_sisters = self.xp.where(self.sister_coupled_to == -1)[0]
         print(f"Before sister loop: {len(self._position_to_extruders)} positions")
-
+        
         for sister_id in uncoupled_sisters:
             sister_pos = int(self.sister_positions[sister_id])
             print(f"Checking sister {sister_id} at position {sister_pos}")
@@ -128,13 +149,12 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             if sister_pos in self._position_to_extruders:
                 extruder_id = self._position_to_extruders[sister_pos][0]
                 print(f"  -> Found extruder {extruder_id} at sister position {sister_pos}")
-
                 ## update the array
                 self.sister_coupled_to[sister_id] = extruder_id
                 self.extruder_sister_counts[extruder_id] += 1
                 print(f"  -> Updated arrays: sister_coupled_to[{sister_id}] = {extruder_id}")
 
-                ## IMMEDIATELY update dictionaries too
+                ## update dictionaries too
                 self.coupled_to_extruder[int(sister_id)] = extruder_id
                 if extruder_id not in self.coupled_to_sister:
                     self.coupled_to_sister[extruder_id] = []
@@ -163,8 +183,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         coupled_sisters = self.xp.where(coupled_mask)[0]
         extruder_ids = self.sister_coupled_to[coupled_sisters]
         
-        # Check which extruders are dead (vectorized)
-        dead_mask = self.states[extruder_ids] == 0
+        # Check which extruders are dead (vectorized), if 0 dead, if 1 is active 
+        dead_mask = self.states[extruder_ids] == 0 
         dead_couplings = coupled_sisters[dead_mask]
         
         if len(dead_couplings) > 0:
@@ -176,7 +196,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             for sister_id in dead_couplings:
                 sister_id_int = int(sister_id)
                 extruder_id = int(dead_extruder_ids[sister_id == dead_couplings][0])
-            
+                
                 # Remove from dicts
                 if sister_id_int in self.coupled_to_extruder:
                     del self.coupled_to_extruder[sister_id_int]
@@ -230,12 +250,12 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(ids_death) == 0:
             return
         # Vectorized uncoupling: find all sisters coupled to dying extruders
-        coupled_sisters = self.xp.where(
+        coupled_sisters_death = self.xp.where(
             self.xp.isin(self.sister_coupled_to, ids_death))[0]
         
-        if len(coupled_sisters) > 0:
-            # Reset coupling status for affected sisters
-            self.sister_coupled_to[coupled_sisters] = -1
+        if len(coupled_sisters_death) > 0:
+            # Reset sister coupling status to -1 for unload coupled sisters
+            self.sister_coupled_to[coupled_sisters_death] = -1
         # Reset sister counts for dying extruders
         self.extruder_sister_counts[ids_death] = 0
         # Standard unload for extruders
@@ -243,28 +263,9 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.positions[ids_death] = -1
         
         # Invalidate position cache
-        self._position_cache_valid = False
-    
-    def _sync_coupling_dicts(self):
-        """Sync array-based coupling data to dictionary format for backward compatibility"""
-        self.coupled_to_extruder.clear()
-        self.coupled_to_sister.clear()
-        
-        # Only sync if sisters are initialized
-        if self.sister_coupled_to is not None:
-            coupled_mask = self.sister_coupled_to != -1
-            coupled_sisters = self.xp.where(coupled_mask)[0]
-            
-            for sister_id in coupled_sisters:
-                extruder_id = int(self.sister_coupled_to[sister_id])
-                self.coupled_to_extruder[int(sister_id)] = extruder_id
-                
-                if extruder_id not in self.coupled_to_sister:
-                    self.coupled_to_sister[extruder_id] = []
-                self.coupled_to_sister[extruder_id].append(int(sister_id))
+        # self._position_cache_valid = False
 
     def update_states(self, unbound_state_id, bound_state_id):
-        """Unchanged - already efficient"""
         ids_birth = self.birth(unbound_state_id)
         ids_death = self.death(bound_state_id)
         
@@ -276,7 +277,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def update_occupancies(self):
         """Optimized occupancy update with safety checks"""
         super().update_occupancies()
-        
         # Only update sister occupancies if sisters are initialized
         if self.sister_positions is not None:
             # Vectorized sister occupancy update
@@ -328,17 +328,16 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         """Optimized step function"""
         print(f"\n=== DEBUG STEP START ===")
         print(f"Before update_states - Active extruders: {self.xp.sum(self.states != 0)}")
-    
         # Standard extruder birth/death updates
         self.update_states(unbound_state_id, bound_state_id)
         print(f"After update_states - Active extruders: {self.xp.sum(self.states != 0)}")
-    
+        
         # Check coupling dictionaries before check_sister_coupling
         print(f"Before check_sister_coupling: coupled_to_extruder = {self.coupled_to_extruder}")
-    
+        
         # Optimized sister-extruder coupling checks
         self.check_sister_coupling()  
-    
+        
         # Check coupling dictionaries after check_sister_coupling
         print(f"After check_sister_coupling: coupled_to_extruder = {self.coupled_to_extruder}")
     

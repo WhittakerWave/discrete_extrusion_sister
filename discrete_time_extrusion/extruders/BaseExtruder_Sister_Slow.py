@@ -1,7 +1,7 @@
 
 from . import NullExtruder, EngineFactory
 
-class BaseExtruder_Sister(NullExtruder.NullExtruder):
+class BaseExtruder_Sister_Slow(NullExtruder.NullExtruder):
     
     def __init__(self,
                  number,

@@ -51,7 +51,7 @@ def symmetric_sister_step_cpu(active_state_id,
                 process_extruder_movement(extruder_id, rngs, positions, stalled, 
                                         occupied, pause_prob, stall_left, 
                                         stall_right, processed_extruders)
-                  
+                        
     # Note: Uncoupled sisters don't move, so no separate processing needed
 
 # Uncoupled extruder - move independently 
@@ -110,8 +110,9 @@ def process_coupled_extruder_movement_SIMPLE(extruder_id, sister_ids, rngs, posi
         sister_pos = sister_positions[sister_id]
         # if sister positions was the old position of left leg 
         if sister_pos == old_pos1 and new_pos1 != old_pos1:
-            sister_positions[sister_id] = new_pos1  # Sister carried by leg 1
+            sister_positions[sister_id] = new_pos1  # Sister carried by leg 1 
         elif sister_pos == old_pos2 and new_pos2 != old_pos2:
             sister_positions[sister_id] = new_pos2  # Sister carried by leg 2
+    
 
 
