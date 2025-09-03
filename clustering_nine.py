@@ -62,7 +62,7 @@ def plot_unique_positions_combined(filenames, labels=None):
         if unique_positions is None:
             continue
 
-        time_steps = np.arange(len(unique_positions)) * 50
+        time_steps = np.arange(len(unique_positions)) * 100
 
         # Determine color
         for base in base_labels:
@@ -98,20 +98,16 @@ def plot_unique_positions_combined(filenames, labels=None):
 
 # Example usage
 filenames = [
-    'sister_trajectory_500_65000steps_WT_CTCF.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF.pkl',
-    'sister_trajectory_500_65000steps_WT.pkl',
-    'sister_trajectory_500_65000steps_dN.pkl',
-    'sister_trajectory_500_65000steps_dW.pkl', 
-    'sister_trajectory_500_65000steps_WT_CTCF_dynamic.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF_dynamic.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF_dynamic.pkl',
+    'sister_trajectory_500_65000steps_WT_CTCF_fast.pkl',
+    'sister_trajectory_500_65000steps_dN_CTCF_fast.pkl',
+    'sister_trajectory_500_65000steps_dW_CTCF_fast.pkl',
+    'sister_trajectory_500_65000steps_WT_CTCF_fast_dynamic.pkl',
+    'sister_trajectory_500_65000steps_dN_CTCF_fast_dynamic.pkl',
+    'sister_trajectory_500_65000steps_dW_CTCF_fast_dynamic.pkl',
 
 ]
 
 labels = ['WT+CTCF', 'dN75%+CTCF', 'dW+CTCF', \
-        'WT', 'dN75%', 'dW',\
          'WT+CTCF (dynamic)', 'dN75%+CTCF (dynamic)', 'dW+CTCF (dynamic)', ]  # optional, for legend clarity
 
 plot_unique_positions_combined(filenames, labels)

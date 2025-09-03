@@ -48,13 +48,7 @@ def plot_unique_positions_across_files(filenames, labels=None):
 
 # Example usage
 filenames = [
-    'sister_trajectory_500_65000steps_WT_CTCF.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF.pkl',
-    'sister_trajectory_500_65000steps_WT.pkl',
-    'sister_trajectory_500_65000steps_dN.pkl',
-    'sister_trajectory_500_65000steps_dW.pkl'
-
+    'sister_trajectory.pkl',
 ]
 
 labels = ['WT+CTCF', 'dN75%+CTCF', 'dW+CTCF', 'WT', 'dN75%', 'dW']  # optional, for legend clarity

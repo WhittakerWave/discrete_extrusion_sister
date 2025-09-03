@@ -416,5 +416,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     
         # Movement step with coupling information
         self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)
-        print(f"=== DEBUG STEP END ===\n")
+
+
     
