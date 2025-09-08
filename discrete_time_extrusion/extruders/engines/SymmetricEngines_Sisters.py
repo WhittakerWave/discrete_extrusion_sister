@@ -23,8 +23,8 @@ def symmetric_sister_step_cpu(active_state_id,
     """
     
     # Default values if sister parameters not provided
-    # if coupled_to_extruder is None:
-    #    coupled_to_extruder = {}
+    if coupled_to_extruder is None:
+        coupled_to_extruder = {}
     if coupled_to_sister is None:
         coupled_to_sister = {}
     if sister_positions is None:

@@ -115,7 +115,31 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                 if extruder_id not in self.coupled_to_sister:
                     self.coupled_to_sister[extruder_id] = []
                 self.coupled_to_sister[extruder_id].append(int(sister_id))
-
+    
+    def check_sister_coupling_old(self):
+        """Check if any sisters have landed on extruder leg positions"""
+        # First, uncouple any sisters whose extruders have died
+        self._check_extruder_deaths()
+        
+        # Check for new couplings
+        for sister_id in range(self.num_sisters):
+            if not sister_id in self.coupled_to_extruder:  # Sister is free
+                sister_pos = self.sister_positions[sister_id]  
+                # Check if sister position matches any extruder leg position
+                for extruder_id in range(self.number):
+                    if self.states[extruder_id] !=0:  # Extruder is active
+                        extruder_pos1 = self.positions[extruder_id, 0]
+                        extruder_pos2 = self.positions[extruder_id, 1]
+                        
+                        # Check if sister is at same position as either extruder leg
+                        if sister_pos == extruder_pos1 or sister_pos == extruder_pos2:
+                            # Establish coupling
+                            self.coupled_to_extruder[sister_id] = extruder_id
+                            if extruder_id not in self.coupled_to_sister:
+                                self.coupled_to_sister[extruder_id] = []
+                            self.coupled_to_sister[extruder_id].append(sister_id)  
+                            # print(f"Sister {sister_id} coupled to extruder {extruder_id} at position {sister_pos}")
+                            break
 
     def check_sister_coupling(self):
         """Optimized coupling check with immediate dict sync and safe caching"""
@@ -245,7 +269,20 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                                                    self.positions[ids, 1])
             self.directions[ids] = rng_dir.astype(self.xp.uint32)
                                                            
-        return ids    
+        return ids
+    
+    def death_old(self, bound_state_id):
+        """Only extruders (non-sisters) can die"""
+        death_prob = self.xp.where(self.stalled,
+                                   self.stalled_death_prob[self.positions],
+                                   self.death_prob[self.positions])
+        death_prob = self.xp.max(death_prob, axis=1)
+        
+        rng = self.xp.less(self.xp.random.random(self.number), death_prob)
+        ids = self.xp.flatnonzero(rng * self.xp.equal(self.states, bound_state_id))
+        
+        return ids
+    
 
     def death(self, bound_state_id):
         """Optimized death function"""
@@ -276,6 +313,20 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Invalidate position cache
         self._position_cache_valid = False
 
+    def unload_old(self, ids_death):
+        """Unload dead extruders and uncouple any associated sisters"""
+        for extruder_id in ids_death:
+            # If this extruder was coupled to a sister, uncouple them
+            if extruder_id in self.coupled_to_sister:
+                sister_list = self.coupled_to_sister[extruder_id] 
+                for sister_id in sister_list:  # ✅ Uncouple all sisters
+                    if sister_id in self.coupled_to_extruder:         
+                        del self.coupled_to_extruder[sister_id]
+                del self.coupled_to_sister[extruder_id]
+        # Standard unload for extruders only
+        self.stalled[ids_death] = False
+        self.positions[ids_death] = -1
+
     def update_states(self, unbound_state_id, bound_state_id):
         ids_birth = self.birth(unbound_state_id)
         ids_death = self.death(bound_state_id)
@@ -284,6 +335,17 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.states[ids_death] = unbound_state_id
 
         self.unload(ids_death)
+    
+    def update_occupancies_old(self):
+        """Optimized occupancy update with safety checks"""
+        super().update_occupancies()
+        # Only update sister occupancies if sisters are initialized
+        if self.sister_positions is not None:
+            # Vectorized sister occupancy update
+            valid_sisters = self.sister_positions >= 0
+            if self.xp.any(valid_sisters):
+                valid_positions = self.sister_positions[valid_sisters]
+                self.occupied[valid_positions] = True
     
     def update_occupancies(self):
         """Update lattice occupancy including both extruders and sisters"""
@@ -351,8 +413,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Update kwargs with coupling info
         kwargs.update({
-            'coupled_to_extruder': self.coupled_to_extruder,
-            'coupled_to_sister': self.coupled_to_sister})
+            'coupled_to_extruder': self.coupled_to_extruder})
+        # 'coupled_to_sister': self.coupled_to_sister
     
         # Movement step with coupling information
         self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)
