@@ -23,7 +23,7 @@ except:
     
 try:
     import numba as nb
-    use_numba = True
+    use_numba = False
 
     diffusion_step_numba = nb.njit(fastmath=True)(_diffusion_step_cpu)
     symmetric_step_numba = nb.njit(fastmath=True)(_symmetric_step_cpu)
@@ -43,11 +43,12 @@ except ImportError:
     diffusion_step = _diffusion_step_cpu
     symmetric_step = _symmetric_step_cpu
     asymmetric_step = _asymmetric_step_cpu
-    
+    symmetric_sister_step = symmetric_sister_step_cpu
+
     python_engines = {'diffusion' : diffusion_step,
                       'symmetric' : symmetric_step,
                       'asymmetric' : asymmetric_step,
-					  'symmetric_sister' : symmetric_sister_step_cpu}
+					  'symmetric_sister' : symmetric_sister_step}
 
 	
 def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_block=256, **kwargs):
@@ -68,9 +69,9 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
 	has_sisters = hasattr(sim, 'num_sisters') and sim.num_sisters > 0
 	      
 	if mode == "symmetric":
-		rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)
-		
+        
 		if has_sisters:
+			rngs = sim.xp.random.random((sim.number, 5)).astype(sim.xp.float32)
 			# Use sister-aware stepping engine
 			args = tuple([active_state_id,
                           rngs,
@@ -86,9 +87,12 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
                           sim.sister_positions,
                           sim.num_sisters,
                           sim.coupled_to_extruder,
-                          sim.coupled_to_sister])
+                          sim.coupled_to_sister,
+						  sim.sister_tau,
+						  sim.sister_damping])
 			mode_key = "symmetric_sister"
 		else: 
+			rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)
 			args = tuple([active_state_id,
 			      rngs,
 			      sim.number,

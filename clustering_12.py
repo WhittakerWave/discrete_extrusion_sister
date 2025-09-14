@@ -13,7 +13,7 @@ def extract_unique_positions(filename):
         print(f"{filename} is empty.")
         return None, None
 
-    sister_array = np.array(sister_trajectory)
+    sister_array = np.array(sister_trajectory['sister'])
     num_steps, num_sisters = sister_array.shape
     
     unique_positions = []
@@ -24,25 +24,43 @@ def extract_unique_positions(filename):
     
     return np.array(unique_positions), sister_array
 
+def extract_consecutive_positions(filename):
+    """Extract consecutive position clusters over time from a trajectory file"""
+    with open(filename, 'rb') as f:
+        sister_trajectory = pickle.load(f)
+        
+    if len(sister_trajectory) == 0:
+        print(f"{filename} is empty.")
+        return None, None
+
+    sister_array = np.array(sister_trajectory['sister'])
+    num_steps, num_sisters = sister_array.shape
+    
+    consecutive_positions = []
+    for t in range(num_steps):
+        positions = sister_array[t, :]
+        # Sort positions to identify consecutive ranges
+        sorted_positions = np.sort(positions)
+        
+        # Merge consecutive positions
+        merged_count = 1  # Start with first position
+        for i in range(1, len(sorted_positions)):
+            # If current position is not consecutive to previous, count as new cluster
+            if sorted_positions[i] - sorted_positions[i-1] > 1:
+                merged_count += 1
+        
+        consecutive_positions.append(merged_count)
+    
+    return np.array(consecutive_positions), sister_array
+
+
 def plot_unique_positions_combined(filenames, labels=None):
     """Plot unique positions for static and dynamic trajectory files"""
     import matplotlib.pyplot as plt
     import numpy as np
     import pickle
 
-    def extract_unique_positions(filename):
-        with open(filename, 'rb') as f:
-            sister_trajectory = pickle.load(f)
-
-        if len(sister_trajectory) == 0:
-            print(f"{filename} is empty.")
-            return None, None
-
-        sister_array = np.array(sister_trajectory)
-        unique_positions = [len(np.unique(sister_array[t, :])) for t in range(sister_array.shape[0])]
-        return np.array(unique_positions), sister_array
-
-    plt.figure(figsize=(10, 8))
+    plt.figure(figsize=(8, 6))
 
     base_labels = ['WT', 'dN75%', 'dW']
     color_map = {
@@ -58,7 +76,7 @@ def plot_unique_positions_combined(filenames, labels=None):
 
     for i, filename in enumerate(filenames):
         label = labels[i] if labels else f"Dataset {i+1}"
-        unique_positions, _ = extract_unique_positions(filename)
+        unique_positions, _ = extract_consecutive_positions(filename)
         if unique_positions is None:
             continue
 
@@ -76,7 +94,7 @@ def plot_unique_positions_combined(filenames, labels=None):
 
         is_dynamic = 'dynamic' in filename or 'dynamic' in label
         is_ctcf = 'CTCF' in label
-        is_1000s = '1000s' in label
+        is_1000s = '2000s' in label
 
         if is_dynamic:
             # Different marker styles for 500 vs 1000s dynamic
@@ -94,9 +112,10 @@ def plot_unique_positions_combined(filenames, labels=None):
                      linestyle=linestyle, linewidth=2)
 
     # Final plot formatting
-    plt.title("Number of Unique Sisters Over Time", fontsize=20)
+    plt.title("CTCF Static", fontsize=24)
     plt.xlabel("Time Step [Extrusion Timestep Units]", fontsize=20)
     plt.ylabel("Unique Positions", fontsize=20)
+    plt.ylim(0, 500)
     plt.grid(True, alpha=0.3)
     plt.tick_params(axis='both', labelsize=16)
     plt.legend(fontsize=12, loc='best')
@@ -106,27 +125,31 @@ def plot_unique_positions_combined(filenames, labels=None):
 # Updated file list with the three additional files
 filenames = [
     # Original files with CTCF
-    'sister_trajectory_500_65000steps_WT_CTCF_fast.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF_fast.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF_fast.pkl',
-    'sister_trajectory_500_65000steps_WT_CTCF_fast_dynamic.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF_fast_dynamic.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF_fast_dynamic.pkl',
-    'sister_trajectory_500_65000steps_WT_CTCF_fast_dynamic_1000s.pkl',
-    'sister_trajectory_500_65000steps_dN_CTCF_fast_dynamic_1000s.pkl',
-    'sister_trajectory_500_65000steps_dW_CTCF_fast_dynamic_1000s.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_CTCF_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_CTCF_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_CTCF_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_CTCF_fast_dynamic.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_CTCF_fast_dynamic.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_CTCF_fast_dynamic.pkl',
+    'CTCF_dynamics_0912/WT_CTCF_static_sister1.pkl',
+    'CTCF_dynamics_0912/dN_CTCF_static_sister1.pkl',
+    'CTCF_dynamics_0912/dW_CTCF_static_sister1.pkl',
     # New files without CTCF
-    'sister_trajectory_500_65000steps_WT_fast.pkl',
-    'sister_trajectory_500_65000steps_dN_fast.pkl',
-    'sister_trajectory_500_65000steps_dW_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_static.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_static.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_static.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_fast.pkl',
+    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_fast.pkl',
 ]
 
 # Updated labels with the three additional files
 labels = [
-    'WT+CTCF [static]', 'dN75%+CTCF [static]', 'dW+CTCF [static]',
-    'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
-    'WT+CTCF [dynamic 1000s]', 'dN75%+CTCF [dynamic 1000s]', 'dW+CTCF [dynamic 1000s]',
-    'WT', 'dN75%', 'dW'
+    # 'WT+CTCF [static]', 'dN75%+CTCF [static]', 'dW+CTCF [static]',
+    # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
+    # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
+    'WT+CTCF [Static]', 'dN+CTCF [Static]',  'dW+CTCF [Static]',
+    # 'WT', 'dN75%', 'dW'
 ]
 
 plot_unique_positions_combined(filenames, labels)

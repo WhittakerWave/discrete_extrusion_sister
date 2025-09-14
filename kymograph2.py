@@ -116,7 +116,7 @@ def plot_cluster_convergence(sister_trajectory, cluster, sample_interval=50, ctc
 
 def analyze_cluster_transitions(filename='sister_trajectory.pkl', sample_interval=50,
                                 ctcf_left_file='ctcf_left_positions.npy'):
-    sister_trajectory = load_sister_trajectory(filename)
+    sister_trajectory = load_sister_trajectory(filename)['sister']
     sister_array = np.array(sister_trajectory)
     
     print(f"Loaded trajectory: {len(sister_array)} time points, {sister_array.shape[1]} sisters")
@@ -146,8 +146,8 @@ def analyze_cluster_transitions(filename='sister_trajectory.pkl', sample_interva
 
 
 analyze_cluster_transitions(
-        filename='CTCF_dynamic/sister_trajectory_500_65000steps_dW_CTCF_dynamic.pkl',
-        sample_interval=50,
-        ctcf_left_file='CTCF_dynamic/ctcf_left_positions.npy'
+        filename='translocator_trajectory.pkl',
+        sample_interval=1,
+        ctcf_left_file='ctcf_left_positions_simple.npy'
     )
 

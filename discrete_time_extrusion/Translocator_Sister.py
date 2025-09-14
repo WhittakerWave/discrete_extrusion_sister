@@ -1,4 +1,6 @@
 from . import arrays
+import numpy as np
+
 
 class Translocator_Sister():
     def __init__(self,
@@ -43,9 +45,16 @@ class Translocator_Sister():
         self.barrier_engine = barrier_engine(*ctcf_arrays, *ctcf_dynamic_arrays)
 
         number_of_sisters = kwargs['num_of_sisters']
+        
+        # define sisiter_tau and sister_damping
+        sister_tau  = kwargs['sister_lifetime']
+        sister_damping = kwargs['sister_damping']
+
         self.extrusion_engine = extrusion_engine(
                                number_of_LEFs, 
                                number_of_sisters,
+                               sister_tau,
+                               sister_damping,
                                self.barrier_engine, 
                                *lef_arrays, **lef_transition_dict)
                 

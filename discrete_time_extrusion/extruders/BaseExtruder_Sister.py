@@ -1,6 +1,6 @@
 
 import numpy as np
-import matplotlib.pyplot as plt 
+# import matplotlib.pyplot as plt 
 from . import NullExtruder, EngineFactory
 
 class BaseExtruder_Sister(NullExtruder.NullExtruder):
@@ -8,6 +8,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def __init__(self,
                  number_of_extruders,
                  number_of_sisters, 
+                 sister_tau,
+                 sister_damping,
                  barrier_engine,
                  birth_prob,
                  death_prob,
@@ -40,10 +42,32 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.stalled_death_prob = stalled_death_prob
         self.diffusion_prob = diffusion_prob
         self.pause_prob = pause_prob
+        self.sister_tau = sister_tau
+        self.sister_damping = sister_damping
         self.stepping_engine = EngineFactory.SteppingEngine
         
         # Initialize sisters after parent constructor completes
-        self._initialize_sisters()
+        # self._initialize_sisters()
+        self._initialize_sisters_load()
+        # self.test_single_position()
+    
+    def _initialize_sisters_load(self, load_from_file=False, sister_file_path="sister.npy"):
+        """Initialize sisters either randomly or from saved file"""
+        if self.num_sisters <= 0:
+            print("No sisters to initialize")
+            return
+        # Initialize arrays
+        self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
+        self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
+        self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
+
+        if load_from_file:
+            loaded_positions = self.xp.load(sister_file_path)
+            if len(loaded_positions) >= self.num_sisters:
+                self.sister_positions = loaded_positions[:self.num_sisters]
+            print(f"Loaded sisters from {sister_file_path}")
+        else:
+            self._initialize_sisters()
     
     def _initialize_sisters(self):
         """Optimized sister initialization using vectorized operations"""
@@ -75,8 +99,23 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             self.sister_positions[:num_to_place] = free_positions[:num_to_place]
             # Mark excess sisters as inactive
             self.sister_positions[num_to_place:] = -1
-            
+        
+        self.xp.save("sister.npy", self.sister_positions) 
         print(f"Initialized {self.num_sisters} sisters at positions: {self.sister_positions}")
+    
+
+    def test_single_position(self):
+        # Initialize arrays
+        lattice_size = len(self.occupied)
+        print(f"Initializing {self.num_sisters} sisters on lattice of size {lattice_size}")
+        # Initialize arrays
+        self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
+        self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
+        self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
+
+        # Manually put all sisters at position 1000
+        self.sister_positions = [2500, 3500]
+        print(f"Result: {self.sister_positions}")
     
     def _update_extruder_position_cache(self):
         ### Build the extruder two leg postions -- id map 
@@ -285,18 +324,16 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
 
         self.unload(ids_death)
     
-    def update_occupancies(self):
-        """Update lattice occupancy including both extruders and sisters"""
-        super().update_occupancies()
-        
-        # Sisters also occupy lattice sites
-        # Check if sister attributes are properly initialized
-        if hasattr(self, 'is_sister') and self.is_sister is not None:
-            for i in range(self.number):
-                if self.is_sister[i] and self.states[i] == 1:
-                    pos = self.positions[i, 0]
-                    if pos >= 0:
-                        self.occupied[pos] = True
+    def update_sister_states(self):
+        if self.sister_positions is None:
+            return
+        else:
+            ## time_step is 1s
+            decay_prob = 1 - np.exp(-1 / self.sister_tau)
+            random_vals = np.random.random(len(self.sister_positions))
+            fall_off_mask = random_vals < decay_prob
+            # Set fallen off positions to -1
+            self.sister_positions[fall_off_mask] = -1
 
     def get_coupling_status(self):
         """Optimized coupling status using vectorized operations"""
@@ -336,13 +373,45 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             'uncoupled_sisters': uncoupled_sisters_list,
             'total_sisters': self.num_sisters
         }
+    
 
+    def setup_test_scenario(self):
+        """Setup a single permanent LEF at position [50, 50]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+    
+        # Take the first unbound LEF
+        lef_id = unbound_ids[0]
+        
+        # Set it at position [50, 50] and make it bound
+        self.positions[lef_id] = self.xp.array([3000, 3000])
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
+    
+        print(f"Test LEF {lef_id} initialized at position [50, 50]")
 
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
        
+        # if not hasattr(self, '_test_initialized'):
+        # self.setup_test_scenario()
+        
         self.update_states(unbound_state_id, bound_state_id)
         
+        ## Update sister states (decay)
+        self.update_sister_states()
+
         self.check_sister_coupling()      
     
         self.update_occupancies()
