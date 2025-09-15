@@ -64,7 +64,7 @@ def plot_unique_positions_combined(filenames, labels=None):
 
     base_labels = ['WT', 'dN75%', 'dW']
     color_map = {
-        'WT': '#1f77b4',      # blue
+        'WT': '#EE3B2A',      # blue
         'dN75%': '#ff7f0e',   # orange
         'dW': '#2ca02c'       # green
     }
@@ -89,7 +89,7 @@ def plot_unique_positions_combined(filenames, labels=None):
                 marker = marker_map[base]
                 break
         else:
-            color = 'black'
+            color = '#6BADD7'
             marker = 'o'
 
         is_dynamic = 'dynamic' in filename or 'dynamic' in label
@@ -112,7 +112,7 @@ def plot_unique_positions_combined(filenames, labels=None):
                      linestyle=linestyle, linewidth=2)
 
     # Final plot formatting
-    plt.title("CTCF Static", fontsize=24)
+    plt.title("CTCF 1000s", fontsize=24)
     plt.xlabel("Time Step [Extrusion Timestep Units]", fontsize=20)
     plt.ylabel("Unique Positions", fontsize=20)
     plt.ylim(0, 500)
@@ -125,22 +125,9 @@ def plot_unique_positions_combined(filenames, labels=None):
 # Updated file list with the three additional files
 filenames = [
     # Original files with CTCF
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_CTCF_fast.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_CTCF_fast.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_CTCF_fast.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_CTCF_fast_dynamic.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_CTCF_fast_dynamic.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_CTCF_fast_dynamic.pkl',
-    'CTCF_dynamics_0912/WT_CTCF_static_sister1.pkl',
-    'CTCF_dynamics_0912/dN_CTCF_static_sister1.pkl',
-    'CTCF_dynamics_0912/dW_CTCF_static_sister1.pkl',
-    # New files without CTCF
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_static.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_static.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_static.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_WT_fast.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dN_fast.pkl',
-    # 'CTCF_dynamic_1000s_100s_no_CTCF/sister_trajectory_500_65000steps_dW_fast.pkl',
+    'CTCF_dynamics_0914_tau64800/WT_CTCF1000s_damp1_sister1.pkl',
+    'CTCF_dynamics_0914_tau64800/dN_CTCF1000s_damp1_sister1.pkl',
+    'CTCF_dynamics_0914_tau64800/dW_CTCF1000s_damp1_sister1.pkl',
 ]
 
 # Updated labels with the three additional files
@@ -148,7 +135,7 @@ labels = [
     # 'WT+CTCF [static]', 'dN75%+CTCF [static]', 'dW+CTCF [static]',
     # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
     # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
-    'WT+CTCF [Static]', 'dN+CTCF [Static]',  'dW+CTCF [Static]',
+    'WT+CTCF [1000s]', 'dN+CTCF [1000s]',  'dW+CTCF [1000s]',
     # 'WT', 'dN75%', 'dW'
 ]
 

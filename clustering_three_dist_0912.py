@@ -29,7 +29,7 @@ def plot_cluster_size_distribution(filenames, labels, bins='auto'):
     
     plt.xlabel('Cluster Size [Number of sisters in one lattice]', fontsize=20)
     plt.ylabel('Number of Clusters', fontsize=20)
-    plt.title('Cluster Size Distribution at 65000 steps \n CTCF 1000s', fontsize=20)
+    plt.title('Cluster Size Distribution at 65000 steps \n CTCF Static', fontsize=20)
     plt.legend(fontsize=18)
     plt.tick_params(axis='both', labelsize=18)
     plt.grid(True, alpha=0.3)
@@ -37,9 +37,9 @@ def plot_cluster_size_distribution(filenames, labels, bins='auto'):
     plt.show()
 
 filenames = [
-    'CTCF_dynamics_0914/dW_CTCF1000s_damp1_sister1.pkl',
-    'CTCF_dynamics_0914/dN_CTCF1000s_damp1_sister1.pkl',
-    'CTCF_dynamics_0914/WT_CTCF1000s_damp1_sister1.pkl'
+    'CTCF_dynamics_0912/dW_CTCF_Static_sister1.pkl',
+    'CTCF_dynamics_0912/dN_CTCF_Static_sister1.pkl',
+    'CTCF_dynamics_0912/WT_CTCF_Static_sister1.pkl'
 ]
 labels = ['dW99%', 'dN75%', 'WT']
 

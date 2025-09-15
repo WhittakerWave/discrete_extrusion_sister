@@ -51,7 +51,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._initialize_sisters_load()
         # self.test_single_position()
     
-    def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dW_sister.npy"):
+    def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dN_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")

@@ -63,6 +63,7 @@ def plot_sisters_and_lefs_with_ctcf(data, sample_interval=1, ctcf_left_positions
 
 
 # Example usage
+
 data = load_translocator("CTCF_dynamics_0912/dN_CTCF_Static_sister1.pkl")
 ctcf_left_positions = np.load("ctcf_left_positions.npy")
 ctcf_right_positions = np.load("ctcf_right_positions.npy")
