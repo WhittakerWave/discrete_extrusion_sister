@@ -37,9 +37,9 @@ def plot_cluster_size_distribution(filenames, labels, bins='auto'):
     plt.show()
 
 filenames = [
-    'CTCF_dynamics_0912/dW_CTCF1000s_sister1.pkl',
-    'CTCF_dynamics_0912/dN_CTCF1000s_sister1.pkl',
-    'CTCF_dynamics_0912/WT_CTCF1000s_sister1.pkl'
+    'CTCF_dynamics_0914/dW_CTCF1000s_damp1_sister1.pkl',
+    'CTCF_dynamics_0914/dN_CTCF1000s_damp1_sister1.pkl',
+    'CTCF_dynamics_0914/WT_CTCF1000s_damp1_sister1.pkl'
 ]
 labels = ['dW99%', 'dN75%', 'WT']
 

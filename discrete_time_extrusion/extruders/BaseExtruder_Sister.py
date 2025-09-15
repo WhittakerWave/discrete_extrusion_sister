@@ -51,7 +51,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._initialize_sisters_load()
         # self.test_single_position()
     
-    def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dN_sister.npy"):
+    def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dW_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
@@ -335,6 +335,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             # Set fallen off positions to -1
             self.sister_positions[fall_off_mask] = -1
 
+
     def get_coupling_status(self):
         """Optimized coupling status using vectorized operations"""
         # Safety check for initialization
@@ -410,7 +411,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.update_states(unbound_state_id, bound_state_id)
         
         ## Update sister states (decay)
-        self.update_sister_states()
+        # self.update_sister_states()
 
         self.check_sister_coupling()      
     

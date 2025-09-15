@@ -135,6 +135,7 @@ class Translocator_Sister():
                         self.coupling_trajectory = []
                     self.sister_trajectory.append([])
                     self.coupling_trajectory.append({'coupled_pairs': [], 'uncoupled_sisters': [], 'total_sisters': 0})
+     
 
     # Also add this method to initialize trajectory lists in your Translocator_Sister class
     def clear_trajectory(self):
