@@ -33,7 +33,7 @@ from discrete_time_extrusion.extruders.BaseExtruder_Sister_Slow import BaseExtru
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_RN_RB_RP_RW_HBD_S61.json", 'r') as dict_file:
+with open("data/extrusion_dict_Simple.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -72,17 +72,17 @@ number_of_ctcf = 364
 # ctcf_right_positions = ctcf_positions[half:]
 # np.save('ctcf_right_positions.npy', ctcf_right_positions)
 
-ctcf_left_positions = np.load('ctcf_left_positions.npy')
-ctcf_right_positions = np.load('ctcf_right_positions.npy')
+# ctcf_left_positions = np.load('ctcf_left_positions_simple.npy')
+# ctcf_right_positions = np.load('ctcf_right_positions_simple.npy')
 
 # np.save('ctcf_left_positions.npy', ctcf_left_positions)
 # ctcf_left_positions = np.load('ctcf_left_positions.npy')
 # ctcf_right_positions =  ctcf_left_positions.copy()
-# ctcf_left_positions = [1500]
-# ctcf_right_positions = []
+ctcf_left_positions = []
+ctcf_right_positions = [1500]
 
 start = time.time()
-translocator1 = Translocator_Sister(MultistateExtruder_Sister,
+translocator1 = Translocator_Sister(BaseExtruder_Sister,
                             DynamicBoundary,
                             type_list, 
                             site_types,
@@ -91,14 +91,14 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps = 65000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=100)
+translocator1.run_trajectory(steps = 10000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=1)
 
 end = time.time()
 print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 import pickle
-with open('translocator_trajectory.pkl', 'wb') as f:
+with open('test_case_V.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,
         "lef": translocator1.lef_trajectory,

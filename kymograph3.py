@@ -33,7 +33,7 @@ def plot_sisters_with_lefs(sister_array, lef_array, sample_interval=1, cmap='vir
 
     plt.xlabel("Time Steps", fontsize=25)
     plt.ylabel("Lattice Position", fontsize=25)
-    plt.title("Kymograph for LEFs and sisters \n CTCF off 1/1000 \n CTCF Set left", fontsize=25)
+    plt.title("Kymograph for LEFs and sisters \n  alpha=1 \n CTCF 10s", fontsize=25)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
     plt.legend(fontsize=20)
@@ -41,7 +41,7 @@ def plot_sisters_with_lefs(sister_array, lef_array, sample_interval=1, cmap='vir
     plt.show()
 
 # --- Usage ---
-data = load_translocator_data('translocator_trajectory.pkl')
+data = load_translocator_data('translocator_test_cases_with_fall_off/test_case_V.pkl')
 plot_sisters_with_lefs(data["sister"], data["lef"], sample_interval=1)
 
 

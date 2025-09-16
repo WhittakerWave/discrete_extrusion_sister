@@ -48,8 +48,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Initialize sisters after parent constructor completes
         # self._initialize_sisters()
-        self._initialize_sisters_load()
-        # self.test_single_position()
+        # self._initialize_sisters_load()
+        self.test_single_position()
     
     def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dN_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
@@ -114,7 +114,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
 
         # Manually put all sisters at position 1000
-        self.sister_positions = [2500, 3500]
+        self.sister_positions = [2500, 3500, 4500, 4500, 4500, 4500]
         print(f"Result: {self.sister_positions}")
     
     def _update_extruder_position_cache(self):
@@ -391,7 +391,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         lef_id = unbound_ids[0]
         
         # Set it at position [50, 50] and make it bound
-        self.positions[lef_id] = self.xp.array([3000, 3000])
+        self.positions[lef_id] = self.xp.array([1000, 1000])
         self.states[lef_id] = 1  # bound state
         self.directions[lef_id] = 0
         self.stalled[lef_id] = False
@@ -406,9 +406,9 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         """Optimized step function"""
        
         # if not hasattr(self, '_test_initialized'):
-        # self.setup_test_scenario()
+        self.setup_test_scenario()
         
-        self.update_states(unbound_state_id, bound_state_id)
+        # self.update_states(unbound_state_id, bound_state_id)
         
         ## Update sister states (decay)
         # self.update_sister_states()
