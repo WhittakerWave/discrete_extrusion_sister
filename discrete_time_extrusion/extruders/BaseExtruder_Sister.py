@@ -48,10 +48,10 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Initialize sisters after parent constructor completes
         # self._initialize_sisters()
-        # self._initialize_sisters_load()
-        self.test_single_position()
+        self._initialize_sisters_load()
+        # self.test_single_position()
     
-    def _initialize_sisters_load(self, load_from_file=True, sister_file_path="dN_sister.npy"):
+    def _initialize_sisters_load(self, load_from_file = True, sister_file_path="dN_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
@@ -406,9 +406,9 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         """Optimized step function"""
        
         # if not hasattr(self, '_test_initialized'):
-        self.setup_test_scenario()
+        # self.setup_test_scenario()
         
-        # self.update_states(unbound_state_id, bound_state_id)
+        self.update_states(unbound_state_id, bound_state_id)
         
         ## Update sister states (decay)
         # self.update_sister_states()
