@@ -47,8 +47,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.stepping_engine = EngineFactory.SteppingEngine
         
         # Initialize sisters after parent constructor completes
-        # self._initialize_sisters()
-        self._initialize_sisters_load()
+        self._initialize_sisters()
+        # self._initialize_sisters_load()
         # self.test_single_position()
     
     def _initialize_sisters_load(self, load_from_file = True, sister_file_path="dN_sister.npy"):
@@ -334,7 +334,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             fall_off_mask = random_vals < decay_prob
             # Set fallen off positions to -1
             self.sister_positions[fall_off_mask] = -1
-
 
     def get_coupling_status(self):
         """Optimized coupling status using vectorized operations"""

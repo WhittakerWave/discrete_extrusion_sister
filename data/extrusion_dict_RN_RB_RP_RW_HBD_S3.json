@@ -55,7 +55,7 @@
     "LEF_separation": 41,
     "mode": "symmetric",
     "sites_per_monomer": 1,
-    "monomers_per_replica": 32000,
+    "monomers_per_replica": 320000,
     "num_of_sisters": 500,
     "sister_lifetime": 64800,
     "sister_damping": 1,

@@ -93,7 +93,6 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             ctcf_right_positions, 
                             **paramdict_WT)
 
-
 # translocator1.run(10000)
 # Disable automatic sister updates
 def apply_param_dict_to_translocator(translocator, param_dict):
@@ -135,7 +134,6 @@ def shared_sister_update(translocator1, translocator2, step_number, shared_decay
         # falling_indices = np.where(fall_off_mask)[0]
         # if len(falling_indices) > 0:
         #    print(f"Step {step_number}: Synchronized sister decay - indices {falling_indices}")
-
 
 def run_synchronized_trajectories_simple(translocator1, translocator2, period = None, steps = None, 
                                         prune_unbound_LEFs=True, track_sisters=False, 
