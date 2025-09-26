@@ -77,7 +77,7 @@ def N_total_collision(t_array, M, L, k, rho, alpha, rho_c=None):
         out[i] = min(k * N_per, M)             # total cannot exceed M
     return out
 
-# 
+## 
 def expected_N_ex_per_extruder(t, rho, alpha, rho_c, rho_e, v=1.0):
     lam = 2.0 * rho_e * v
     if lam == 0.0:

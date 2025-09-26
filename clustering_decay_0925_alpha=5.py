@@ -54,7 +54,6 @@ def extract_consecutive_positions(filename):
     return np.array(consecutive_positions), sister_array
 
 
-
 def plot_unique_positions_combined(filenames, labels=None, t=None, rho=None, alpha=None, M=None):
     """Plot unique positions for trajectories + analytic extruder curve."""
     import matplotlib.pyplot as plt
