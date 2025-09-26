@@ -55,7 +55,7 @@ def extract_consecutive_positions(filename):
     
     return np.array(consecutive_positions), sister_array
 
-
+# 
 def Ns(t, rho, alpha, rho_c=0.0):
     if t <= 0:
         return 0.0
@@ -89,7 +89,7 @@ def N_total_collision(t_array, M, L, k, rho, alpha, rho_c=None):
         out[i] = min(k * N_per, M)             # total cannot exceed M
     return out
 
-### LEF have some lifetime 
+
 
 def expected_N_ex_per_extruder(t, rho, alpha, rho_c, rho_e, v=1.0):
     lam = 2.0 * rho_e * v
@@ -138,7 +138,6 @@ def plot_unique_positions_combined_v2(filenames, labels=None, t=None, M=None, L=
     plt.legend(fontsize=12, loc='best')
     plt.tight_layout()
     plt.show()
-
 
 
 filenames = [

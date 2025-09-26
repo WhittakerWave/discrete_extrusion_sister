@@ -89,6 +89,34 @@ def N_total_collision(t_array, M, L, k, rho, alpha, rho_c=None):
         out[i] = min(k * N_per, M)             # total cannot exceed M
     return out
 
+
+def N_total_collision_fixed(t_array, M, L, k, rho, alpha, rho_c=None):
+    """
+    - per-extruder total = rho_c + 2*Ns(t)
+    - cap per-extruder total at L/k (cannot step over neighbors)
+    - total = k * per-extruder, cap at M
+    - enforce lower bound of k (each extruder occupies at least one site)
+    """
+    if rho_c is None:
+        # if you want each extruder center counted as 1, set rho_c = 1.0
+        # but in your previous code you used rho (M/L). Choose what's correct.
+        rho_c = rho
+
+    out = np.zeros_like(t_array, dtype=float)
+    max_per_extruder = float(L) / float(k)  # maximum total per extruder (both sides + center)
+
+    for i, t in enumerate(t_array):
+        per_side = Ns(t, rho, alpha, rho_c)            # per-side growth
+        per_extruder = rho_c + 2.0 * per_side          # center + both sides
+        # cap per-extruder at the collision-limited max
+        per_extruder = min(per_extruder, max_per_extruder)
+        total = k * per_extruder
+        total = min(total, M)                          # cannot exceed total points
+        total = max(total, k)                          # at least one site per extruder
+        out[i] = total
+
+    return out 
+
 ### LEF have some lifetime 
 
 def expected_N_ex_per_extruder(t, rho, alpha, rho_c, rho_e, v=1.0):
@@ -126,7 +154,7 @@ def plot_unique_positions_combined_v2(filenames, labels=None, t=None, M=None, L=
 
     # ---- Analytic curve ----
     if all(v is not None for v in [t, M, L, k, rho, alpha]):
-        N_analytic = M - N_total_collision(t, M, L, k, rho, alpha, rho_c=None)
+        N_analytic = M - N_total_collision_fixed(t, M, L, k, rho, alpha, rho_c=None)
         plt.plot(t, N_analytic, 'k--', linewidth=2.5, label=f"Analytic k={k}, alpha={alpha}")
 
     # ---- Formatting ----
