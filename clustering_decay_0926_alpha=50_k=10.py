@@ -1,5 +1,4 @@
 
-
 import pickle
 import numpy as np
 from math import sqrt
@@ -55,18 +54,7 @@ def extract_consecutive_positions(filename):
     
     return np.array(consecutive_positions), sister_array
 
-# 
-def Ns(t, rho, alpha, rho_c=0.0):
-    if t <= 0:
-        return 0.0
-    a = alpha
-    b = 1.0 + alpha * rho_c
-    if a == 0.0:
-        return rho * t
-    disc = b*b + 4.0 * a * rho * t
-    return (-b + sqrt(disc)) / (2.0 * a)
-
-# Single-side growth
+## Single-side growth
 def Ns(t, rho, alpha, rho_c=0.0):
     if t <= 0:
         return 0.0
@@ -88,7 +76,6 @@ def N_total_collision(t_array, M, L, k, rho, alpha, rho_c=None):
         N_per = min(N_per, max_per_extruder)   # limit due to collisions
         out[i] = min(k * N_per, M)             # total cannot exceed M
     return out
-
 
 
 def expected_N_ex_per_extruder(t, rho, alpha, rho_c, rho_e, v=1.0):
