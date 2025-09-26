@@ -80,7 +80,7 @@ ctcf_right_positions = np.load('ctcf_right_positions.npy')
 
 start = time.time()
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
@@ -88,7 +88,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,

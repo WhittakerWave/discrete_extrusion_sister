@@ -7,6 +7,7 @@ import json
 import codecs
 # import cooltools
 import time
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -44,7 +45,7 @@ sites_per_monomer = paramdict['sites_per_monomer']
 type_list = ['A']
 monomer_types = type_list.index('A') * np.ones(monomers_per_replica, dtype=int)
 site_types = np.repeat(monomer_types, sites_per_monomer)
-    
+
 # LEF/CTCF properties in type A monomers may be obtained from the paramdict as follows
 LEF_off_rate = paramdict['LEF_off_rate']
 CTCF_facestall = paramdict['CTCF_facestall']
@@ -83,21 +84,20 @@ ctcf_right_positions = [1500]
 
 start = time.time()
 translocator1 = Translocator_Sister(BaseExtruder_Sister,
-                            DynamicBoundary,
-                            type_list, 
-                            site_types,
-                            ctcf_left_positions,
-                            ctcf_right_positions, 
-                            **paramdict)
+                    DynamicBoundary,
+                    type_list, 
+                    site_types,
+                    ctcf_left_positions,
+                    ctcf_right_positions, 
+                    **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory(steps = 10000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=1)
+translocator1.run_trajectory_one_sister(steps = 1000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=1)
 
 end = time.time()
 print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
-import pickle
 with open('test_case_V.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,

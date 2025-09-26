@@ -1,7 +1,6 @@
 from . import arrays
 import numpy as np
 
-
 class Translocator_Sister():
     def __init__(self,
                  extrusion_engine,
@@ -46,7 +45,7 @@ class Translocator_Sister():
 
         number_of_sisters = kwargs['num_of_sisters']
         
-        # define sisiter_tau and sister_damping
+        # Define sisiter_lifetime and sister_damping
         sister_tau  = kwargs['sister_lifetime']
         sister_damping = kwargs['sister_damping']
 
@@ -57,7 +56,7 @@ class Translocator_Sister():
                                sister_damping,
                                self.barrier_engine, 
                                *lef_arrays, **lef_transition_dict)
-                
+          
         kwargs['steps'] = int(kwargs['steps'] / self.time_unit)
         kwargs['dummy_steps'] = int(kwargs['dummy_steps'] / self.time_unit)
         self.params = kwargs
@@ -85,8 +84,8 @@ class Translocator_Sister():
     def run(self, N, **kwargs):
         self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
         
-    
-    def run_trajectory(self, period=None, steps=None, prune_unbound_LEFs=True, track_sisters=False, sample_interval=1, **kwargs):
+    def run_trajectory_one_sister(self, period = None, steps = None, 
+            prune_unbound_LEFs = True, track_sisters = False, sample_interval = 1, **kwargs):
         self.clear_trajectory()
         steps = int(steps) if steps else self.params['steps']
         period = int(period) if period else self.params['sites_per_monomer']
@@ -110,22 +109,19 @@ class Translocator_Sister():
                 self.lef_trajectory.append(LEF_positions)
                 self.ctcf_trajectory.append(CTCF_positions)
         
-                # Track sister trajectories if requested - call methods on extrusion_engine
+                # Track sister trajectories
                 if track_sisters:
                     # Check if extrusion engine has sister functionality
                     if hasattr(self.extrusion_engine, 'sister_positions') and hasattr(self.extrusion_engine, 'get_coupling_status'):
                         # Make a copy for trajectory
                         sister_positions = self.extrusion_engine.sister_positions.copy()  
                         coupling_status = self.extrusion_engine.get_coupling_status()
-                
+                        
                         self.sister_trajectory.append(sister_positions)
                         self.coupling_trajectory.append(coupling_status)
                         
                         if step_idx % sample_interval  == 0:
                             print(f"Step {step_idx}: Saved trajectory point {len(self.sister_trajectory)}")
-                        # Debug print to verify data
-                        # print(f"Step {step_idx}: Sisters at positions {sister_positions}")
-                        # print(f"Step {step_idx}: Coupling status - {len(coupling_status['coupled_pairs'])} coupled, {len(coupling_status['uncoupled_sisters'])} uncoupled")
                 else:
                     print(f"Warning: Extrusion engine doesn't have sister functionality")
                     # Initialize empty sister trajectories if not already done
@@ -137,7 +133,7 @@ class Translocator_Sister():
                     self.coupling_trajectory.append({'coupled_pairs': [], 'uncoupled_sisters': [], 'total_sisters': 0})
      
 
-    # Also add this method to initialize trajectory lists in your Translocator_Sister class
+    # Add this method to initialize trajectory lists in the translocator
     def clear_trajectory(self):
         """Clear all trajectory data including sister trajectories"""
         # Call parent clear_trajectory if it exists

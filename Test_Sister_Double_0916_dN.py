@@ -4,6 +4,7 @@ import sys
 import os
 import json
 # import hoomd
+import pickle
 import codecs
 # import cooltools
 import time
@@ -79,8 +80,9 @@ ctcf_right_positions = np.load('ctcf_right_positions_full.npy')
 # ctcf_right_positions = []
 
 start = time.time()
+
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
@@ -88,7 +90,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
@@ -233,7 +235,7 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
                     translocator2.sister_trajectory.append(sister_positions_2)
                     translocator2.coupling_trajectory.append(coupling_status_2)
 
-# EVEN SIMPLER: Just modify the existing step method
+# Just modify the existing step method
 def disable_sister_updates_in_step(translocator):
     """Temporarily disable sister updates in the step method"""
     original_update = translocator.extrusion_engine.update_sister_states
@@ -255,11 +257,11 @@ run_synchronized_trajectories_continue(
     clear_trajectories=True  # Start fresh
 )
 
-
+## Update the dictionary 
 update(translocator1, paramdict_dN)
 update(translocator2, paramdict_dN)
 
-# Second run - continue from where we left off
+# Second run - continue from the translocator states
 run_synchronized_trajectories_continue(
    translocator1, translocator2,
    paramdict_dN['sister_lifetime'],
@@ -278,7 +280,6 @@ print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 
-import pickle
 with open('dN_trajectory1.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,
@@ -292,7 +293,9 @@ with open('dN_trajectory2.pkl', 'wb') as f:
         "lef": translocator2.lef_trajectory,
         "ctcf": translocator2.ctcf_trajectory,
     }, f)
-print("Sister trajectory saved!")
 
 
-translocator1.extrusion_engine._initialize_sisters()
+print("Finish: Sister trajectory saved!")
+
+
+

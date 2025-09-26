@@ -5,6 +5,7 @@ import os
 import json
 # import hoomd
 import codecs
+import pickle
 # import cooltools
 import time
 import numpy as np
@@ -80,7 +81,7 @@ ctcf_right_positions = np.load('ctcf_right_positions.npy')
 
 start = time.time()
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
@@ -88,7 +89,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
-                            DynamicBoundary,
+                            StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
@@ -276,7 +277,6 @@ print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 
-import pickle
 with open('dW_trajectory1.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,

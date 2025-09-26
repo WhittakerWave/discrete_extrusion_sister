@@ -112,7 +112,7 @@ def plot_unique_positions_combined(filenames, labels=None):
                      linestyle=linestyle, linewidth=2)
 
     # Final plot formatting
-    plt.title("CTCF 100s alpha 10000", fontsize=24)
+    plt.title("CTCF Static alpha 10000", fontsize=24)
     plt.xlabel("Time Step [Extrusion Timestep Units]", fontsize=20)
     plt.ylabel("Unique Positions", fontsize=20)
     plt.ylim(0, 800)
@@ -125,9 +125,9 @@ def plot_unique_positions_combined(filenames, labels=None):
 # Updated file list with the three additional files
 filenames = [
     # Original files with CTCF
-    'CTCF_dynamics_0916/WT_trajectory1_alpha10000_ctcf100.pkl',
-    'CTCF_dynamics_0916/dN_trajectory1_alpha10000_ctcf100.pkl',
-    'CTCF_dynamics_0916/dW_trajectory1_alpha10000_ctcf100.pkl',
+    'CTCF_dynamics_0916/WT_trajectory1_alpha10000_Static.pkl',
+    'CTCF_dynamics_0916/dN_trajectory1_alpha10000_Static.pkl',
+    'CTCF_dynamics_0916/dW_trajectory1_alpha10000_Static.pkl',
 ]
 
 # Updated labels with the three additional files
@@ -135,8 +135,8 @@ labels = [
     # 'WT+CTCF [static]', 'dN75%+CTCF [static]', 'dW+CTCF [static]',
     # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
     # 'WT+CTCF [dynamic 100s]', 'dN75%+CTCF [dynamic 100s]', 'dW+CTCF [dynamic 100s]',
-    # 'WT+CTCF [Static]', 'dN+CTCF [Static]',  'dW+CTCF [Static]',
-    'WT+CTCF [100s]', 'dN+CTCF [100s]',  'dW+CTCF [100s]',
+    'WT+CTCF [Static]', 'dN+CTCF [Static]',  'dW+CTCF [Static]',
+    # 'WT+CTCF [100s]', 'dN+CTCF [100s]',  'dW+CTCF [100s]',
     # 'WT', 'dN75%', 'dW'
 ]
 

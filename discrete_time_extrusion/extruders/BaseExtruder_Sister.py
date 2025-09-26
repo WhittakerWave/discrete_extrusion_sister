@@ -21,8 +21,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.num_extruders = number_of_extruders
         self.num_sisters = number_of_sisters
 
-        # Initialize sister attributes BEFORE calling super().__init__
-        # This prevents AttributeError in update_occupancies()
         self.sister_positions = None
         self.sister_coupled_to = None       # Array: sister_id -> extruder_id (-1 if uncoupled)
         self.extruder_sister_counts = None  # Array: extruder_id -> number of coupled sisters
@@ -46,12 +44,15 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.sister_damping = sister_damping
         self.stepping_engine = EngineFactory.SteppingEngine
         
-        # Initialize sisters after parent constructor completes
+        # Initialize sisters 
+        # Way1: randomly 
         self._initialize_sisters()
+        # Way2: load sister positions
         # self._initialize_sisters_load()
-        # self.test_single_position()
+        # Test function of loading sisterCs
+        # self._test_single_position()
     
-    def _initialize_sisters_load(self, load_from_file = True, sister_file_path="dN_sister.npy"):
+    def _initialize_sisters_load(self, load_from_file = True, sister_file_path = "dN_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
@@ -103,8 +104,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.xp.save("sister.npy", self.sister_positions) 
         print(f"Initialized {self.num_sisters} sisters at positions: {self.sister_positions}")
     
-
-    def test_single_position(self):
+    def _test_single_position(self):
         # Initialize arrays
         lattice_size = len(self.occupied)
         print(f"Initializing {self.num_sisters} sisters on lattice of size {lattice_size}")
@@ -112,9 +112,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
         self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
         self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
-
         # Manually put all sisters at position 1000
-        self.sister_positions = [2500, 3500, 4500, 4500, 4500, 4500]
+        # self.sister_positions = [2500, 3500, 4500, 4500, 4500, 4500]
         print(f"Result: {self.sister_positions}")
     
     def _update_extruder_position_cache(self):
@@ -127,7 +126,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                 active_extruders.append(extruder_id)
                 pos1 = int(self.positions[extruder_id, 0])
                 pos2 = int(self.positions[extruder_id, 1])
-                # Add both leg positions
+                ## Add both leg positions
                 if pos1 not in self._position_to_extruders:
                     self._position_to_extruders[pos1] = []
                 self._position_to_extruders[pos1].append(extruder_id)
@@ -173,7 +172,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             ## if sister pos in the extruder positions, couple them 
             if sister_pos in self._position_to_extruders:
                 extruder_id = self._position_to_extruders[sister_pos][0]
-                ## update the array
+                ## update the arrary sister_couple_to 
                 self.sister_coupled_to[sister_id] = extruder_id
                 self.extruder_sister_counts[extruder_id] += 1
                 ## update dictionaries 
@@ -235,30 +234,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                     if not self.coupled_to_sister[extruder_id]:
                         del self.coupled_to_sister[extruder_id]
     
-    def birth_old(self, unbound_state_id):
-        """Only extruders (non-sisters) can birth"""
-        
-        free_sites = self.sites[~self.occupied]
-        binding_sites = self.xp.random.choice(free_sites, size=self.number, replace=False)
-
-        rng = self.xp.less(self.xp.random.random(self.number), self.birth_prob[binding_sites])
-        ids = self.xp.flatnonzero(rng * self.xp.equal(self.states, unbound_state_id))
-                
-        if len(ids) > 0:
-            binding_sites = binding_sites[ids]
-            self.positions[ids] = binding_sites[:, None]  # Both legs start at same position
-        
-            rng_dir = self.xp.less(self.xp.random.random(len(ids)), 0.5)
-            rng_stagger = self.xp.less(self.xp.random.random(len(ids)), 0.5) * ~self.occupied[binding_sites+1]
-            
-            # Second leg can expand if adjacent site is free
-            self.positions[ids, 1] = self.xp.where(rng_stagger,
-                                                   self.positions[ids, 1] + 1,
-                                                   self.positions[ids, 1])
-            self.directions[ids] = rng_dir.astype(self.xp.uint32)
-                                                           
-        return ids
-    
     def birth(self, unbound_state_id):
         """Optimized birth function - unchanged but benefits from improved coupling"""
         self._position_cache_valid = False  # Invalidate cache
@@ -267,7 +242,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(free_sites) == 0:
             return self.xp.array([])
             
-        binding_sites = self.xp.random.choice(free_sites, size=self.number, replace=False)
+        binding_sites = self.xp.random.choice(free_sites, size = self.number, replace = False)
 
         rng = self.xp.less(self.xp.random.random(self.number), self.birth_prob[binding_sites])
         ids = self.xp.flatnonzero(rng * self.xp.equal(self.states, unbound_state_id))
@@ -321,10 +296,10 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         self.states[ids_birth] = bound_state_id
         self.states[ids_death] = unbound_state_id
-
+        
         self.unload(ids_death)
     
-    def update_sister_states(self):
+    def update_sister_active_states(self):
         if self.sister_positions is None:
             return
         else:
@@ -332,7 +307,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             decay_prob = 1 - np.exp(-1 / self.sister_tau)
             random_vals = np.random.random(len(self.sister_positions))
             fall_off_mask = random_vals < decay_prob
-            # Set fallen off positions to -1
+            ## Set fallen off positions to -1
             self.sister_positions[fall_off_mask] = -1
 
     def get_coupling_status(self):
@@ -387,10 +362,13 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             return
     
         # Take the first unbound LEF
-        lef_id = unbound_ids[0]
+        # lef_id = unbound_ids[0]
         
-        # Set it at position [50, 50] and make it bound
-        self.positions[lef_id] = self.xp.array([1000, 1000])
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:50]
+        starts = np.random.choice(np.arange(32000), size=50, replace=False)
+        self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
         self.states[lef_id] = 1  # bound state
         self.directions[lef_id] = 0
         self.stalled[lef_id] = False
@@ -404,14 +382,14 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
        
-        # if not hasattr(self, '_test_initialized'):
-        # self.setup_test_scenario()
+        ## test simple cases 
+        self.setup_test_scenario()
         
-        self.update_states(unbound_state_id, bound_state_id)
+        # self.update_states(unbound_state_id, bound_state_id)
         
-        ## Update sister states (decay)
-        # self.update_sister_states()
-
+        ## Update sister states for decaying
+        # self.update_sister_active_states()
+        
         self.check_sister_coupling()      
     
         self.update_occupancies()
@@ -422,8 +400,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         kwargs.update({
             'coupled_to_extruder': self.coupled_to_extruder,
             'coupled_to_sister': self.coupled_to_sister})
-    
-        # Movement step with coupling information
+        
+        # Movement step of sisters and extruders with coupling information
         self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)
 
 
