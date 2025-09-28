@@ -366,8 +366,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Set it at position [1, 1] (left) as one test case and make it bound
         # self.positions[lef_id] = self.xp.array([1, 1])
-        lef_id = unbound_ids[0:50]
-        starts = np.random.choice(np.arange(32000), size=50, replace=False)
+        lef_id = unbound_ids[0:10]
+        starts = np.random.choice(np.arange(32000), size=10, replace=False)
         self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
         self.states[lef_id] = 1  # bound state
         self.directions[lef_id] = 0
