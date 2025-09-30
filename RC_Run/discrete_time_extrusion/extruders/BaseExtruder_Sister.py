@@ -50,13 +50,13 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Way2: load sister positions
         # self._initialize_sisters_load()
 
-        # Test function of loading sisterCs
-        # self._test_single_position()
+        # Test function: loading sisterCs
+        # self._test_sister_position_init()
  
-        # Test function of loading extruders       
-        # self.setup_test_scenario()
+        # Test function: loading extruders       
+        # self._test_extruder_position_init()
     
-    def _initialize_sisters_load(self, load_from_file = True, sister_file_path = "dN_sister.npy"):
+    def _initialize_sisters_load(self, load_from_file = True, sister_file_path = "sister.npy"):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
@@ -108,7 +108,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.xp.save("sister.npy", self.sister_positions) 
         print(f"Initialized {self.num_sisters} sisters at positions: {self.sister_positions}")
     
-    def _test_single_position(self):
+    def _test_sister_position_init(self):
         # Initialize arrays
         lattice_size = len(self.occupied)
         print(f"Initializing {self.num_sisters} sisters on lattice of size {lattice_size}")
@@ -290,7 +290,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.extruder_sister_counts[ids_death] = 0
         # Standard unload for extruders
         self.stalled[ids_death] = False
-        self.positions[ids_death] = -1
+        self.positions[ids_death] = -1 
         # Invalidate position cache
         self._position_cache_valid = False
 
@@ -354,8 +354,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         }
     
 
-    def setup_test_scenario(self):
-        """Setup a single permanent LEF at position [50, 50]"""
+    def _test_extruder_position_init(self):
+        """Setup a single permanent LEF at certain positions"""
         if hasattr(self, '_test_initialized') and self._test_initialized:
             return
         # Find one unbound LEF
@@ -367,7 +367,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     
         # Take the first unbound LEF
         # lef_id = unbound_ids[0]
-        
         # Set it at position [1, 1] (left) as one test case and make it bound
         # self.positions[lef_id] = self.xp.array([1, 1])
         lef_id = unbound_ids[0:1000]
@@ -381,18 +380,15 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._test_initialized = True
         self._position_cache_valid = False
     
-        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+        print(f"Test LEF {lef_id} initialized at positions")
 
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
-       
-        ## test simple cases for extruders 
-        # self.setup_test_scenario()
-
+        
         ## Update extruders
         self.update_states(unbound_state_id, bound_state_id)
         
-        ## Update sister states for decaying
+        ## Update sister states for decaying: can only work for 1 sister chain
         # self.update_sister_active_states()
         
         self.check_sister_coupling()      

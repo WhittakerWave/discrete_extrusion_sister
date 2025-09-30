@@ -1,5 +1,5 @@
 
-
+import pickle
 import sys
 import os
 import json
@@ -10,8 +10,6 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import discrete_time_extrusion
-
 import discrete_time_extrusion.arrays as arrays 
 from discrete_time_extrusion.Translocator_Sister import Translocator_Sister
 from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
@@ -21,11 +19,9 @@ from discrete_time_extrusion.extruders.MultistateExtruder_Sister import Multista
 with open("data/extrusion_dict_RN_RB_RP_RW_HBD_WT.json", 'r') as dict_file:
         paramdict_WT = json.load(dict_file)
 
-    
 monomers_per_replica = paramdict_WT['monomers_per_replica'] 
 sites_per_monomer = paramdict_WT['sites_per_monomer']
 
-# sites_per_replica = s_per_monomer
 # Work with a single type of monomers (A, assigned to type index 0)
 type_list = ['A']
 monomer_types = type_list.index('A') * np.ones(monomers_per_replica, dtype=int)
@@ -37,13 +33,11 @@ CTCF_facestall = paramdict_WT['CTCF_facestall']
 print(LEF_off_rate['A'], CTCF_facestall['A'])
 
 anchor_positions = []
-
 ### sample half and half
 ctcf_left_positions = []
 ctcf_right_positions = []
 
 
-start = time.time()
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
                             type_list, 
@@ -61,27 +55,23 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             **paramdict_WT)
 
 def shared_sister_update(translocator1, translocator2, step_number, shared_decay_decisions):
-        """
-        Update sister states for both translocators using shared decisions
-        """
-        if step_number >= len(shared_decay_decisions):
-            return
-        # Get the decay mask for this step
-        fall_off_mask = shared_decay_decisions[step_number]
-        # Apply to translocator1
-        if translocator1.extrusion_engine.sister_positions is not None:
-            active_mask_1 = translocator1.extrusion_engine.sister_positions != -1
-            final_mask_1 = fall_off_mask & active_mask_1
-            translocator1.extrusion_engine.sister_positions[final_mask_1] = -1
-        # Apply to translocator2 
-        if translocator2.extrusion_engine.sister_positions is not None:
-            active_mask_2 = translocator2.extrusion_engine.sister_positions != -1
-            final_mask_2 = fall_off_mask & active_mask_2
-            translocator2.extrusion_engine.sister_positions[final_mask_2] = -1
-        # Debug output
-        # falling_indices = np.where(fall_off_mask)[0]
-        # if len(falling_indices) > 0:
-        #    print(f"Step {step_number}: Synchronized sister decay - indices {falling_indices}")
+    """
+    Update sister states for both translocators using shared decisions
+    """
+    if step_number >= len(shared_decay_decisions):
+        return
+    # Get the decay mask for this step
+    fall_off_mask = shared_decay_decisions[step_number]
+    # Apply to translocator1
+    if translocator1.extrusion_engine.sister_positions is not None:
+        active_mask_1 = translocator1.extrusion_engine.sister_positions != -1
+        final_mask_1 = fall_off_mask & active_mask_1
+        translocator1.extrusion_engine.sister_positions[final_mask_1] = -1
+    # Apply to translocator2 
+    if translocator2.extrusion_engine.sister_positions is not None:
+        active_mask_2 = translocator2.extrusion_engine.sister_positions != -1
+        final_mask_2 = fall_off_mask & active_mask_2
+        translocator2.extrusion_engine.sister_positions[final_mask_2] = -1
 
 def run_synchronized_trajectories_continue(translocator1, translocator2, sister_lifetime, 
                         period=None, steps=None, 
@@ -119,11 +109,7 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
         translocator2.coupling_trajectory = []
         translocator2.ctcf_trajectory = []
         translocator2.sister_trajectory = []
-    
-    # Replace step methods to remove sister updates
-    translocator1.extrusion_engine.update_sister_states = lambda: None
-    translocator2.extrusion_engine.update_sister_states = lambda: None
-    
+       
     step_counter = 0
     # Dummy steps
     translocator1.run(dummy_steps*period, **kwargs)
@@ -182,6 +168,8 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
                     translocator2.coupling_trajectory.append(coupling_status_2)
 
 
+start = time.time()
+
 run_synchronized_trajectories_continue(
     translocator1, translocator2,
     paramdict_WT['sister_lifetime'],
@@ -198,7 +186,6 @@ print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
 
-import pickle
 with open('WT_trajectory1.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,
@@ -212,7 +199,5 @@ with open('WT_trajectory2.pkl', 'wb') as f:
         "lef": translocator2.lef_trajectory,
         "ctcf": translocator2.ctcf_trajectory,
     }, f)
-print("Sister trajectory saved!")
+print("Sister, LEF, CTCF trajectory saved!")
 
-
-translocator1.extrusion_engine._initialize_sisters()

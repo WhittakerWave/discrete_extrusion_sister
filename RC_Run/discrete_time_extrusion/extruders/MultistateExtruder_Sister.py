@@ -1,6 +1,5 @@
 from . import BaseExtruder_Sister
     
-
 class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
     
     def __init__(self,
