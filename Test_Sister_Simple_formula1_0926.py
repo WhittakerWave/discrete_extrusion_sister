@@ -34,7 +34,7 @@ from discrete_time_extrusion.extruders.BaseExtruder_Sister_Slow import BaseExtru
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 from discrete_time_extrusion.extruders.BaseExtruder import BaseExtruder
 
-with open("data/extrusion_dict_Simple_formula1_0926_k500_a0.json", 'r') as dict_file:
+with open("data/extrusion_dict_Simple_formula1_0929_k2000_a10_dynamical_LEF.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -92,7 +92,7 @@ translocator1 = Translocator_Sister(BaseExtruder_Sister,
                     **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory_one_sister(steps = 10000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=100)
+translocator1.run_trajectory_one_sister(steps = 65000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=100)
 
 
 end = time.time()

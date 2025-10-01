@@ -51,6 +51,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # self._initialize_sisters_load()
         # Test function of loading sisterCs
         # self._test_single_position()
+
+        # self.setup_test_scenario()
     
     def _initialize_sisters_load(self, load_from_file = True, sister_file_path = "dN_sister.npy"):
         """Initialize sisters either randomly or from saved file"""
@@ -366,8 +368,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Set it at position [1, 1] (left) as one test case and make it bound
         # self.positions[lef_id] = self.xp.array([1, 1])
-        lef_id = unbound_ids[0:500]
-        starts = np.random.choice(np.arange(32000), size=500, replace=False)
+        lef_id = unbound_ids[0:1000]
+        starts = np.random.choice(np.arange(32000), size=1000, replace=False)
         self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
         self.states[lef_id] = 1  # bound state
         self.directions[lef_id] = 0
@@ -382,10 +384,11 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
        
-        ## test simple cases 
-        self.setup_test_scenario()
-        
-        # self.update_states(unbound_state_id, bound_state_id)
+        ## test simple cases for extruders 
+        # self.setup_test_scenario()
+
+        ## Update extruders
+        self.update_states(unbound_state_id, bound_state_id)
         
         ## Update sister states for decaying
         # self.update_sister_active_states()
