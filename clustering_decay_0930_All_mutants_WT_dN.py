@@ -85,10 +85,10 @@ def extract_consecutive_positions(filename):
 
 # Example: filenames for multiple runs
 filenames = [
-    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory2.pkl",
+    "test_0930_all_mutants/alpha500_tau15h/dN_trajectory1.pkl",
+    "test_0930_all_mutants/alpha500_tau15h/dN_trajectory2.pkl",
+    "test_0930_all_mutants/alpha500_tau15h/WT_trajectory1.pkl",
+    "test_0930_all_mutants/alpha500_tau15h/WT_trajectory2.pkl",
 ]
 
 labels = [
@@ -136,8 +136,8 @@ def plot_simulation_with_long_time(filenames, labels=None, colors=None):
     plt.tight_layout()
     plt.show()
 
-def plot_simulation_with_decay(filenames, labels=None, colors=None, 
-                               N0=7765, tau=10*3600, T=20*3600):
+def plot_simulation_with_decay(filenames, labels, colors, 
+                               N0, tau, T, alpha):
     """Plot simulation trajectories + ODE decay on the same figure"""
     plt.figure(figsize=(8,6))
 
@@ -159,7 +159,7 @@ def plot_simulation_with_decay(filenames, labels=None, colors=None,
              label=fr"Decay-only: $N(t)={N0} e^{{-t/\tau}}, \tau={tau/3600:.0f}h$")
 
     # ---- Formatting ----
-    plt.title("WT vs dN + ODE\n[$M$=776, $N$=32000, a=10, using CRN LE]", fontsize=20)
+    plt.title(f"WT vs dN + ODE\n[$M$=776, $N$=32000, a={alpha}, using CRN LE]", fontsize=20)
     plt.xlabel("Time [h]", fontsize=24)
     plt.ylabel("Unique Sister Positions", fontsize=24)
     plt.ylim(0, 800)
@@ -172,7 +172,8 @@ def plot_simulation_with_decay(filenames, labels=None, colors=None,
 
 # plot_decay_ode(N0=7765, tau=10*3600, T=20*3600)
 # Example usage
+residence_time = 15
 colors = ["#e66d50", "#f3a361", "#8ab07c", "#299d8f"]  # blue, orange, green, red
 plot_simulation_with_decay(filenames, labels=labels, colors=colors, 
-                N0=776, tau=10*3600, T=18*3600)
+                N0=776, tau=residence_time*3600, T=18*3600, alpha=500)
 

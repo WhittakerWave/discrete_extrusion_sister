@@ -25,10 +25,10 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
 
-with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_dS_alpha500_tau15h.json", 'r') as dict_file:
+with open("data/new_dict/alpha50_tau10h/extrusion_dict_RN_RB_RP_RW_HBD_dS4h_alpha50_tau10h.json", 'r') as dict_file:
         paramdict_dS9h = json.load(dict_file)
 
-with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_dW_alpha500_tau15h.json", 'r') as dict_file:
+with open("data/new_dict/alpha50_tau10h/extrusion_dict_RN_RB_RP_RW_HBD_dW13h_alpha50_tau10h.json", 'r') as dict_file:
         paramdict_dWdS = json.load(dict_file)
 
 

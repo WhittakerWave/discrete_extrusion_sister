@@ -23,7 +23,7 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
 
-with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha500_tau15h.json", 'r') as dict_file:
+with open("data/new_dict/alpha50_tau10h/extrusion_dict_RN_RB_RP_RW_HBD_WT9h_alpha50_tau10h.json", 'r') as dict_file:
         paramdict_WT = json.load(dict_file)
     
 monomers_per_replica = paramdict_WT['monomers_per_replica'] 

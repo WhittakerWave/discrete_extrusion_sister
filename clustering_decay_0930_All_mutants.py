@@ -83,18 +83,18 @@ def plot_sister_difference_histograms(filenames, labels, bins=50):
 
 # Example: filenames for multiple runs
 filenames = [
-    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/S2h_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/S2h_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dS_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dS_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dW_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dW_trajectory2.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dWdS_trajectory1.pkl",
-    "test_0930_all_mutants/alpha10_tau10h/dWdS_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/WT_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/WT_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/S2h_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/S2h_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dS_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dS_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dN_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dN_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dW_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dW_trajectory2.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dWdS_trajectory1.pkl",
+    "test_0930_all_mutants/alpha50_tau10h/dWdS_trajectory2.pkl",
 ]
 
 labels = []
