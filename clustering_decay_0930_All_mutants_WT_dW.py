@@ -82,13 +82,14 @@ def extract_consecutive_positions(filename):
     
     return np.array(consecutive_positions), sister_array
 
-
+alpha = 50
+tau = 10
 # Example: filenames for multiple runs
 filenames = [
-    "test_0930_all_mutants/alpha100_tau20h/WT_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/WT_trajectory2.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dW_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dW_trajectory2.pkl",
+    f"test_0930_all_mutants/alpha{alpha}_tau{tau}h/WT_trajectory1.pkl",
+    f"test_0930_all_mutants/alpha{alpha}_tau{tau}h/WT_trajectory2.pkl",
+    f"test_0930_all_mutants/alpha{alpha}_tau{tau}h/dW_trajectory1.pkl",
+    f"test_0930_all_mutants/alpha{alpha}_tau{tau}h/dW_trajectory2.pkl",
 ]
 
 
@@ -173,8 +174,8 @@ def plot_simulation_with_decay(filenames, labels=None, colors=None,
 
 # plot_decay_ode(N0=7765, tau=10*3600, T=20*3600)
 # Example usage
-residence_time = 20 
+residence_time = 10
 colors = ["#e66d50", "#f3a361", "#8ab07c", "#299d8f"]  # blue, orange, green, red
 plot_simulation_with_decay(filenames, labels=labels, colors=colors, 
-                N0=776, tau=residence_time*3600, T=18*3600, alpha=100)
+                N0=776, tau=residence_time*3600, T=18*3600, alpha=50)
 
