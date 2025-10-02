@@ -23,12 +23,12 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
 
-with open("data/new_dict/alpha100_tau20h/extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha100_tau20h.json", 'r') as dict_file:
+with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha500_tau15h.json", 'r') as dict_file:
         paramdict_WT = json.load(dict_file)
     
 monomers_per_replica = paramdict_WT['monomers_per_replica'] 
 sites_per_monomer = paramdict_WT['sites_per_monomer']
-
+num_of_sisters = paramdict_WT['num_of_sisters']
 # sites_per_replica = s_per_monomer
 # Work with a single type of monomers (A, assigned to type index 0)
 type_list = ['A']
@@ -46,12 +46,17 @@ ctcf_left_positions = []
 ctcf_right_positions = []
 
 start = time.time()
+
+common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
+
+
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
@@ -60,6 +65,7 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_WT)
 
 def shared_sister_update(translocator1, translocator2, step_number, shared_decay_decisions):
@@ -178,7 +184,7 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
 run_synchronized_trajectories_continue(
     translocator1, translocator2,
     paramdict_WT['sister_lifetime'],
-    steps = 64800, 
+    steps = 65000, 
     prune_unbound_LEFs = True,
     track_sisters = True,
     sample_interval = 100,
@@ -204,5 +210,6 @@ with open('WT_trajectory2.pkl', 'wb') as f:
         "lef": translocator2.lef_trajectory,
         "ctcf": translocator2.ctcf_trajectory,
     }, f)
-    df_since_8hprint("Sister trajectory saved!")
+    
+print("Sister trajectory saved!")
 

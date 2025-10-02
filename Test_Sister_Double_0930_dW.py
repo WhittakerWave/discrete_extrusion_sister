@@ -23,16 +23,16 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
 
-with open("data/new_dict/alpha100_tau20h/extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha100_tau20h.json", 'r') as dict_file:
+with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha500_tau15h.json", 'r') as dict_file:
         paramdict_WT = json.load(dict_file)
 
-with open("data/new_dict/alpha100_tau20h/extrusion_dict_RN_RB_RP_RW_HBD_dW_alpha100_tau20h.json", 'r') as dict_file:
+with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_dW_alpha500_tau15h.json", 'r') as dict_file:
         paramdict_dW = json.load(dict_file)
 
 
 monomers_per_replica = paramdict_WT['monomers_per_replica'] 
 sites_per_monomer = paramdict_WT['sites_per_monomer']
-
+num_of_sisters = paramdict_WT['num_of_sisters']
 # sites_per_replica = s_per_monomer
 # Work with a single type of monomers (A, assigned to type index 0)
 type_list = ['A']
@@ -125,7 +125,8 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
     translocator1.run(dummy_steps*period)
     translocator2.run(dummy_steps*period)
     print(f"Running {dummy_steps} dummy steps...")
-
+    
+    
     for step_idx in range(steps):
         # Run 'period' number of steps
         translocator1.run(1)
@@ -179,12 +180,16 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
 
 start = time.time()
 
+
+common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
+
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
@@ -193,8 +198,8 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_WT)
-
 
 run_synchronized_trajectories_continue(
     translocator1, translocator2,
@@ -203,7 +208,7 @@ run_synchronized_trajectories_continue(
     prune_unbound_LEFs = True,
     track_sisters = True,
     sample_interval = 100,
-    seed=42,
+    seed = 42,
     clear_trajectories = True  # Start fresh
 )
 

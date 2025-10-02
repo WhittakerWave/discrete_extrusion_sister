@@ -14,6 +14,7 @@ class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
                  pause_prob,
                  sister_tau,
                  sister_damping,
+                 initial_sister_positions, 
                  *args, **kwargs):
     
         super().__init__(number,
@@ -25,7 +26,8 @@ class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
                          diffusion_prob,
                          pause_prob,
                          sister_tau,
-                         sister_damping)
+                         sister_damping,
+                         initial_sister_positions)
         
         self.state_dict = kwargs["LEF_states"]
         self.transition_dict = kwargs["LEF_transitions"]

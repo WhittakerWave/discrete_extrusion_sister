@@ -10,6 +10,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                  number_of_sisters, 
                  sister_tau,
                  sister_damping,
+                 initial_sister_positions, 
                  barrier_engine,
                  birth_prob,
                  death_prob,
@@ -46,15 +47,18 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         # Initialize sisters 
         # Way1: randomly 
-        self._initialize_sisters()
+        if initial_sister_positions is not None:
+            self._initialize_sisters_fix(initial_sister_positions)
+            self.sister_positions = self.xp.array(initial_sister_positions, dtype=self.xp.int32)
+        else:
+            self._initialize_sisters()
         # Way2: load sister positions
         # self._initialize_sisters_load()
         # Test function of loading sisterCs
         # self._test_single_position()
 
         # self.setup_test_scenario()
-    
-    def _initialize_sisters_load(self, load_from_file = True, sister_file_path = "dN_sister.npy"):
+    def _initialize_sisters_fix(self, initial_positions):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
@@ -64,13 +68,26 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
         self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
 
-        if load_from_file:
-            loaded_positions = self.xp.load(sister_file_path)
-            if len(loaded_positions) >= self.num_sisters:
-                self.sister_positions = loaded_positions[:self.num_sisters]
-            print(f"Loaded sisters from {sister_file_path}")
-        else:
-            self._initialize_sisters()
+        if len(initial_positions) >= self.num_sisters:
+            self.sister_positions = initial_positions[:self.num_sisters]
+        print(f"Loaded sisters from fixed positions ")
+
+
+    def _initialize_sisters_load(self, sister_file_path = None):
+        """Initialize sisters either randomly or from saved file"""
+        if self.num_sisters <= 0:
+            print("No sisters to initialize")
+            return
+        # Initialize arrays
+        self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
+        self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
+        self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
+
+        loaded_positions = self.xp.load(sister_file_path)
+        if len(loaded_positions) >= self.num_sisters:
+            self.sister_positions = loaded_positions[:self.num_sisters]
+        print(f"Loaded sisters from {sister_file_path}")
+
     
     def _initialize_sisters(self):
         """Optimized sister initialization using vectorized operations"""

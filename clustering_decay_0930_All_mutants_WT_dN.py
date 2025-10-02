@@ -85,10 +85,10 @@ def extract_consecutive_positions(filename):
 
 # Example: filenames for multiple runs
 filenames = [
-    "test_0930_all_mutants/alpha100_tau20h/dN_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dN_trajectory2.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/WT_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/WT_trajectory2.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory1.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dN_trajectory2.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory1.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/WT_trajectory2.pkl",
 ]
 
 labels = [
@@ -156,10 +156,10 @@ def plot_simulation_with_decay(filenames, labels=None, colors=None,
     t = np.linspace(0, T, 500)
     N = N0 * np.exp(-t / tau)
     plt.plot(t/3600, N, '--', lw=2.5, color = "#6BADD7",
-             label=fr"ODE: $N(t)={N0} e^{{-t/\tau}}, \tau={tau/3600:.0f}h$")
+             label=fr"Decay-only: $N(t)={N0} e^{{-t/\tau}}, \tau={tau/3600:.0f}h$")
 
     # ---- Formatting ----
-    plt.title("WT vs dN + ODE\n[$M$=776, $N$=32000, a=100, using CRN LE]", fontsize=20)
+    plt.title("WT vs dN + ODE\n[$M$=776, $N$=32000, a=10, using CRN LE]", fontsize=20)
     plt.xlabel("Time [h]", fontsize=24)
     plt.ylabel("Unique Sister Positions", fontsize=24)
     plt.ylim(0, 800)
@@ -174,5 +174,5 @@ def plot_simulation_with_decay(filenames, labels=None, colors=None,
 # Example usage
 colors = ["#e66d50", "#f3a361", "#8ab07c", "#299d8f"]  # blue, orange, green, red
 plot_simulation_with_decay(filenames, labels=labels, colors=colors, 
-                        N0=776, tau=20*3600, T=18*3600)
+                N0=776, tau=10*3600, T=18*3600)
 

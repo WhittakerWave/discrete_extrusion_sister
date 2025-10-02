@@ -85,10 +85,10 @@ def extract_consecutive_positions(filename):
 
 # Example: filenames for multiple runs
 filenames = [
-    "test_0930_all_mutants/alpha100_tau20h/dWdS_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dWdS_trajectory2.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dW_trajectory1.pkl",
-    "test_0930_all_mutants/alpha100_tau20h/dW_trajectory2.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dWdS_trajectory1.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dWdS_trajectory2.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dW_trajectory1.pkl",
+    "test_0930_all_mutants/alpha10_tau10h/dW_trajectory2.pkl",
 ]
 
 labels = [
@@ -126,7 +126,7 @@ def plot_simulation_with_long_time(filenames, labels=None, colors=None):
     #             label=f"Theoretical Long-time limit ~ {A:.1f}")
 
     # ---- Formatting ----
-    plt.title("dW vs dWdS\n[$M$=776, $N$=32000, a=100, using CRN LE]", fontsize=20)
+    plt.title("dW vs dWdS\n[$M$=776, $N$=32000, a=500, using CRN LE]", fontsize=20)
     plt.xlabel("Time Step [h]", fontsize=24)
     plt.ylabel("Unique Sister Positions", fontsize=24)
     plt.ylim(0, 800)
@@ -136,8 +136,43 @@ def plot_simulation_with_long_time(filenames, labels=None, colors=None):
     plt.tight_layout()
     plt.show()
 
+def plot_simulation_with_decay(filenames, labels, colors, N0, tau, T):
+    """Plot simulation trajectories + ODE decay on the same figure"""
+    plt.figure(figsize=(8,6))
 
+    # ---- Simulation data ----
+    for i, filename in enumerate(filenames):
+        label = labels[i] if labels else f"Dataset {i+1}"
+        consecutive_positions, _ = extract_consecutive_positions(filename)
+        if consecutive_positions is None:
+            continue
+        time_steps = np.arange(len(consecutive_positions)) * 100/3600
+        color = colors[i] if colors else None
+        plt.plot(time_steps, consecutive_positions, 
+                 label=label, linewidth=2, color=color)
+
+    # ---- ODE Decay Curve ----
+    t = np.linspace(0, T, 500)
+    N = N0 * np.exp(-t / tau)
+    plt.plot(t/3600, N, '--', lw=2.5, color = "#6BADD7",
+             label=fr"Decay-only: $N(t)={N0} e^{{-t/\tau}}, \tau={tau/3600:.0f}h$")
+
+    # ---- Formatting ----
+    plt.title("dW vs dWdS + ODE\n[$M$=776, $N$=32000, a=10, using CRN LE]", fontsize=20)
+    plt.xlabel("Time [h]", fontsize=24)
+    plt.ylabel("Unique Sister Positions", fontsize=24)
+    plt.ylim(0, 800)
+    plt.grid(True, alpha=0.3)
+    plt.tick_params(axis='both', labelsize=18)
+    plt.legend(fontsize=14, loc='best')
+    plt.tight_layout()
+    plt.show()
+
+
+# plot_decay_ode(N0=7765, tau=10*3600, T=20*3600)
 # Example usage
 colors = ["#e66d50", "#f3a361", "#8ab07c", "#299d8f"]  # blue, orange, green, red
-plot_simulation_with_long_time(filenames, labels, colors)
+plot_simulation_with_decay(filenames, labels=labels, colors=colors, 
+        N0=776, tau=10*3600, T=18*3600)
+
 

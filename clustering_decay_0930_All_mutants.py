@@ -21,7 +21,6 @@ def extract_consecutive_positions_last(filename):
 
     # ---- Remove -1 entries ----
     valid_positions = sister_array[sister_array != -1]
-
     # ---- Sort ----
     sorted_positions = np.sort(valid_positions)
     return sorted_positions
@@ -43,7 +42,7 @@ def plot_sister_difference_histograms(filenames, labels, bins=50):
     # (sister1, sister2)
     mutants = {
         "WT": (filenames[0], filenames[1]),   
-        "S2h": (filenames[2], filenames[3]), 
+        "S8h": (filenames[2], filenames[3]), 
         "dS": (filenames[4], filenames[5]), 
         "dN": (filenames[6], filenames[7]), 
         "dW": (filenames[8], filenames[9]), 
@@ -72,7 +71,7 @@ def plot_sister_difference_histograms(filenames, labels, bins=50):
         plt.hist(diff, bins=bins, alpha=0.75, color="#1f77b4", edgecolor="k")
         # Overlay Gaussian fit
         # plt.plot(x, pdf, "r-", lw=2, label=f"N(0, {sigma:.2f}²)")
-        plt.title(f"{mutant}: Sister2 - Sister1\n σ = {sigma:.2f}", fontsize=18)
+        plt.title(f"{mutant}: Sister2 - Sister1\n σ = {sigma:.2f} [kb]", fontsize=18)
         plt.xlabel("Difference [kb]", fontsize=14)
         plt.ylabel("Count", fontsize=14)
         plt.grid(True, alpha=0.3)
@@ -81,23 +80,6 @@ def plot_sister_difference_histograms(filenames, labels, bins=50):
     plt.tight_layout()
     plt.show()
 
-def plot_decay_ode(N0=7765, tau=10*3600, T=20*3600):
-    """
-    Plot solution of dN/dt = -(1/tau) N with N(0)=N0 up to time T.
-    """
-    t = np.linspace(0, T, 500)
-    N = N0 * np.exp(-t / tau)
-
-    plt.figure(figsize=(6,4))
-    plt.plot(t/3600, N, 'r-', lw=2,
-             label=fr"$N(t) = {N0} e^{{-t/\tau}}, \, \tau={tau/3600:.1f}h$")
-    plt.xlabel("Time [h]", fontsize=14)
-    plt.ylabel("N(t)", fontsize=14)
-    plt.title("ODE: dN/dt = -(1/τ)N (decay)", fontsize=16)
-    plt.legend(fontsize=12)
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
 
 # Example: filenames for multiple runs
 filenames = [
@@ -118,4 +100,5 @@ filenames = [
 labels = []
 
 
+plot_sister_difference_histograms(filenames, labels, bins=50)
 

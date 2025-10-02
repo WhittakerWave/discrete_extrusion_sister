@@ -9,6 +9,7 @@ class Translocator_Sister():
                  site_types,
                  ctcf_left_positions,
                  ctcf_right_positions,
+                 initial_sister_positions, 
                  device='CPU',
                  **kwargs):
         if device == 'CPU':
@@ -54,6 +55,7 @@ class Translocator_Sister():
                                number_of_sisters,
                                sister_tau,
                                sister_damping,
+                               initial_sister_positions, 
                                self.barrier_engine, 
                                *lef_arrays, **lef_transition_dict)
           

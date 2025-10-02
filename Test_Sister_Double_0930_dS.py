@@ -23,12 +23,12 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 # from discrete_time_extrusion.extruders.MultistateExtruder import MultistateExtruder
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
-with open("data/new_dict/alpha100_tau20h/extrusion_dict_RN_RB_RP_RW_HBD_dS_alpha100_tau20h.json", 'r') as dict_file:
+with open("data/new_dict/alpha500_tau15h/extrusion_dict_RN_RB_RP_RW_HBD_dS_alpha500_tau15h.json", 'r') as dict_file:
         paramdict_dS = json.load(dict_file)
     
 monomers_per_replica = paramdict_dS['monomers_per_replica'] 
 sites_per_monomer = paramdict_dS['sites_per_monomer']
-
+num_of_sisters = paramdict_dS['num_of_sisters']
 # sites_per_replica = s_per_monomer
 # Work with a single type of monomers (A, assigned to type index 0)
 type_list = ['A']
@@ -46,12 +46,16 @@ ctcf_left_positions = []
 ctcf_right_positions = []
 
 start = time.time()
+
+common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
+
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             StaticBoundary,
                             type_list, 
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_dS)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
@@ -60,6 +64,7 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
+                            initial_sister_positions = common_sisters, 
                             **paramdict_dS)
 
 def shared_sister_update(translocator1, translocator2, step_number, shared_decay_decisions):
