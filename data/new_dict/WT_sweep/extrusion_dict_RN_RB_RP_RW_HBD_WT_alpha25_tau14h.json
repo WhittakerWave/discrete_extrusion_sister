@@ -1,0 +1,66 @@
+{
+    "CTCF_facestall": {
+        "A": 1.0
+    },
+    "CTCF_backstall": {
+        "A": 0
+    },
+    "CTCF_on_rate": {
+        "A": 0.0233
+    },
+    "CTCF_off_rate": {
+        "A": 0.01
+    },
+    "LEF_on_rate": {
+        "A": 0.0013620769372986977
+    },
+    "LEF_off_rate": {
+        "A": 0.007560658122616963
+    },
+    "LEF_stalled_off_rate": {
+        "A": 0.007560658122616963
+    },
+    "LEF_diffusion_rate": {
+        "A": 0
+    },
+    "LEF_pause": {
+        "A": 0
+    },
+    "LEF_states": {
+        "RN": 1,
+        "RB": 2,
+        "RP": 3,
+        "RW": 4
+    },
+    "LEF_transition_rates": {
+        "21": {
+            "A": 0.007294698843528999
+        },
+        "23": {
+            "A": 0.007484035011546042
+        },
+        "12": {
+            "A": 0.013888888888888888
+        },
+        "32": {
+            "A": 0.03243480130964062
+        },
+        "34": {
+            "A": 0.06896837892869306
+        },
+        "43": {
+            "A": 0.014661564099605258
+        }
+    },
+    "LEF_separation": 41,
+    "mode": "symmetric",
+    "sites_per_monomer": 1,
+    "monomers_per_replica": 32000,
+    "num_of_sisters": 776,
+    "sister_lifetime": 50400,
+    "sister_damping": 25,
+    "number_of_replica": 1,
+    "steps": 65000,
+    "dummy_steps": 0,
+    "velocity_multiplier": 0.6124368979308226
+}

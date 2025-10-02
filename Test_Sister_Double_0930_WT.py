@@ -23,7 +23,11 @@ from discrete_time_extrusion.boundaries.StaticBoundary import StaticBoundary
 from discrete_time_extrusion.extruders.MultistateExtruder_Sister import MultistateExtruder_Sister
 
 
-with open("data/new_dict/alpha50_tau10h/extrusion_dict_RN_RB_RP_RW_HBD_WT9h_alpha50_tau10h.json", 'r') as dict_file:
+
+alpha = 50
+tau = 10 
+
+with open(f"data/new_dict/alpha50_tau10h/extrusion_dict_RN_RB_RP_RW_HBD_WT9h_alpha{alpha}_tau{tau}h.json", 'r') as dict_file:
         paramdict_WT = json.load(dict_file)
     
 monomers_per_replica = paramdict_WT['monomers_per_replica'] 
@@ -197,14 +201,14 @@ end = time.time()
 print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
-with open('WT_trajectory1.pkl', 'wb') as f:
+with open(f'WT_trajectory1_alpha{alpha}_tau{tau}h.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,
         "lef": translocator1.lef_trajectory,
         "ctcf": translocator1.ctcf_trajectory,
     }, f)
 
-with open('WT_trajectory2.pkl', 'wb') as f:
+with open('WT_trajectory2_alpha{alpha}_tau{tau}h.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator2.sister_trajectory,
         "lef": translocator2.lef_trajectory,

@@ -8,9 +8,8 @@ import tellurium as te
 import pandas as pd
 
 # Define the ranges you want to loop over
-residence_times = [10]  # in hours
-sister_dampings = [50]  # damping values
-
+residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20]  # in hours
+sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150]  # damping values
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")
@@ -54,65 +53,8 @@ rhs_ext = [ Kext_RN_R - 1 / tau_N_ext,  # NIPBL unbinding kinetics
 
 sol_rates_ext = sym.solve(rhs_ext, rates_ext)
 
-def build_model_ext_coh(model, parameter_dict):
-    string_params = {str(k): v for k, v in parameter_dict.items()}
-    return model.format(**string_params)
-
-
-# Store your main calculation code in a function
-def run_simulation(residence_time, sister_damping):
-    """
-    Run the simulation for given residence_time and sister_damping
-    Returns the params dictionary ready to save
-    """
-    # Define the input parameters
-    x = 0.1306   # for W
-    y = 0.3067  # for P  
-    z = 0.1536  # for N
-    paras_values_coh = [
-        100.,                  # tau_S
-        0.52,                  # F_S
-        79770,                 # N_S
-        45.,                   # tau_W
-        x/(0.65 + x),          # modified F_W for sister 
-        69542*(0.65 + x),      # modified N_W for sister
-        72,                    # tau_P
-        y/(0.58 + y),          # modified F_P for sister
-        180615*(0.58 + y),     # modified N_P for sister
-        72.,                   # tau_N
-        z/(0.6 + z),           # modified F_N for sister
-        119308*(0.6 + z),      # modified N_N for sister
-        3600 * residence_time,             # tau_R_sister, 6h 
-        1/2,                   # modified F_R_sister
-        284470*2/3,            # modified N_R
-    ]
-    # Update the parameters that depend on residence_time
-    paras_values_coh[12] = 3600 * residence_time  # tau_R_sister
-    # Rebuild the parameter dictionary
-    paras_dict_coh = dict(zip(paras_coh, paras_values_coh))
-    for s in sol_rates_coh.items():
-        rate = s[1].evalf(subs=paras_dict_coh)
-        paras_dict_coh[s[0]] = rate
-    
-    paras_values_ext = [
-       72.,                          # tau_N
-       (0.4 - z)/(1 - z),            # F_N
-       119308*(1 - z),               # N_N
-       45.,                          # tau_W
-       (0.35 - x)/(1 - x),           # modified F_W for extrusive
-       69542*(1 - x),                # modified N_W for extrusive
-       72,                           # tau_P
-       (0.42 - y)/(1 - y),           # modified F_P for extrusive
-        180615*(1 - y),               # modified N_P for extrusive
-        822.,                         # tau_R_extrusive
-        1/2,                          # modified F_R_sister
-        284470*2/3,                   # modified N_R
-    ]
-    
-    paras_dict_ext = dict(zip(paras_ext, paras_values_ext))
-    
-    ## models for combined cohesive and extrusive networks
-    model_ext_coh ='''
+ ## models for combined cohesive and extrusive networks
+model_ext_coh ='''
     # Define species and parameters
     
     # Cohesive network 
@@ -175,35 +117,96 @@ def run_simulation(residence_time, sister_damping):
     P = {P_init};
     '''
 
+
+
+def build_model_ext_coh(model, parameter_dict):
+    string_params = {str(k): v for k, v in parameter_dict.items()}
+    return model.format(**string_params)
+
+# Store your main calculation code in a function
+def run_simulation(residence_time, sister_damping):
+    """
+    Run the simulation for given residence_time and sister_damping
+    Returns the params dictionary ready to save
+    """
+    # Define the input parameters
+    x = 0.1306   # for W
+    y = 0.3067  # for P  
+    z = 0.1536  # for N
+    paras_values_coh = [
+        100.,                  # tau_S
+        0.52,                  # F_S
+        79770,                 # N_S
+        45.,                   # tau_W
+        x/(0.65 + x),          # modified F_W for sister 
+        69542*(0.65 + x),      # modified N_W for sister
+        72,                    # tau_P
+        y/(0.58 + y),          # modified F_P for sister
+        180615*(0.58 + y),     # modified N_P for sister
+        72.,                   # tau_N
+        z/(0.6 + z),           # modified F_N for sister
+        119308*(0.6 + z),      # modified N_N for sister
+        3600 * residence_time,           # tau_R_sister, 6h 
+        1/2,                   # modified F_R_sister
+        284470*2/3,            # modified N_R
+    ]
+    paras_values_coh_copy = paras_values_coh.copy()
+    # Rebuild the cohesive parameter dictionary
+    paras_dict_coh_local = dict(zip(paras_coh, paras_values_coh_copy))
+    for s in sol_rates_coh.items():
+        rate = s[1].evalf(subs=paras_dict_coh_local)
+        paras_dict_coh_local[s[0]] = rate
+    
+    paras_values_ext = [
+       72.,                          # tau_N
+       (0.4 - z)/(1 - z),            # F_N
+       119308*(1 - z),               # N_N
+       45.,                          # tau_W
+       (0.35 - x)/(1 - x),           # modified F_W for extrusive
+       69542*(1 - x),                # modified N_W for extrusive
+       72,                           # tau_P
+       (0.42 - y)/(1 - y),           # modified F_P for extrusive
+        180615*(1 - y),               # modified N_P for extrusive
+        822.,                         # tau_R_extrusive
+        1/2,                          # modified F_R_sister
+        284470*2/3,                   # modified N_R
+    ]
+    
+    # Rebuild the extrusive parameter dictionary (need to recalculate with new values)
+    paras_dict_ext_local = dict(zip(paras_ext, paras_values_ext))
+    for s in sol_rates_ext.items():
+        rate = s[1].evalf(subs=paras_dict_ext_local)
+        paras_dict_ext_local[s[0]] = rate
+
     # Define symbolic initial conditions
     Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init = sym.symbols(
         "Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init")
     
     init_conditions_ext_coh = {
        Rac_free_init: 0, 
-       Rac_init: paras_dict_coh[N_R]*1/2, 
+       Rac_init: paras_dict_coh_local[N_R]*1/2, 
        RacN_init: 0, 
        RacP_init: 0,
        RacPW_init: 0,
        RacPS_init: 0,
 
-       R_free_init: paras_dict_coh[N_R],
+       R_free_init: paras_dict_coh_local[N_R],
        RN_init: 0,
        R_init: 0,
        RP_init: 0, 
        RPW_init: 0, 
     
        N_init: 119308,
-       S_init: paras_dict_coh[N_S],
+       S_init: paras_dict_coh_local[N_S],
        W_init: 69542,
        P_init: 180615,
     }
     # Update combined dictionary
-    paras_dict = paras_dict_coh | paras_dict_ext | init_conditions_ext_coh | {"K_Rac_free_R_free": 1/2495}
-    paras_dict_ext_coh = {str(key): value for key, value in paras_dict.items()}
+    paras_dict_local = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh | {"K_Rac_free_R_free": 1/2495}
+    paras_dict_ext_coh_local = {str(key): value for key, value in paras_dict_local.items()}
     
     # Rebuild and simulate model
-    Model_ext_coh = build_model_ext_coh(model_ext_coh, paras_dict_ext_coh)
+    Model_ext_coh = build_model_ext_coh(model_ext_coh, paras_dict_ext_coh_local)
     r_ext_coh = te.loada(Model_ext_coh)
     Model_ext_coh_WT = r_ext_coh.simulate(0, 3600*18, 3600*18)
     
@@ -212,30 +215,30 @@ def run_simulation(residence_time, sister_damping):
     
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
     
-    # Calculate rates at 9h
-    time_9h = 3600*9 - 1
-    rate_R_free_to_RN = paras_dict_ext_coh['Kext_R_free_RN'] * df_WT['N'][time_9h]
-    rate_RPW_R_free = paras_dict_ext_coh['Kext_RPW_R_free']
-    rate_RN_R = paras_dict_ext_coh['Kext_RN_R']
-    rate_R_RN = paras_dict_ext_coh['Kext_R_RN'] * df_WT['N'][time_9h]
-    rate_R_RP = paras_dict_ext_coh['Kext_R_RP'] * df_WT['P'][time_9h]
-    rate_RP_R = paras_dict_ext_coh['Kext_RP_R']
-    rate_RP_RPW = paras_dict_ext_coh['Kext_RP_RPW'] * df_WT['W'][time_9h]
-    rate_RPW_RP = paras_dict_ext_coh['Kext_RPW_RP']
+    # Calculate rates at 1h
+    time_1h = 3600*1 - 1
+    rate_R_free_to_RN = paras_dict_ext_coh_local['Kext_R_free_RN'] * df_WT['N'][time_1h]
+    rate_RPW_R_free = paras_dict_ext_coh_local['Kext_RPW_R_free']
+    rate_RN_R = paras_dict_ext_coh_local['Kext_RN_R']
+    rate_R_RN = paras_dict_ext_coh_local['Kext_R_RN'] * df_WT['N'][time_1h]
+    rate_R_RP = paras_dict_ext_coh_local['Kext_R_RP'] * df_WT['P'][time_1h]
+    rate_RP_R = paras_dict_ext_coh_local['Kext_RP_R']
+    rate_RP_RPW = paras_dict_ext_coh_local['Kext_RP_RPW'] * df_WT['W'][time_1h]
+    rate_RPW_RP = paras_dict_ext_coh_local['Kext_RPW_RP']
     
-    # Calculate LEF_sep and velocity at 9h
-    h = 9
+    # Calculate LEF_sep and velocity at 1h
+    h = 1
     index = 3600 * h - 1
     bound_extC_ratio = (df_WT['R'][index] + df_WT['RN'][index] + 
-                        df_WT['RP'][index] + df_WT['RPW'][index]) / (paras_dict_coh[N_R]*0.5)
+                        df_WT['RP'][index] + df_WT['RPW'][index]) / (paras_dict_coh_local[N_R]*0.5)
     extC_bound_frac = ((df_WT['R'][index] + df_WT['RN'][index] + 
                         df_WT['RP'][index] + df_WT['RPW'][index]) /
                        ((df_WT['R'][index] + df_WT['RN'][index] + 
                          df_WT['RP'][index] + df_WT['RPW'][index]) + df_WT['R_free'][index]))
     extC_value = int(num_sisterCs * bound_extC_ratio)
-    velocity_9h = 1/5 * (df_WT['R'][index] + df_WT['RN'][index] + 
+    velocity_1h = 1/5 * (df_WT['R'][index] + df_WT['RN'][index] + 
                          df_WT['RP'][index] + df_WT['RPW'][index]) / df_WT['RN'][index]
-    LEF_sep_9h = int(lattice_size * extC_bound_frac / (extC_value / 2))
+    LEF_sep_1h = int(lattice_size * extC_bound_frac / (extC_value / 2))
     
     # Load base parameters and update
     with open(f"extrusion_dict_RN_RB_RP_RW_HBD_WT.json", "r") as f:
@@ -251,8 +254,8 @@ def run_simulation(residence_time, sister_damping):
     params["LEF_transition_rates"]["34"]["A"] = float(rate_RP_RPW)
     params["LEF_transition_rates"]["43"]["A"] = float(rate_RPW_RP)
 
-    params["LEF_separation"] = LEF_sep_9h
-    params["velocity_multiplier"] = float(velocity_9h)
+    params["LEF_separation"] = LEF_sep_1h
+    params["velocity_multiplier"] = float(velocity_1h)
     params["monomers_per_replica"] = 32000
     params["num_of_sisters"] = 776
     params["sister_damping"] = sister_damping
@@ -272,14 +275,12 @@ for residence_time in residence_times:
         params = run_simulation(residence_time, sister_damping)
         
         # Save to file
-        filename = f"extrusion_dict_RN_RB_RP_RW_HBD_WT_alpha{sister_damping}_tau{residence_time}h.json"
+        filename = f"dN_sweep/extrusion_dict_RN_RB_RP_RW_HBD_WT1h_alpha{sister_damping}_tau{residence_time}h.json"
         with open(filename, "w") as f:
             json.dump(params, f, indent=4)
         
         print(f"Saved: {filename}")
 
 print("\nAll simulations complete!")
-
-
 
 
