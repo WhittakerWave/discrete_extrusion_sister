@@ -8,8 +8,8 @@ import tellurium as te
 import pandas as pd
 
 # Define the ranges you want to loop over
-residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20]  # in hours
-sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150]  # damping values
+residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")
@@ -116,7 +116,6 @@ model_ext_coh ='''
     W = {W_init}; 
     P = {P_init};
     '''
-
 
 
 def build_model_ext_coh(model, parameter_dict):
@@ -275,7 +274,7 @@ for residence_time in residence_times:
         params = run_simulation(residence_time, sister_damping)
         
         # Save to file
-        filename = f"dN_sweep/extrusion_dict_RN_RB_RP_RW_HBD_WT1h_alpha{sister_damping}_tau{residence_time}h.json"
+        filename = f"dN_sweep_d25/extrusion_dict_RN_RB_RP_RW_HBD_WT1h_alpha{sister_damping}_tau{residence_time}h.json"
         with open(filename, "w") as f:
             json.dump(params, f, indent=4)
         

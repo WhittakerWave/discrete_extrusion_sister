@@ -8,8 +8,8 @@ import tellurium as te
 import pandas as pd
 
 # Define the ranges you want to loop over
-residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20]  # in hours
-sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150]  # damping values
+residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")

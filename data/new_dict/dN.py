@@ -1,6 +1,5 @@
 
 
-
 import json
 import numpy as np
 import sympy as sym 
@@ -8,8 +7,8 @@ import tellurium as te
 import pandas as pd
 
 # Define the ranges you want to loop over
-residence_times = [10]  # in hours
-sister_dampings = [50]  # damping values
+residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")
@@ -52,7 +51,7 @@ rhs_ext = [ Kext_RN_R - 1 / tau_N_ext,  # NIPBL unbinding kinetics
 
 sol_rates_ext = sym.solve(rhs_ext, rates_ext)
 
- ## models for combined cohesive and extrusive networks
+## models for combined cohesive and extrusive networks
 model_ext_coh ='''
     # Define species and parameters
     
@@ -148,7 +147,7 @@ def run_simulation(residence_time, sister_damping):
         72.,                   # tau_N
         z/(0.6 + z),           # modified F_N for sister
         119308*(0.6 + z),      # modified N_N for sister
-        3600 * residence_time,           # tau_R_sister, 6h 
+        3600 * residence_time,       # tau_R_sister, 6h 
         1/2,                   # modified F_R_sister
         284470*2/3,            # modified N_R
     ]
@@ -168,10 +167,10 @@ def run_simulation(residence_time, sister_damping):
        69542*(1 - x),                # modified N_W for extrusive
        72,                           # tau_P
        (0.42 - y)/(1 - y),           # modified F_P for extrusive
-        180615*(1 - y),               # modified N_P for extrusive
-        822.,                         # tau_R_extrusive
-        1/2,                          # modified F_R_sister
-        284470*2/3,                   # modified N_R
+       180615*(1 - y),               # modified N_P for extrusive
+       822.,                         # tau_R_extrusive
+       1/2,                          # modified F_R_sister
+       284470*2/3,                   # modified N_R
     ]
     
     # Rebuild the extrusive parameter dictionary (need to recalculate with new values)
@@ -213,30 +212,30 @@ def run_simulation(residence_time, sister_damping):
     Model_ext_coh_WT = r_ext_coh.simulate(0, 3600*18, 3600*18)
 
     columns = ['time', 'Rac', 'N', 'RacN', 'P', 'RacP', 'S', 'RacPS', 'W', 'RacPW', 
-           'Rac_free', 'R_free', 'RN', 'R', 'RP', 'RPW']
+               'Rac_free', 'R_free', 'RN', 'R', 'RP', 'RPW']
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
     time_2h = 3600 * 2 - 1
-    depletion_level = 0.95
+    depletion_level = 0.25
     remaining_level = 1 - depletion_level 
     init_conditions_ext_coh_dNipbl_2h = {
         Rac_free_init: df_WT['Rac_free'][time_2h], 
-        Rac_init: df_WT['Rac'][time_2h] + df_WT['RacN'][time_2h] * remaining_level, 
-        RacN_init: df_WT['RacN'][time_2h] * depletion_level , 
+        Rac_init: df_WT['Rac'][time_2h] + df_WT['RacN'][time_2h] * depletion_level, 
+        RacN_init: df_WT['RacN'][time_2h] * remaining_level, 
         RacP_init: df_WT['RacP'][time_2h],
         RacPW_init: df_WT['RacPW'][time_2h],
         RacPS_init: df_WT['RacPS'][time_2h],
 
         R_free_init: df_WT['R_free'][time_2h],
-        RN_init: df_WT['RN'][time_2h] * depletion_level ,
-        R_init: df_WT['R'][time_2h] + df_WT['RN'][time_2h] * remaining_level ,
+        RN_init: df_WT['RN'][time_2h] * remaining_level ,
+        R_init: df_WT['R'][time_2h] + df_WT['RN'][time_2h] * depletion_level ,
         RP_init: df_WT['RP'][time_2h], 
         RPW_init: df_WT['RPW'][time_2h], 
     
-        N_init: df_WT['N'][time_2h] * depletion_level ,
+        N_init: df_WT['N'][time_2h] * depletion_level,
         S_init: df_WT['S'][time_2h],
         W_init: df_WT['W'][time_2h],
         P_init: df_WT['P'][time_2h],
-    }
+       }
 
     paras_dict_since_2h_dN = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh_dNipbl_2h | {"K_Rac_free_R_free": 1/2495}
     paras_dict_ext_coh_since_2h_dN = {str(key): value for key, value in paras_dict_since_2h_dN.items()}
@@ -261,23 +260,20 @@ def run_simulation(residence_time, sister_damping):
                        ((df_since_2h['R'][index] + df_since_2h['RN'][index] + 
                          df_since_2h['RP'][index] + df_since_2h['RPW'][index]) + df_since_2h['R_free'][index]))
     extC_value = int(num_sisterCs * bound_extC_ratio)
-    velocity_8h = 1/5 * (df_since_2h['R'][index] + df_since_2h['RN'][index] + 
-                         df_since_2h['RP'][index] + df_since_2h['RPW'][index]) / df_since_2h['RN'][index]
+    velocity_8h = 1/5 * (df_since_2h['R'][index] + df_since_2h['RN'][index] + df_since_2h['RP'][index] + df_since_2h['RPW'][index]) / df_since_2h['RN'][index]
     LEF_sep_8h = int(lattice_size * extC_bound_frac / (extC_value / 2))
-
-    time_10h = 3600*10 - 1
+    
+    time_8h = 3600*8 - 1
 
     sister_RAD21_time_10h = sister_RAD21_bound_time(
         K_RacPW_Rac_free = paras_dict_ext_coh_since_2h_dN['K_RacPW_Rac_free'], \
-        B_W_sister = df_since_2h['RacPW'][time_10h], \
-        B_R_sister = df_since_2h['RacPS'][time_10h] \
-            + df_since_2h['RacPW'][time_10h] \
-            + df_since_2h['RacP'][time_10h] \
-            + df_since_2h['Rac'][time_10h]  \
-            + df_since_2h['RacN'][time_10h])
+        B_W_sister = df_since_2h['RacPW'][time_8h], \
+        B_R_sister = df_since_2h['RacPS'][time_8h] \
+            + df_since_2h['RacPW'][time_8h] \
+            + df_since_2h['RacP'][time_8h] \
+            + df_since_2h['Rac'][time_8h]  \
+            + df_since_2h['RacN'][time_8h])
 
-    
-    time_8h = 3600 * 8 - 1
     rate_R_free_to_RN = paras_dict_ext_coh_since_2h_dN['Kext_R_free_RN']*df_since_2h['N'][time_8h]
     rate_RPW_R_free = paras_dict_ext_coh_since_2h_dN['Kext_RPW_R_free']
     rate_RN_R = paras_dict_ext_coh_since_2h_dN['Kext_RN_R']
@@ -312,7 +308,7 @@ def run_simulation(residence_time, sister_damping):
 
 # Main loop
 num_sisterCs = 7765 
-lattice_size = 320000
+lattice_size = 32000
 
 for residence_time in residence_times:
     for sister_damping in sister_dampings:
@@ -321,7 +317,7 @@ for residence_time in residence_times:
         # Run simulation
         params = run_simulation(residence_time, sister_damping)
         # Save to file
-        filename = f"extrusion_dict_RN_RB_RP_RW_HBD_dN10h_alpha{sister_damping}_tau{residence_time}h.json"
+        filename = f"dN_sweep_d25/extrusion_dict_RN_RB_RP_RW_HBD_dN10h_alpha{sister_damping}_tau{residence_time}h.json"
         with open(filename, "w") as f:
             json.dump(params, f, indent=4)
         
