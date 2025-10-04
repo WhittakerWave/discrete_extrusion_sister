@@ -223,10 +223,6 @@ def run_simulation(config, residence_time, sister_damping):
     # Define symbolic initial conditions
     Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init = sym.symbols(
         "Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init")
-
-    # Define symbolic initial conditions
-    Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init = sym.symbols(
-        "Rac_free_init, Rac_init, RacN_init, RacP_init, RacPW_init, RacPS_init, R_free_init, RN_init, R_init, RP_init, RPW_init, N_init, S_init, W_init, P_init")
     
     init_conditions_ext_coh = {
        Rac_free_init: 0, 
@@ -261,17 +257,6 @@ def run_simulation(config, residence_time, sister_damping):
     
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
     
-    # Calculate rates at 9h
-    time_9h = 3600*9 - 1
-    rate_R_free_to_RN = paras_dict_ext_coh_local['Kext_R_free_RN'] * df_WT['N'][time_9h]
-    rate_RPW_R_free = paras_dict_ext_coh_local['Kext_RPW_R_free']
-    rate_RN_R = paras_dict_ext_coh_local['Kext_RN_R']
-    rate_R_RN = paras_dict_ext_coh_local['Kext_R_RN'] * df_WT['N'][time_9h]
-    rate_R_RP = paras_dict_ext_coh_local['Kext_R_RP'] * df_WT['P'][time_9h]
-    rate_RP_R = paras_dict_ext_coh_local['Kext_RP_R']
-    rate_RP_RPW = paras_dict_ext_coh_local['Kext_RP_RPW'] * df_WT['W'][time_9h]
-    rate_RPW_RP = paras_dict_ext_coh_local['Kext_RPW_RP']
-    
     # Calculate LEF_sep and velocity at 9h
     h = 9
     index = 3600 * h - 1
@@ -283,15 +268,15 @@ def run_simulation(config, residence_time, sister_damping):
     velocity_9h = 1/5 * total_bound_ext / df_WT['RN'][index]
     LEF_sep_9h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
     
-     # Calculate transition rates
+    # Calculate transition rates
     rates = {
-        'R_free_to_RN': paras_dict_ext_coh_local['Kext_R_free_RN']*df_WT['N'][index],
+        'R_free_to_RN': paras_dict_ext_coh_local['Kext_R_free_RN'] * df_WT['N'][index],
         'RPW_R_free': paras_dict_ext_coh_local['Kext_RPW_R_free'],
         'RN_R': paras_dict_ext_coh_local['Kext_RN_R'],
-        'R_RN': paras_dict_ext_coh_local['Kext_R_RN']*df_WT['N'][index],
-        'R_RP': paras_dict_ext_coh_local['Kext_R_RP']*df_WT['P'][index],
+        'R_RN': paras_dict_ext_coh_local['Kext_R_RN'] * df_WT['N'][index],
+        'R_RP': paras_dict_ext_coh_local['Kext_R_RP'] * df_WT['P'][index],
         'RP_R': paras_dict_ext_coh_local['Kext_RP_R'],
-        'RP_RPW': paras_dict_ext_coh_local['Kext_RP_RPW']*df_WT['W'][index],
+        'RP_RPW': paras_dict_ext_coh_local['Kext_RP_RPW'] * df_WT['W'][index],
         'RPW_RP': paras_dict_ext_coh_local['Kext_RPW_RP'],
     }
 
