@@ -238,10 +238,10 @@ def run_simulation(config, residence_time, sister_damping):
        RP_init: 0, 
        RPW_init: 0, 
     
-       N_init: 119308,
+       N_init: config['base_parameters']['N_N'],
        S_init: paras_dict_coh_local[N_S],
-       W_init: 69542,
-       P_init: 180615,
+       W_init: config['base_parameters']['N_W'],
+       P_init: config['base_parameters']['N_P'],
     }
     # Update combined dictionary
     paras_dict_local = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh | {"K_Rac_free_R_free": 1/2495}
