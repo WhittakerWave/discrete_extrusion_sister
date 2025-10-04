@@ -1,15 +1,26 @@
 
 
-
 import json
 import numpy as np
 import sympy as sym 
 import tellurium as te
 import pandas as pd
+from pathlib import Path
 
-# Define the ranges you want to loop over
-residence_times = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
-sister_dampings = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
+
+# Load configuration files
+def load_config(filename):
+    """Load configuration from JSON file"""
+    with open(filename, 'r') as f:
+        return json.load(f)
+    
+# Define the ranges 
+RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+SISTER_DAMPINGS = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
+
+# Physical constants
+NUM_SISTERCS = 7765 
+LATTICE_SIZE = 32000
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")
@@ -53,7 +64,7 @@ rhs_ext = [ Kext_RN_R - 1 / tau_N_ext,  # NIPBL unbinding kinetics
 
 sol_rates_ext = sym.solve(rhs_ext, rates_ext)
 
- ## models for combined cohesive and extrusive networks
+## models for combined cohesive and extrusive networks
 model_ext_coh ='''
     # Define species and parameters
     
