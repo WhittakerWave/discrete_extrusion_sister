@@ -18,7 +18,7 @@ SISTER_DAMPINGS = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping v
 
 # Physical constants
 NUM_SISTERCS = 7765 
-LATTICE_SIZE = 32000
+LATTICE_SIZE = 320000
 
 ## Rates for cohesive network 
 rates_coh = sym.symbols("K_RacP_RacPW, K_RacPW_RacP, K_RacP_RacPS, K_RacPS_RacP, K_RacP_Rac, K_Rac_RacP, K_Rac_RacN, K_RacN_Rac, K_RacPW_Rac_free")
