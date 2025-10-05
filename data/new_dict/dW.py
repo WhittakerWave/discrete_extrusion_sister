@@ -266,19 +266,19 @@ def run_simulation(config, residence_time, sister_damping):
         Rac_free_init: df_WT['Rac_free'][time_8h], 
         Rac_init: df_WT['Rac'][time_8h], 
         RacN_init: df_WT['RacN'][time_8h], 
-        RacP_init: df_WT['RacP'][time_8h] + df_WT['RacPW'][time_8h]*depletion_level,
+        RacP_init: df_WT['RacP'][time_8h] + df_WT['RacPW'][time_8h] * depletion_level,
         RacPW_init: df_WT['RacPW'][time_8h] * remaining_level,
         RacPS_init: df_WT['RacPS'][time_8h],
 
         R_free_init: df_WT['R_free'][time_8h],
         RN_init: df_WT['RN'][time_8h] ,
         R_init: df_WT['R'][time_8h]  ,
-        RP_init: df_WT['RP'][time_8h] + df_WT['RPW'][time_8h]*depletion_level, 
+        RP_init: df_WT['RP'][time_8h] + df_WT['RPW'][time_8h] * depletion_level, 
         RPW_init: df_WT['RPW'][time_8h] * remaining_level, 
     
         N_init: df_WT['N'][time_8h],
         S_init: df_WT['S'][time_8h],
-        W_init: df_WT['W'][time_8h] * depletion_level,
+        W_init: df_WT['W'][time_8h] * remaining_level,
         P_init: df_WT['P'][time_8h],
        }
 
@@ -290,7 +290,7 @@ def run_simulation(config, residence_time, sister_damping):
     # Load the modes
     r_ext_coh_since_8h_dW = te.loada(Model_ext_coh_since_8h_dW)
     # Simulate the model
-    Model_ext_coh_since_8h_dW = r_ext_coh_since_8h_dW.simulate(0, 3600*16, 3600*16)
+    Model_ext_coh_since_8h_dW = r_ext_coh_since_8h_dW.simulate(0, 3600*10, 3600*10)
     
     df_since_8h = pd.DataFrame(Model_ext_coh_since_8h_dW, columns=columns)
     
@@ -306,7 +306,7 @@ def run_simulation(config, residence_time, sister_damping):
     extC_value = int(NUM_SISTERCS * bound_extC_ratio)
     velocity_8h = 1/5 * total_bound_ext / df_since_8h['RN'][index]
     LEF_sep_8h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
-    
+
     total_sister_rad21 = (df_since_8h['RacPS'][index] + df_since_8h['RacPW'][index] + 
                           df_since_8h['RacP'][index] + df_since_8h['Rac'][index] + 
                           df_since_8h['RacN'][index])
