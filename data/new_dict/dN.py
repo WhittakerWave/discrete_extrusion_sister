@@ -1,4 +1,8 @@
 
+
+### 
+### this scripts generates the parameters for extrusion simulations with Mipbl depletion
+
 import json
 import numpy as np
 import sympy as sym 
@@ -292,7 +296,7 @@ def run_simulation(config, residence_time, sister_damping):
     df_since_2h = pd.DataFrame(Model_ext_coh_since_2h_dN, columns=columns)
     
     analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
-    index = 3600 * analysis_hours  - 1
+    index = 3600 * analysis_hours  - 1 
 
     # Calculate metrics
     total_bound_ext = (df_since_2h['R'][index] + df_since_2h['RN'][index] + 
@@ -323,7 +327,7 @@ def run_simulation(config, residence_time, sister_damping):
         'RP_RPW': paras_dict_ext_coh_since_2h_dN['Kext_RP_RPW']*df_since_2h['W'][index],
         'RPW_RP': paras_dict_ext_coh_since_2h_dN['Kext_RPW_RP'],
     }
-
+    
     # Load base parameters and update
     with open(f"extrusion_dict_RN_RB_RP_RW_HBD_dN.json", "r") as f:
         output_params = json.load(f)
