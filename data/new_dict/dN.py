@@ -1,7 +1,7 @@
 
 
 ### 
-### this scripts generates the parameters for extrusion simulations with Mipbl depletion
+### This script generates the parameters for extrusion simulations with Nipbl depletion
 
 import json
 import numpy as np

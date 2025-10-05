@@ -1,5 +1,9 @@
 
 
+
+### 
+### This script generates the parameters for extrusion simulations with WT
+
 import json
 import numpy as np
 import sympy as sym 
@@ -128,7 +132,7 @@ model_ext_coh ='''
     P = {P_init};
     '''
 
-def build_model_ext_coh(model, parameter_dict):
+def build_model(model, parameter_dict):
     string_params = {str(k): v for k, v in parameter_dict.items()}
     return model.format(**string_params)
 
@@ -248,7 +252,7 @@ def run_simulation(config, residence_time, sister_damping):
     paras_dict_ext_coh_local = {str(key): value for key, value in paras_dict_local.items()}
     
     # Rebuild and simulate model
-    Model_ext_coh = build_model_ext_coh(model_ext_coh, paras_dict_ext_coh_local)
+    Model_ext_coh = build_model(model_ext_coh, paras_dict_ext_coh_local)
     r_ext_coh = te.loada(Model_ext_coh)
     Model_ext_coh_WT = r_ext_coh.simulate(0, 3600*18, 3600*18)
     
@@ -258,8 +262,8 @@ def run_simulation(config, residence_time, sister_damping):
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
     
     # Calculate LEF_sep and velocity at 9h
-    h = 9
-    index = 3600 * h - 1
+    analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
+    index = 3600 * analysis_hours - 1
     total_bound_ext = (df_WT['R'][index] + df_WT['RN'][index] + 
                        df_WT['RP'][index] + df_WT['RPW'][index])
     bound_extC_ratio = total_bound_ext / (paras_dict_coh_local[N_R]*0.5)
