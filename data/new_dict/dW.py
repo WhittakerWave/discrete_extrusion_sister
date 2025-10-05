@@ -65,7 +65,7 @@ rhs_ext = [ Kext_RN_R - 1 / tau_N_ext,  # NIPBL unbinding kinetics
 sol_rates_ext = sym.solve(rhs_ext, rates_ext)
 
 ## models for combined cohesive and extrusive networks
-model_ext_coh ='''
+MODEL_EXT_COH_TEMPLATE ='''
     # Define species and parameters
     
     # Cohesive network 
@@ -257,78 +257,79 @@ def run_simulation(config, residence_time, sister_damping):
                'Rac_free', 'R_free', 'RN', 'R', 'RP', 'RPW']
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
 
-    ## Apply Nipbl depletion at 2h 
-    time_2h = 3600 * 2 - 1
+    ## Apply Wapl depletion at 8h 
+    time_8h = 3600 * 8 - 1
     depletion_level = config['simulation_parameters']['depletion_level']
     remaining_level = 1 - depletion_level 
 
-    init_conditions_ext_coh_dNipbl_2h = {
-        Rac_free_init: df_WT['Rac_free'][time_2h], 
-        Rac_init: df_WT['Rac'][time_2h] + df_WT['RacN'][time_2h] * depletion_level, 
-        RacN_init: df_WT['RacN'][time_2h] * remaining_level, 
-        RacP_init: df_WT['RacP'][time_2h],
-        RacPW_init: df_WT['RacPW'][time_2h],
-        RacPS_init: df_WT['RacPS'][time_2h],
+    init_conditions_ext_coh_dWapl_8h = {
+        Rac_free_init: df_WT['Rac_free'][time_8h], 
+        Rac_init: df_WT['Rac'][time_8h], 
+        RacN_init: df_WT['RacN'][time_8h], 
+        RacP_init: df_WT['RacP'][time_8h] + df_WT['RacPW'][time_8h]*depletion_level,
+        RacPW_init: df_WT['RacPW'][time_8h] * remaining_level,
+        RacPS_init: df_WT['RacPS'][time_8h],
 
-        R_free_init: df_WT['R_free'][time_2h],
-        RN_init: df_WT['RN'][time_2h] * remaining_level ,
-        R_init: df_WT['R'][time_2h] + df_WT['RN'][time_2h] * depletion_level ,
-        RP_init: df_WT['RP'][time_2h], 
-        RPW_init: df_WT['RPW'][time_2h], 
+        R_free_init: df_WT['R_free'][time_8h],
+        RN_init: df_WT['RN'][time_8h] ,
+        R_init: df_WT['R'][time_8h]  ,
+        RP_init: df_WT['RP'][time_8h] + df_WT['RPW'][time_8h]*depletion_level, 
+        RPW_init: df_WT['RPW'][time_8h] * remaining_level, 
     
-        N_init: df_WT['N'][time_2h] * depletion_level,
-        S_init: df_WT['S'][time_2h],
-        W_init: df_WT['W'][time_2h],
-        P_init: df_WT['P'][time_2h],
+        N_init: df_WT['N'][time_8h],
+        S_init: df_WT['S'][time_8h],
+        W_init: df_WT['W'][time_8h] * depletion_level,
+        P_init: df_WT['P'][time_8h],
        }
 
-    paras_dict_since_2h_dN = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh_dNipbl_2h | {"K_Rac_free_R_free": 1/2495}
-    paras_dict_ext_coh_since_2h_dN = {str(key): value for key, value in paras_dict_since_2h_dN.items()}
+    paras_dict_since_8h_dW = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh_dWapl_8h | {"K_Rac_free_R_free": 1/2495}
+    paras_dict_ext_coh_since_8h_dW = {str(key): value for key, value in paras_dict_since_8h_dW.items()}
     
-    Model_ext_coh_since_2h_dN = build_model(MODEL_EXT_COH_TEMPLATE, paras_dict_ext_coh_since_2h_dN)
+    Model_ext_coh_since_8h_dW = build_model(MODEL_EXT_COH_TEMPLATE, paras_dict_ext_coh_since_8h_dW)
     # print(model_ext_coh)
     # Load the modes
-    r_ext_coh_since_2h_dN = te.loada(Model_ext_coh_since_2h_dN)
+    r_ext_coh_since_8h_dW = te.loada(Model_ext_coh_since_8h_dW)
     # Simulate the model
-    Model_ext_coh_since_2h_dN = r_ext_coh_since_2h_dN.simulate(0, 3600*16, 3600*16)
+    Model_ext_coh_since_8h_dW = r_ext_coh_since_8h_dW.simulate(0, 3600*16, 3600*16)
     
-    df_since_2h = pd.DataFrame(Model_ext_coh_since_2h_dN, columns=columns)
+    df_since_8h = pd.DataFrame(Model_ext_coh_since_8h_dW, columns=columns)
     
     analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
     index = 3600 * analysis_hours  - 1
 
     # Calculate metrics
-    total_bound_ext = (df_since_2h['R'][index] + df_since_2h['RN'][index] + 
-                       df_since_2h['RP'][index] + df_since_2h['RPW'][index])
+    total_bound_ext = (df_since_8h['R'][index] + df_since_8h['RN'][index] + 
+                       df_since_8h['RP'][index] + df_since_8h['RPW'][index])
     
     bound_extC_ratio = total_bound_ext / (paras_dict_coh_local[N_R]*0.5)
-    extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_2h['R_free'][index])
+    extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_8h['R_free'][index])
     extC_value = int(NUM_SISTERCS * bound_extC_ratio)
-    velocity_8h = 1/5 * total_bound_ext / df_since_2h['RN'][index]
+    velocity_8h = 1/5 * total_bound_ext / df_since_8h['RN'][index]
     LEF_sep_8h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
-    total_sister_rad21 = (df_since_2h['RacPS'][index] + df_since_2h['RacPW'][index] + 
-                          df_since_2h['RacP'][index] + df_since_2h['Rac'][index] + 
-                          df_since_2h['RacN'][index])
+    
+    total_sister_rad21 = (df_since_8h['RacPS'][index] + df_since_8h['RacPW'][index] + 
+                          df_since_8h['RacP'][index] + df_since_8h['Rac'][index] + 
+                          df_since_8h['RacN'][index])
 
     sister_RAD21_time_10h = calculate_sister_RAD21_bound_time(
-        K_RacPW_Rac_free = paras_dict_ext_coh_since_2h_dN['K_RacPW_Rac_free'], \
-        B_W_sister = df_since_2h['RacPW'][index], \
+        K_RacPW_Rac_free = paras_dict_ext_coh_since_8h_dW['K_RacPW_Rac_free'], \
+        B_W_sister = df_since_8h['RacPW'][index], \
         B_R_sister = total_sister_rad21)
     
     # Calculate transition rates
     rates = {
-        'R_free_to_RN': paras_dict_ext_coh_since_2h_dN['Kext_R_free_RN']*df_since_2h['N'][index],
-        'RPW_R_free': paras_dict_ext_coh_since_2h_dN['Kext_RPW_R_free'],
-        'RN_R': paras_dict_ext_coh_since_2h_dN['Kext_RN_R'],
-        'R_RN': paras_dict_ext_coh_since_2h_dN['Kext_R_RN']*df_since_2h['N'][index],
-        'R_RP': paras_dict_ext_coh_since_2h_dN['Kext_R_RP']*df_since_2h['P'][index],
-        'RP_R': paras_dict_ext_coh_since_2h_dN['Kext_RP_R'],
-        'RP_RPW': paras_dict_ext_coh_since_2h_dN['Kext_RP_RPW']*df_since_2h['W'][index],
-        'RPW_RP': paras_dict_ext_coh_since_2h_dN['Kext_RPW_RP'],
+        'R_free_to_RN': paras_dict_ext_coh_since_8h_dW['Kext_R_free_RN']*df_since_8h['N'][index],
+        'RPW_R_free': paras_dict_ext_coh_since_8h_dW['Kext_RPW_R_free'],
+        'RN_R': paras_dict_ext_coh_since_8h_dW['Kext_RN_R'],
+        'R_RN': paras_dict_ext_coh_since_8h_dW['Kext_R_RN']*df_since_8h['N'][index],
+        'R_RP': paras_dict_ext_coh_since_8h_dW['Kext_R_RP']*df_since_8h['P'][index],
+        'RP_R': paras_dict_ext_coh_since_8h_dW['Kext_RP_R'],
+        'RP_RPW': paras_dict_ext_coh_since_8h_dW['Kext_RP_RPW']*df_since_8h['W'][index],
+        'RPW_RP': paras_dict_ext_coh_since_8h_dW['Kext_RPW_RP'],
     }
 
     # Load base parameters and update
-    with open(f"extrusion_dict_RN_RB_RP_RW_HBD_dN.json", "r") as f:
+    with open(f"extrusion_dict_RN_RB_RP_RW_HBD_dW.json", "r") as f:
         output_params = json.load(f)
     
     output_params["LEF_on_rate"]["A"] = float(rates['R_free_to_RN'])
@@ -350,6 +351,39 @@ def run_simulation(config, residence_time, sister_damping):
     
     return output_params 
 
+
+def main():
+    """Main execution function"""
+    # Load configuration
+    config = load_config('network_parameters_dW.json')
+    
+    # Create output directory
+    output_dir = Path(config['output_directory'])
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Run parameter sweep
+    for residence_time in RESIDENCE_TIMES:
+        for sister_damping in SISTER_DAMPINGS:
+            print(f"\nRunning: residence_time={residence_time}h, sister_damping={sister_damping}")
+            
+            # Run simulation
+            params = run_simulation(config, residence_time, sister_damping)
+            
+            # Save to file
+            filename = (f"{config['output_prefix']}_"
+                       f"alpha{sister_damping}_tau{residence_time}h.json")
+            filepath = output_dir / filename
+            
+            with open(filepath, "w") as f:
+                json.dump(params, f, indent=4)
+            
+            print(f"Saved: {filepath}")
+
+    print("\nAll simulations complete!")
+
+
+if __name__ == "__main__":
+    main()
 
 
 
