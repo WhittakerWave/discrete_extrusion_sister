@@ -29,7 +29,7 @@
         "analysis_timepoint_hours": 9,
         "num_of_sisters": 776
     },
-    "output_directory": "WT_sweep_Test",
-    "output_prefix": "extrusion_dict_RN_RB_RP_RW_HBD_WT",
+    "output_directory": "WT_sweep_1004",
+    "output_prefix": "extrusion_dict_RN_RB_RP_RW_HBD_WT9h",
     "output_template_file": "extrusion_dict_RN_RB_RP_RW_HBD_WT.json"
 }

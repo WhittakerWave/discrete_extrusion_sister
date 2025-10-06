@@ -20,7 +20,7 @@ def load_config(filename):
 RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
 SISTER_DAMPINGS = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
-# Physical constants
+# Physical constants for ODE 
 NUM_SISTERCS = 7765 
 LATTICE_SIZE = 320000
 
@@ -198,6 +198,8 @@ def calculate_extrusive_parameters(config):
         base['N_R'] * base['N_R_fraction'],
     ]
 
+# run simulations for given parameters  
+
 def run_simulation(config, residence_time, sister_damping):
     """
     Run the simulation for given residence_time and sister_damping
@@ -277,7 +279,7 @@ def run_simulation(config, residence_time, sister_damping):
         RP_init: df_WT['RP'][time_2h], 
         RPW_init: df_WT['RPW'][time_2h], 
     
-        N_init: df_WT['N'][time_2h] * depletion_level,
+        N_init: df_WT['N'][time_2h] * remaining_level,
         S_init: df_WT['S'][time_2h],
         W_init: df_WT['W'][time_2h],
         P_init: df_WT['P'][time_2h],
@@ -343,8 +345,9 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
     
     output_params["LEF_separation"] = LEF_sep_8h
-    output_params["velocity_multiplier"] = float(velocity_8h)
-    output_params["monomers_per_replica"] = LATTICE_SIZE
+    # output_params["velocity_multiplier"] = float(velocity_8h)
+    output_params["velocity_multiplier"] = 0.6
+    output_params["monomers_per_replica"] = 32000
     output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["sister_damping"] = sister_damping
     output_params["sister_lifetime"] = int(sister_RAD21_time_10h)
@@ -355,7 +358,7 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters.json')
+    config = load_config('network_parameters_dNd75.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])

@@ -1,5 +1,8 @@
 
 
+### 
+### This script generates the parameters for extrusion simulations with WT 1h
+
 import json
 import numpy as np
 import sympy as sym 
@@ -196,8 +199,7 @@ def calculate_extrusive_parameters(config):
         base['N_R'] * base['N_R_fraction'],
     ]
 
-
-# Store your main calculation code in a function
+# run simulations for given parameters 
 def run_simulation(config, residence_time, sister_damping):
     """
     Run the simulation for given residence_time and sister_damping
@@ -258,8 +260,7 @@ def run_simulation(config, residence_time, sister_damping):
     
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
     
-    # Calculate rates at 1h
-    # Calculate LEF_sep and velocity at 1h
+    # Calculate rates at G2 1h 
     h = 1
     index = 3600 * h - 1
     total_bound_ext = (df_WT['R'][index] + df_WT['RN'][index] + 
@@ -297,7 +298,8 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
 
     output_params["LEF_separation"] = LEF_sep_1h
-    output_params["velocity_multiplier"] = float(velocity_1h)
+    # output_params["velocity_multiplier"] = float(velocity_1h)
+    output_params["velocity_multiplier"] = 0.6
     output_params["monomers_per_replica"] = 32000
     output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["sister_damping"] = sister_damping

@@ -28,7 +28,7 @@
         "analysis_timepoint_hours": 8,
         "num_of_sisters": 776
     },
-    "output_directory": "dN_sweep_d25_Test",
+    "output_directory": "dN_sweep_d25_1004",
     "output_prefix": "extrusion_dict_RN_RB_RP_RW_HBD_dN10h",
     "output_template_file": "extrusion_dict_RN_RB_RP_RW_HBD_dN.json"
 }

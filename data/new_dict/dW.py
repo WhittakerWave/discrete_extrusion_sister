@@ -343,7 +343,8 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
     
     output_params["LEF_separation"] = LEF_sep_8h
-    output_params["velocity_multiplier"] = float(velocity_8h)
+    # output_params["velocity_multiplier"] = float(velocity_8h)
+    output_params["velocity_multiplier"] = 0.6
     output_params["monomers_per_replica"] = LATTICE_SIZE
     output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["sister_damping"] = sister_damping

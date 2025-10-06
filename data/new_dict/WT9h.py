@@ -1,8 +1,7 @@
 
 
-
 ### 
-### This script generates the parameters for extrusion simulations with WT
+### This script generates the parameters for extrusion simulations with WT 9h
 
 import json
 import numpy as np
@@ -201,6 +200,8 @@ def calculate_extrusive_parameters(config):
         base['N_R'] * base['N_R_fraction'],
     ]
 
+# run simulations for given parameters  
+
 def run_simulation(config, residence_time, sister_damping):
     """
     Run the simulation for given residence_time and sister_damping
@@ -299,7 +300,8 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
 
     output_params["LEF_separation"] = LEF_sep_9h
-    output_params["velocity_multiplier"] = float(velocity_9h)
+    # output_params["velocity_multiplier"] = float(velocity_9h)
+    output_params["velocity_multiplier"] = 0.6
     output_params["monomers_per_replica"] = 32000
     output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["sister_damping"] = sister_damping
@@ -311,7 +313,7 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters_WT.json')
+    config = load_config('network_parameters_WT9h.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])
