@@ -129,6 +129,10 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
         # Run 'period' number of steps
         translocator1.run(1)
         translocator2.run(1)
+
+        positions = translocator1.extrusion_engine.positions  # shape (N, 2)
+        valid_rows = positions[~np.all(positions == -1, axis=1)]
+        print(valid_rows)
         if step_idx % 1000 == 0:
             print(f"Step {step_idx} completed")
         # Update sisters after each individual step
@@ -201,7 +205,7 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
 run_synchronized_trajectories_continue(
     translocator1, translocator2,
     paramdict_WT['sister_lifetime'],
-    steps = 7200, 
+    steps = 101, 
     prune_unbound_LEFs = True,
     track_sisters = True,
     sample_interval = 100,

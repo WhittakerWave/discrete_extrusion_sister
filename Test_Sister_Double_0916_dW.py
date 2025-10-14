@@ -11,7 +11,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-import discrete_time_extrusion
+# import discrete_time_extrusion
 
 import discrete_time_extrusion.arrays as arrays 
 from discrete_time_extrusion.Translocator import Translocator
@@ -59,16 +59,16 @@ anchor_positions = []
 # ctcf_right_positions =  ctcf_left_positions.copy()
 
 ### sample half and half
-number_of_ctcf = 5637//10
-# ctcf_positions = np.random.choice(monomers_per_replica, size=number_of_ctcf, replace=False)
+number_of_ctcf = 846
+ctcf_positions = np.random.choice(monomers_per_replica, size=number_of_ctcf, replace=False)
 # shuffle and split into two halves
-# np.random.shuffle(ctcf_positions)
-# half = number_of_ctcf // 2
-# ctcf_left_positions = ctcf_positions[:half]
-# ctcf_right_positions = ctcf_positions[half:]
-# np.save('ctcf_left_positions_full.npy', ctcf_left_positions)
-# ctcf_right_positions = ctcf_positions[half:]
-# np.save('ctcf_right_positions_full.npy', ctcf_right_positions)
+np.random.shuffle(ctcf_positions)
+half = number_of_ctcf // 2
+ctcf_left_positions = ctcf_positions[:half]
+ctcf_right_positions = ctcf_positions[half:]
+np.save('ctcf_left_positions_1007.npy', ctcf_left_positions)
+ctcf_right_positions = ctcf_positions[half:]
+np.save('ctcf_right_positions_1007.npy', ctcf_right_positions)
 
 ctcf_left_positions = np.load('ctcf_left_positions.npy')
 ctcf_right_positions = np.load('ctcf_right_positions.npy')

@@ -299,7 +299,7 @@ def run_simulation(config, residence_time, sister_damping):
     }
 
     # Load base parameters and update
-    with open(f"extrusion_dict_RN_RB_RP_RW_HBD_dS.json", "r") as f:
+    with open(f"extrusion_dict_RN_RB_RP_RW_HBD_WT.json", "r") as f:
         output_params = json.load(f)
     
     output_params["LEF_on_rate"]["A"] = float(rates['R_free_to_RN'])
