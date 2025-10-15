@@ -250,6 +250,3 @@ with open('dW_trajectory2.pkl', 'wb') as f:
     }, f)
     
 print("Sister trajectory saved!")
-
-
-

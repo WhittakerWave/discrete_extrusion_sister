@@ -15,7 +15,8 @@ def load_config(filename):
         return json.load(f)
     
 # Define the ranges 
-RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+# RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
+RESIDENCE_TIMES = [10]  # in hours
 SISTER_DAMPINGS = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
 # Physical constants
@@ -136,6 +137,11 @@ def calculate_sister_RAD21_bound_time(K_RacPW_Rac_free, B_W_sister, B_R_sister):
     # K_RPW_R_free * N_W * F_W - F_R_sister*N_R/tau_R
     ### F_R is the fraction of bounded RAD21, T_W is the total number of bounded Wapl 
     return B_R_sister/(K_RacPW_Rac_free * B_W_sister)
+
+def calculate_extrusive_RAD21_bound_time(K_RPW_R_free, B_W_extruder, B_R_extruder):
+    # K_RPW_R_free * N_W * F_W - F_R_sister*N_R/tau_R
+    ### F_R is the fraction of bounded RAD21, T_W is the total number of bounded Wapl 
+    return B_R_extruder/(K_RPW_R_free * B_W_extruder)
 
 def calculate_cohesive_parameters(config, residence_time):
     """
@@ -315,6 +321,15 @@ def run_simulation(config, residence_time, sister_damping):
         K_RacPW_Rac_free = paras_dict_ext_coh_since_8h_dW['K_RacPW_Rac_free'], \
         B_W_sister = df_since_8h['RacPW'][index], \
         B_R_sister = total_sister_rad21)
+    
+    total_extrusive_rad21 = (df_since_8h['RPW'][index] + 
+                          df_since_8h['RP'][index] + df_since_8h['R'][index] + 
+                          df_since_8h['RN'][index])
+
+    extruder_RAD21_time_10h = calculate_extrusive_RAD21_bound_time(
+        K_RPW_R_free = paras_dict_ext_coh_since_8h_dW['Kext_RPW_R_free'], \
+        B_W_extruder = df_since_8h['RPW'][index], \
+        B_R_extruder = total_extrusive_rad21)
     
     # Calculate transition rates
     rates = {
