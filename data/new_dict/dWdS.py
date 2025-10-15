@@ -16,7 +16,7 @@ def load_config(filename):
     
 # Define the ranges 
 RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30]  # in hours
-SISTER_DAMPINGS = [0, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
+SISTER_DAMPINGS = [0, 4, 6, 8, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
 
 # Physical constants
 NUM_SISTERCS = 7765 
@@ -347,8 +347,8 @@ def run_simulation(config, residence_time, sister_damping):
     
     output_params["LEF_separation"] = LEF_sep_8h
     # output_params["velocity_multiplier"] = float(velocity_8h)
-    output_params["velocity_multiplier"] = 0.6
-    output_params["monomers_per_replica"] = LATTICE_SIZE
+    output_params["velocity_multiplier"] = 0.8
+    output_params["monomers_per_replica"] = 32000
     output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["sister_damping"] = sister_damping
     output_params["sister_lifetime"] = int(sister_RAD21_time_10h)
