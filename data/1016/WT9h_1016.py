@@ -17,11 +17,13 @@ def load_config(filename):
     with open(filename, 'r') as f:
         return json.load(f)
     
-# Define the ranges, # in hours
-RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 1000] 
-SISTER_DAMPINGS = [10]  # damping values
+# Define the residence time [in hours]
+RESIDENCE_TIMES = [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 5000]         
+# Define the damping values
+SISTER_DAMPINGS = [10]  
 # SISTER_DAMPINGS = [0, 4, 6, 8, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
-COLLISION_PROB = np.logspace(-5, -2, 20)
+# Prob stepping extruder unload sisters
+COLLISION_PROB = np.logspace(-6, -3, 20)
 
 # Physical constants
 NUM_SISTERCS = 7765 
