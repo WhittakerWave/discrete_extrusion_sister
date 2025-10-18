@@ -89,7 +89,8 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
                           sim.coupled_to_extruder,
                           sim.coupled_to_sister,
 						  sim.sister_tau,
-						  sim.sister_damping])
+						  sim.sister_damping,
+						  sim.collision_release_prob])
 			mode_key = "symmetric_sister"
 		else: 
 			rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)

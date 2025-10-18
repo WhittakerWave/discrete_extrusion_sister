@@ -52,7 +52,7 @@
             "A": 0.014661564099605258
         }
     },
-    "LEF_separation": 41,
+    "LEF_separation": 4,
     "mode": "symmetric",
     "sites_per_monomer": 1,
     "monomers_per_replica": 32000,
@@ -62,5 +62,6 @@
     "number_of_replica": 1,
     "steps": 65000,
     "dummy_steps": 0,
-    "velocity_multiplier": 0.6373290130402828
+    "velocity_multiplier": 0.6373290130402828,
+    "collision_release_prob": 0.1
 }

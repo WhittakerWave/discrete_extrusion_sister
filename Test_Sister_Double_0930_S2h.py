@@ -86,6 +86,94 @@ def shared_sister_update(translocator1, translocator2, step_number, shared_decay
             final_mask_2 = fall_off_mask & active_mask_2
             translocator2.extrusion_engine.sister_positions[final_mask_2] = -1
 
+def shared_sister_collision_decay_old(translocator1, translocator2, step_number, 
+            collision_release_decision_sister1, collision_release_decision_sister2):
+    RN_sisters_translocator1 = []
+    # Get RN sisters for translocator1
+    for sister, extruder in translocator1.extrusion_engine.coupled_to_extruder.items():
+        if translocator1.extrusion_engine.states[extruder] == 1:
+            RN_sisters_translocator1.append(sister)
+    # Get RN sisters for translocator2
+    RN_sisters_translocator2 = []
+    for sister, extruder in translocator2.extrusion_engine.coupled_to_extruder.items():
+        if translocator1.extrusion_engine.states[extruder] == 1:
+            RN_sisters_translocator2.append(sister)
+    # Get collision decisions for this step
+    decisions_step1 = collision_release_decision_sister1[step_number]
+    decisions_step2 = collision_release_decision_sister2[step_number]
+
+    num_sisters = len(decisions_step1)
+    collision_mask = np.zeros(num_sisters, dtype=bool)
+
+    # Convert to numpy arrays and filter valid indices
+    RN_sisters_1 = np.array(RN_sisters_translocator1)
+    RN_sisters_2 = np.array(RN_sisters_translocator2)
+
+    # Apply decisions directly
+    if len(RN_sisters_1) > 0:
+        collision_mask[RN_sisters_1] = decisions_step1[RN_sisters_1]
+    if len(RN_sisters_2) > 0:
+        collision_mask[RN_sisters_2] |= decisions_step2[RN_sisters_2]
+    
+    # Apply to both translocators
+    if translocator1.extrusion_engine.sister_positions is not None:
+        active_mask_1 = translocator1.extrusion_engine.sister_positions != -1
+        final_mask_1 = collision_mask & active_mask_1
+        translocator1.extrusion_engine.sister_positions[final_mask_1] = -1
+    
+    if translocator2.extrusion_engine.sister_positions is not None:
+        active_mask_2 = translocator2.extrusion_engine.sister_positions != -1
+        final_mask_2 = collision_mask & active_mask_2
+        translocator2.extrusion_engine.sister_positions[final_mask_2] = -1
+
+def shared_sister_collision_decay(translocator1, translocator2, step_number, 
+            collision_release_decision_sister1, collision_release_decision_sister2):
+    
+    # Get collision decisions for this step
+    decisions_step1 = collision_release_decision_sister1[step_number]
+    decisions_step2 = collision_release_decision_sister2[step_number]
+    num_sisters = len(decisions_step1)
+    
+    # Convert coupled_to_extruder dict to arrays once
+    if len(translocator1.extrusion_engine.coupled_to_extruder) > 0:
+        sisters1, extruders1 = zip(*translocator1.extrusion_engine.coupled_to_extruder.items())
+        sisters1 = np.array(sisters1)
+        extruders1 = np.array(extruders1)
+        # Vectorized check for active extruders
+        active_mask1 = np.array([translocator1.extrusion_engine.states[e] == 1 for e in extruders1])
+        RN_sisters_1 = sisters1[active_mask1]
+    else:
+        RN_sisters_1 = np.array([], dtype=int)
+    
+    if len(translocator2.extrusion_engine.coupled_to_extruder) > 0:
+        sisters2, extruders2 = zip(*translocator2.extrusion_engine.coupled_to_extruder.items())
+        sisters2 = np.array(sisters2)
+        extruders2 = np.array(extruders2)
+        # Fix: check translocator2's states, not translocator1's
+        active_mask2 = np.array([translocator2.extrusion_engine.states[e] == 1 for e in extruders2])
+        RN_sisters_2 = sisters2[active_mask2]
+    else:
+        RN_sisters_2 = np.array([], dtype=int)
+    
+    # Build collision mask efficiently
+    collision_mask = np.zeros(num_sisters, dtype=bool)
+    
+    if len(RN_sisters_1) > 0:
+        collision_mask[RN_sisters_1] = decisions_step1[RN_sisters_1]
+    if len(RN_sisters_2) > 0:
+        collision_mask[RN_sisters_2] |= decisions_step2[RN_sisters_2]
+    
+    # Apply to both translocators
+    if translocator1.extrusion_engine.sister_positions is not None:
+        active_mask_1 = translocator1.extrusion_engine.sister_positions != -1
+        final_mask_1 = collision_mask & active_mask_1
+        translocator1.extrusion_engine.sister_positions[final_mask_1] = -1
+    
+    if translocator2.extrusion_engine.sister_positions is not None:
+        active_mask_2 = translocator2.extrusion_engine.sister_positions != -1
+        final_mask_2 = collision_mask & active_mask_2
+        translocator2.extrusion_engine.sister_positions[final_mask_2] = -1
+
 def run_synchronized_trajectories_continue(translocator1, translocator2, sister_lifetime, 
                         period=None, steps=None, 
                         prune_unbound_LEFs=True, track_sisters=False, 
@@ -103,9 +191,13 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
     dummy_steps = translocator1.params['dummy_steps'] * period
     total_steps = steps * period + dummy_steps
     
+    collision_release_prob = translocator1.params['collision_release_prob']
+
     np.random.seed(seed)
     shared_decay_decisions = np.random.random((total_steps, num_sisters)) < decay_prob
-    
+    collision_release_decision_sister1 = np.random.random((total_steps, num_sisters)) < collision_release_prob
+    collision_release_decision_sister2 = np.random.random((total_steps, num_sisters)) < collision_release_prob
+
     print(f"Generated shared decay schedule for {total_steps} total steps")
     
     # Initialize trajectory lists only if clearing or they don't exist
@@ -137,6 +229,7 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
             print(f"Step {step_idx} completed")
         # Update sisters after each individual step
         shared_sister_update(translocator1, translocator2, step_counter, shared_decay_decisions)
+        shared_sister_collision_decay(translocator1, translocator2, step_counter, collision_release_decision_sister1, collision_release_decision_sister2)
         step_counter += 1
         # Data collection at sampling intervals
         if step_idx % sample_interval == 0:
@@ -180,6 +273,7 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
                     translocator2.sister_trajectory.append(sister_positions_2)
                     translocator2.coupling_trajectory.append(coupling_status_2)
 
+# paramdict_S1h['sister_lifetime'],
 run_synchronized_trajectories_continue(
     translocator1, translocator2,
     paramdict_S1h['sister_lifetime'],

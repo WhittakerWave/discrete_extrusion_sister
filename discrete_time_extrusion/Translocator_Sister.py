@@ -49,12 +49,15 @@ class Translocator_Sister():
         # Define sisiter_lifetime and sister_damping
         sister_tau  = kwargs['sister_lifetime']
         sister_damping = kwargs['sister_damping']
+        
+        collision_release_prob = kwargs['collision_release_prob']
 
         self.extrusion_engine = extrusion_engine(
                                number_of_LEFs, 
                                number_of_sisters,
                                sister_tau,
                                sister_damping,
+                               collision_release_prob, 
                                initial_sister_positions, 
                                self.barrier_engine, 
                                *lef_arrays, **lef_transition_dict)

@@ -10,6 +10,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                  number_of_sisters, 
                  sister_tau,
                  sister_damping,
+                 collision_release_prob, 
                  initial_sister_positions, 
                  barrier_engine,
                  birth_prob,
@@ -43,6 +44,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.pause_prob = pause_prob
         self.sister_tau = sister_tau
         self.sister_damping = sister_damping
+        self.collision_release_prob = collision_release_prob 
         self.stepping_engine = EngineFactory.SteppingEngine
         
         # Initialize sisters 

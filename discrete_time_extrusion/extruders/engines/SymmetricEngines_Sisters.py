@@ -19,6 +19,7 @@ def symmetric_sister_step_cpu(active_state_id,
                               coupled_to_sister = None,
                               sister_tau = None,
                               sister_damping = None, 
+                              collision_release_prob = None, 
                               **kwargs):
     """
     Sister-aware stepping function that handles extruders and sisters separately
@@ -67,7 +68,7 @@ def symmetric_sister_step_cpu(active_state_id,
     # Helper function: Coupled extruder movement with sisters (MUST be inside for Numba)
     def process_coupled_extruder_movement_SIMPLE(extruder_id, sister_ids, rngs, positions, 
                                                 sister_positions, stalled, occupied, pause_prob,
-                                                stall_left, stall_right, processed_extruders):
+                                                stall_left, stall_right, processed_extruders, collision_release_prob):
         """Even simpler: Just use normal extruder movement, then carry sisters"""
         
         # Store positions before movement
@@ -84,6 +85,9 @@ def symmetric_sister_step_cpu(active_state_id,
         
         # Carry any sisters that were on the moving extruder legs
         for sister_id in sister_ids:
+            # if np.random.random() < collision_release_prob:
+            #     sister_positions[sister_id] = -1 
+            # else: 
             sister_pos = sister_positions[sister_id]
             # if sister positions was the old position of left leg 
             if sister_pos == old_pos1 and new_pos1 != old_pos1:
@@ -111,7 +115,8 @@ def symmetric_sister_step_cpu(active_state_id,
                                                  positions, sister_positions,
                                                  stalled, occupied, pause_prob,
                                                  stall_left, stall_right, 
-                                                 processed_extruders)
+                                                 processed_extruders,
+                                                 collision_release_prob)
                 else:
                     continue
             else:
