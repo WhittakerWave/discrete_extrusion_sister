@@ -63,5 +63,5 @@
     "steps": 65000,
     "dummy_steps": 0,
     "velocity_multiplier": 0.8,
-    "collision_release_prob": 0.0011288378916846883
+    "collision_release_prob": 0.00011288378916846884
 }

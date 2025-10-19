@@ -1,7 +1,7 @@
 
 
 ### 
-### This script generates the parameters for extrusion simulations with WT 9h
+### This script generates the parameters for extrusion simulations with WT 4h
 
 import json
 import numpy as np
@@ -16,11 +16,13 @@ def load_config(filename):
     with open(filename, 'r') as f:
         return json.load(f)
     
-# Define the ranges, # in hours
-RESIDENCE_TIMES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 30, 1000] 
-SISTER_DAMPINGS = [10]  # damping values
+# Define the residence time [in hours]
+RESIDENCE_TIMES = [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 5000]         
+# Define the damping values
+SISTER_DAMPINGS = [10]  
 # SISTER_DAMPINGS = [0, 4, 6, 8, 10, 25, 50, 75, 100, 125, 150, 200, 250, 500]  # damping values
-COLLISION_PROB = np.logspace(-5, -2, 20)
+# Prob stepping extruder unload sisters
+COLLISION_PROB = np.logspace(-6, -3, 20)
 
 # Physical constants
 NUM_SISTERCS = 7765 
@@ -271,7 +273,7 @@ def run_simulation(config, residence_time, sister_damping, collision_prob):
     bound_extC_ratio = total_bound_ext / (paras_dict_coh_local[N_R]*0.5)
     extC_bound_frac =  total_bound_ext / (total_bound_ext + df_WT['R_free'][index])
     extC_value = int(NUM_SISTERCS * bound_extC_ratio)
-    velocity_9h = 1/5 * total_bound_ext / df_WT['RN'][index]
+    # velocity_9h = 1/5 * total_bound_ext / df_WT['RN'][index]
     LEF_sep_9h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
     
     # Calculate transition rates
