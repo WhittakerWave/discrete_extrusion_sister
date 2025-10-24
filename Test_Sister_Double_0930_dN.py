@@ -127,8 +127,8 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
 
     for step_idx in range(steps):
         # Run 'period' number of steps
-        translocator1.run(1)
-        translocator2.run(1)
+        translocator1.run(100)
+        translocator2.run(100)
 
         positions = translocator1.extrusion_engine.positions  # shape (N, 2)
         valid_rows = positions[~np.all(positions == -1, axis=1)]

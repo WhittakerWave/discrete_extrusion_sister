@@ -88,7 +88,9 @@ class Translocator_Sister():
                 
     def run(self, N, **kwargs):
         self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
-        
+    
+    ## function to run loop extrusion and one sister chain 
+    
     def run_trajectory_one_sister(self, period = None, steps = None, 
             prune_unbound_LEFs = True, track_sisters = False, sample_interval = 1, **kwargs):
         self.clear_trajectory()

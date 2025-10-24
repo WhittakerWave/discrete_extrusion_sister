@@ -58,8 +58,9 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # self._initialize_sisters_load()
         # Test function of loading sisterCs
         # self._test_single_position()
-
         # self.setup_test_scenario()
+    
+
     def _initialize_sisters_fix(self, initial_positions):
         """Initialize sisters either randomly or from saved file"""
         if self.num_sisters <= 0:
@@ -143,8 +144,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._position_to_extruders = {}
         active_extruders = []
         for extruder_id in range(self.number):
-            if self.states[extruder_id] != 0:  # Extruder is on chromosome -- active 
-                active_extruders.append(extruder_id)
+            if self.states[extruder_id] != 0:  # Extruder is on chromosome -- active
+                active_extruders.append(extruder_id) 
                 pos1 = int(self.positions[extruder_id, 0])
                 pos2 = int(self.positions[extruder_id, 1])
                 ## Add both leg positions
@@ -155,9 +156,9 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                     if pos2 not in self._position_to_extruders:
                         self._position_to_extruders[pos2] = []
                     self._position_to_extruders[pos2].append(extruder_id)
-
+                  
         self._position_cache_valid = True
-   
+    
     def _sync_coupling_dicts(self):
         """Sync array-based coupling data to dictionary format for backward compatibility"""
         self.coupled_to_extruder.clear()
@@ -207,18 +208,22 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
 
     def _check_extruder_deaths(self):
         """Uncouple sisters whose extruders have died"""
+        ### by updating the coupled_to_extruder and coupled_to_sister dicts 
         dead_couplings = []
-        
         for sister_id, extruder_id in self.coupled_to_extruder.items():
-            if self.states[extruder_id] == 0:  # Extruder died
+            if self.states[extruder_id] == 0:  # Extruder is state 0, died state 
                 dead_couplings.append((sister_id, extruder_id))
-        
         # Uncouple dead extruders but keep sisters alive
+        # Update the coupled_to_extruder: sister --> extruder
+        # Update the coupled_to_sister: extruder --> sister
         for sister_id, extruder_id in dead_couplings:
             del self.coupled_to_extruder[sister_id]
             if extruder_id in self.coupled_to_sister:
+                ## remove sister_id in the extruder_id: sister_id map, 
+                ## extruder id to []
                 self.coupled_to_sister[extruder_id].remove(sister_id)
-                if not self.coupled_to_sister[extruder_id]:  # Empty list
+                ## Need to remove the extruder ids as well 
+                if not self.coupled_to_sister[extruder_id]:  
                     del self.coupled_to_sister[extruder_id]
     
     def _uncouple_dead_extruders(self):
@@ -411,9 +416,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         
         ## Update sister states for decaying
         # self.update_sister_active_states()
-        
         self.check_sister_coupling()      
-    
+        
         self.update_occupancies()
         # Parent class step
         super().step(**kwargs)
