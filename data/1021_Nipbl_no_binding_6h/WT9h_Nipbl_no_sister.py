@@ -1,7 +1,7 @@
 
 
 ### 
-### This script generates the parameters for extrusion simulations with WT 9h
+### This script generates the parameters for extrusion simulations with WT at 9h (18h G2)
 
 import json
 import numpy as np
@@ -20,7 +20,8 @@ def load_config(filename):
 # Define the ranges 
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]  
+# SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
 
 # Physical constants
 NUM_EXTRUDERS = 7765 
@@ -34,7 +35,7 @@ paras_coh = sym.symbols("tau_S, F_S, N_S, tau_W, F_W, N_W, tau_P, F_P, N_P, tau_
 tau_S, F_S, N_S, tau_W, F_W, N_W, tau_P, F_P, N_P, tau_R, F_R_sister, N_R = paras_coh 
 
 ## Equations for cohesive network
-rhs_coh = [K_RacPW_Rac_free * N_W * F_W - F_R_sister*N_R/tau_R,                              # RAD21 unbinding  
+rhs_coh = [K_RacPW_Rac_free * N_W * F_W - F_R_sister * N_R/tau_R,                              # RAD21 unbinding  
            F_W/(tau_W * (1-F_W)) - K_RacP_RacPW * (F_P * N_P - F_S * N_S - F_W * N_W),       # Wapl binding 
            K_RacPW_RacP + K_RacPW_Rac_free - 1/tau_W,                                        # Wapl unbinding  
            F_S/(tau_S * (1-F_S)) - K_RacP_RacPS * (F_P * N_P - F_S * N_S - F_W * N_W),       # Sororin binding

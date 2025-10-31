@@ -19,7 +19,8 @@ def load_config(filename):
 # Define the residence time [in hours]
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40] 
+# SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
 
 # Physical constants
 NUM_SISTERCS = 7765 
@@ -265,7 +266,7 @@ def run_simulation(config, residence_time, sister_damping):
     # 
     extC_value = int(NUM_EXTRUDERS * bound_extC_ratio)
     # velocity_9h = 1/5 * total_bound_ext / df_WT['RN'][index]
-    LEF_sep_9h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
+    LEF_sep_1h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
     
     # Calculate transition rates
     rates = {
@@ -293,7 +294,7 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["34"]["A"] = float(rates['RP_RPW'])
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
 
-    output_params["LEF_separation"] = LEF_sep_9h
+    output_params["LEF_separation"] = LEF_sep_1h
     # output_params["velocity_multiplier"] = float(velocity_9h)
     output_params["velocity_multiplier"] = 0.8
     output_params["monomers_per_replica"] = 32000

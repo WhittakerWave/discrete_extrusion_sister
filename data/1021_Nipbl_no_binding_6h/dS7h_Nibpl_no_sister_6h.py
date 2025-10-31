@@ -20,7 +20,8 @@ def load_config(filename):
 # Define the ranges 
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+# SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]   
+SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]  
 
 # Physical constants
 NUM_EXTRUDERS = 7765 
@@ -261,7 +262,9 @@ def run_simulation(config, residence_time, sister_damping):
     index_start_G2 = 3600*6 - 1 
     NUM_SISTERCS_start_G2 = int((df_dS['Rac'][index_start_G2]  + df_dS['RacPS'][index_start_G2] + 
                        df_dS['RacP'][index_start_G2] + df_dS['RacPW'][index_start_G2])//10)
-    # Calculate LEF_sep and velocity at 9h
+    
+    # Calculate LEF_sep and velocity at 7h (6h+8h)/2=7h
+
     analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
     index = 3600 * analysis_hours - 1
     total_bound_ext = (df_dS['R'][index] + df_dS['RN'][index] + 
@@ -270,7 +273,7 @@ def run_simulation(config, residence_time, sister_damping):
     extC_bound_frac =  total_bound_ext / (total_bound_ext + df_dS['R_free'][index])
     extC_value = int(NUM_EXTRUDERS * bound_extC_ratio)
     # velocity_9h = 1/5 * total_bound_ext / df_dS['RN'][index]
-    LEF_sep_9h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
+    LEF_sep_7h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
     
 
     total_sister_rad21 = (df_dS['RacPS'][index] + df_dS['RacPW'][index] + 
@@ -307,7 +310,7 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["34"]["A"] = float(rates['RP_RPW'])
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
 
-    output_params["LEF_separation"] = LEF_sep_9h
+    output_params["LEF_separation"] = LEF_sep_7h
     # output_params["velocity_multiplier"] = float(velocity_9h)
     output_params["velocity_multiplier"] = 0.8
     output_params["monomers_per_replica"] = 32000
@@ -322,7 +325,7 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters_dS7h.json')
+    config = load_config('network_parameters_dS7h_d85.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])

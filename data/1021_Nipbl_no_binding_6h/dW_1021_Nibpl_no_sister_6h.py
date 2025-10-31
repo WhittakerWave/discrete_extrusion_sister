@@ -1,5 +1,6 @@
 
 
+
 import json
 import numpy as np
 import sympy as sym 
@@ -13,12 +14,13 @@ def load_config(filename):
     """Load configuration from JSON file"""
     with open(filename, 'r') as f:
         return json.load(f)
-    
+
 # Define the ranges 
 # Define the residence time [in hours]
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
 SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+# SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]
 
 # Physical constants
 NUM_SISTERCS = 7765 
@@ -254,83 +256,83 @@ def run_simulation(config, residence_time, sister_damping):
     columns = ['time', 'Rac', 'P', 'RacP', 'S', 'RacPS', 'W', 'RacPW', 
                'Rac_free', 'R_free', 'N', 'RN', 'R', 'RP', 'RPW']
     df_WT = pd.DataFrame(Model_ext_coh_WT, columns=columns)
-
-    ## Apply Wapl depletion at 8h 
-    time_6h = 3600 * 6 - 1
+    
+    ## Apply Wapl depletion at 8h in G2 (14h since start of S phase)
+    time_8h = 3600 * 8 - 1
     depletion_level = config['simulation_parameters']['depletion_level']
     remaining_level = 1 - depletion_level 
-
-    init_conditions_ext_coh_dWapl_6h = {
-        Rac_free_init: df_WT['Rac_free'][time_6h], 
-        Rac_init: df_WT['Rac'][time_6h], 
-        RacP_init: df_WT['RacP'][time_6h] + df_WT['RacPW'][time_6h] * depletion_level,
-        RacPW_init: df_WT['RacPW'][time_6h] * remaining_level,
-        RacPS_init: df_WT['RacPS'][time_6h],
-
-        R_free_init: df_WT['R_free'][time_6h],
-        RN_init: df_WT['RN'][time_6h] ,
-        R_init: df_WT['R'][time_6h]  ,
-        RP_init: df_WT['RP'][time_6h] + df_WT['RPW'][time_6h] * depletion_level, 
-        RPW_init: df_WT['RPW'][time_6h] * remaining_level, 
     
-        N_init: df_WT['N'][time_6h],
-        S_init: df_WT['S'][time_6h],
-        W_init: df_WT['W'][time_6h] * remaining_level,
-        P_init: df_WT['P'][time_6h],
+    init_conditions_ext_coh_dWapl_8h = {
+        Rac_free_init: df_WT['Rac_free'][time_8h], 
+        Rac_init: df_WT['Rac'][time_8h], 
+        RacP_init: df_WT['RacP'][time_8h] + df_WT['RacPW'][time_8h] * depletion_level,
+        RacPW_init: df_WT['RacPW'][time_8h] * remaining_level,
+        RacPS_init: df_WT['RacPS'][time_8h],
+
+        R_free_init: df_WT['R_free'][time_8h],
+        RN_init: df_WT['RN'][time_8h] ,
+        R_init: df_WT['R'][time_8h]  ,
+        RP_init: df_WT['RP'][time_8h] + df_WT['RPW'][time_8h] * depletion_level, 
+        RPW_init: df_WT['RPW'][time_8h] * remaining_level, 
+    
+        N_init: df_WT['N'][time_8h],
+        S_init: df_WT['S'][time_8h],
+        W_init: df_WT['W'][time_8h] * remaining_level,
+        P_init: df_WT['P'][time_8h],
        }
 
-    paras_dict_since_6h_dW = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh_dWapl_6h | {"K_Rac_free_R_free": 1/2495}
-    paras_dict_ext_coh_since_6h_dW = {str(key): value for key, value in paras_dict_since_6h_dW.items()}
+    paras_dict_since_8h_dW = paras_dict_coh_local | paras_dict_ext_local | init_conditions_ext_coh_dWapl_8h | {"K_Rac_free_R_free": 1/2495}
+    paras_dict_ext_coh_since_8h_dW = {str(key): value for key, value in paras_dict_since_8h_dW.items()}
     
-    Model_ext_coh_since_6h_dW = build_model(MODEL_EXT_COH_TEMPLATE, paras_dict_ext_coh_since_6h_dW)
+    Model_ext_coh_since_8h_dW = build_model(MODEL_EXT_COH_TEMPLATE, paras_dict_ext_coh_since_8h_dW)
     # print(model_ext_coh)
     # Load the modes
-    r_ext_coh_since_6h_dW = te.loada(Model_ext_coh_since_6h_dW)
+    r_ext_coh_since_8h_dW = te.loada(Model_ext_coh_since_8h_dW)
     # Simulate the model
-    Model_ext_coh_since_6h_dW = r_ext_coh_since_6h_dW.simulate(0, 3600*10, 3600*10)
+    Model_ext_coh_since_8h_dW = r_ext_coh_since_8h_dW.simulate(0, 3600*10, 3600*10)
     
-    df_since_6h = pd.DataFrame(Model_ext_coh_since_6h_dW, columns=columns)
+    df_since_8h = pd.DataFrame(Model_ext_coh_since_8h_dW, columns=columns)
     
     analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
     index = 3600 * analysis_hours  - 1
 
     # Calculate metrics
-    total_bound_ext = (df_since_6h['R'][index] + df_since_6h['RN'][index] + 
-                       df_since_6h['RP'][index] + df_since_6h['RPW'][index])
+    total_bound_ext = (df_since_8h['R'][index] + df_since_8h['RN'][index] + 
+                       df_since_8h['RP'][index] + df_since_8h['RPW'][index])
     
     bound_extC_ratio = total_bound_ext / (paras_dict_coh_local[N_R]*0.5)
-    extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_6h['R_free'][index])
+    extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_8h['R_free'][index])
     extC_value = int(NUM_SISTERCS * bound_extC_ratio)
     # velocity_7h = 1/5 * total_bound_ext / df_since_8h['RN'][index]
-    LEF_sep_7h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
+    LEF_sep_13h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
 
-    total_sister_rad21 = (df_since_6h['RacPS'][index] + df_since_6h['RacPW'][index] + 
-                          df_since_6h['RacP'][index] + df_since_6h['Rac'][index])
+    total_sister_rad21 = (df_since_8h['RacPS'][index] + df_since_8h['RacPW'][index] + 
+                          df_since_8h['RacP'][index] + df_since_8h['Rac'][index])
 
     sister_RAD21_time_10h = calculate_sister_RAD21_bound_time(
-        K_RacPW_Rac_free = paras_dict_ext_coh_since_6h_dW['K_RacPW_Rac_free'], \
-        B_W_sister = df_since_6h['RacPW'][index], \
+        K_RacPW_Rac_free = paras_dict_ext_coh_since_8h_dW['K_RacPW_Rac_free'], \
+        B_W_sister = df_since_8h['RacPW'][index], \
         B_R_sister = total_sister_rad21)
     
-    total_extrusive_rad21 = (df_since_6h['RPW'][index] + 
-                          df_since_6h['RP'][index] + df_since_6h['R'][index] + 
-                          df_since_6h['RN'][index])
-
+    total_extrusive_rad21 = (df_since_8h['RPW'][index] + 
+                          df_since_8h['RP'][index] + df_since_8h['R'][index] + 
+                          df_since_8h['RN'][index])
+    
     extruder_RAD21_time_10h = calculate_extrusive_RAD21_bound_time(
-        K_RPW_R_free = paras_dict_ext_coh_since_6h_dW['Kext_RPW_R_free'], \
-        B_W_extruder = df_since_6h['RPW'][index], \
+        K_RPW_R_free = paras_dict_ext_coh_since_8h_dW['Kext_RPW_R_free'], \
+        B_W_extruder = df_since_8h['RPW'][index], \
         B_R_extruder = total_extrusive_rad21)
     
     # Calculate transition rates
     rates = {
-        'R_free_to_RN': paras_dict_ext_coh_since_6h_dW['Kext_R_free_RN']*df_since_6h['N'][index],
-        'RPW_R_free': paras_dict_ext_coh_since_6h_dW['Kext_RPW_R_free'],
-        'RN_R': paras_dict_ext_coh_since_6h_dW['Kext_RN_R'],
-        'R_RN': paras_dict_ext_coh_since_6h_dW['Kext_R_RN']*df_since_6h['N'][index],
-        'R_RP': paras_dict_ext_coh_since_6h_dW['Kext_R_RP']*df_since_6h['P'][index],
-        'RP_R': paras_dict_ext_coh_since_6h_dW['Kext_RP_R'],
-        'RP_RPW': paras_dict_ext_coh_since_6h_dW['Kext_RP_RPW']*df_since_6h['W'][index],
-        'RPW_RP': paras_dict_ext_coh_since_6h_dW['Kext_RPW_RP'],
+        'R_free_to_RN': paras_dict_ext_coh_since_8h_dW['Kext_R_free_RN']*df_since_8h['N'][index],
+        'RPW_R_free': paras_dict_ext_coh_since_8h_dW['Kext_RPW_R_free'],
+        'RN_R': paras_dict_ext_coh_since_8h_dW['Kext_RN_R'],
+        'R_RN': paras_dict_ext_coh_since_8h_dW['Kext_R_RN']*df_since_8h['N'][index],
+        'R_RP': paras_dict_ext_coh_since_8h_dW['Kext_R_RP']*df_since_8h['P'][index],
+        'RP_R': paras_dict_ext_coh_since_8h_dW['Kext_RP_R'],
+        'RP_RPW': paras_dict_ext_coh_since_8h_dW['Kext_RP_RPW']*df_since_8h['W'][index],
+        'RPW_RP': paras_dict_ext_coh_since_8h_dW['Kext_RPW_RP'],
     }
 
     # Load base parameters and update
@@ -347,7 +349,7 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["34"]["A"] = float(rates['RP_RPW'])
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
     
-    output_params["LEF_separation"] = LEF_sep_7h
+    output_params["LEF_separation"] = LEF_sep_13h
     # output_params["velocity_multiplier"] = float(velocity_8h)
     output_params["velocity_multiplier"] = 0.8
     output_params["monomers_per_replica"] = 32000

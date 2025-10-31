@@ -17,7 +17,8 @@ def load_config(filename):
 # Define the ranges 
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]  
+# SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
 
 # Physical constants
 NUM_EXTRUDERS = 7765 
@@ -254,7 +255,7 @@ def run_simulation(config, residence_time, sister_damping):
                'Rac_free', 'R_free', 'N', 'RN', 'R', 'RP', 'RPW']
     df_dS = pd.DataFrame(Model_ext_coh_dS, columns=columns)
 
-    ## Apply Wapl depletion at 14h 
+    ## Apply Wapl depletion at 14h  = 6h(Spahse) + 8h = 14h 
     time_14h = 3600 * 14 - 1
     depletion_level_wapl = config['simulation_parameters']['depletion_level_wapl']
     remaining_level_wapl = 1 - depletion_level_wapl 
@@ -300,13 +301,13 @@ def run_simulation(config, residence_time, sister_damping):
     bound_extC_ratio = total_bound_ext / (paras_dict_coh_local[N_R]*0.5)
     extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_14h['R_free'][index])
     extC_value = int(NUM_EXTRUDERS * bound_extC_ratio)
-    velocity_8h = 1/5 * total_bound_ext / df_since_14h['RN'][index]
-    LEF_sep_8h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
+    # velocity_8h = 1/5 * total_bound_ext / df_since_14h['RN'][index]
+    LEF_sep_13h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
 
     total_sister_rad21 = (df_since_14h['RacPS'][index] + df_since_14h['RacPW'][index] + 
                           df_since_14h['RacP'][index] + df_since_14h['Rac'][index])
 
-    sister_RAD21_time_10h = calculate_sister_RAD21_bound_time(
+    sister_RAD21_time_13h = calculate_sister_RAD21_bound_time(
         K_RacPW_Rac_free = paras_dict_ext_coh_since_14h_dW['K_RacPW_Rac_free'], \
         B_W_sister = df_since_14h['RacPW'][index], \
         B_R_sister = total_sister_rad21)
@@ -337,14 +338,14 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["34"]["A"] = float(rates['RP_RPW'])
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
     
-    output_params["LEF_separation"] = LEF_sep_8h
+    output_params["LEF_separation"] = LEF_sep_13h
     # output_params["velocity_multiplier"] = float(velocity_8h)
     output_params["velocity_multiplier"] = 0.8
     output_params["monomers_per_replica"] = 32000
     # output_params["num_of_sisters"] = config['simulation_parameters']['num_of_sisters']
     output_params["num_of_sisters"] = int(NUM_SISTERCS//10)
     output_params["sister_damping"] = sister_damping
-    output_params["sister_lifetime"] = int(sister_RAD21_time_10h)
+    output_params["sister_lifetime"] = int(sister_RAD21_time_13h)
     
     return output_params 
 
@@ -352,7 +353,7 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters_dWdS.json')
+    config = load_config('network_parameters_dW95dS85.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])

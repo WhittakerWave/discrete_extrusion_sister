@@ -1,7 +1,7 @@
 
 
 ### 
-### This script generates the parameters for extrusion simulations with WT 9h
+### This script generates the parameters for extrusion simulations with dS 9h
 
 import json
 import numpy as np
@@ -20,7 +20,8 @@ def load_config(filename):
 # Define the ranges 
 RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
+SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]
+# SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
 
 # Physical constants
 NUM_EXTRUDERS = 7765 

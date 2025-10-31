@@ -30,5 +30,5 @@
     },
     "output_directory": "dW95_sweep_1021_Nipbl_no_sister_6h",
     "output_prefix": "dW",
-    "output_template_file": "extrusion_dict_RN_RB_RP_RW_HBD_dW.json"
+    "output_template_file": "extrusion_dict_RN_RB_RP_RW_HBD_WT.json"
 }
