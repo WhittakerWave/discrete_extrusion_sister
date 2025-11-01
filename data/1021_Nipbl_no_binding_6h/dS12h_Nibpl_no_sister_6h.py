@@ -18,9 +18,9 @@ def load_config(filename):
         return json.load(f)
     
 # Define the ranges 
-RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
+RESIDENCE_TIMES = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]          
 # Define the damping values
-SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]
+SISTER_DAMPINGS = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60]  
 # SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000]  
 
 # Physical constants
