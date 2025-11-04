@@ -19,7 +19,7 @@ def symmetric_sister_step_cpu(active_state_id,
                               coupled_to_sister = None,
                               sister_tau = None,
                               sister_damping = None, 
-                              collision_release_prob = None, 
+                              bypass_prob = None, 
                               **kwargs):
     """
     Sister-aware stepping function that handles extruders and sisters separately
@@ -107,16 +107,14 @@ def symmetric_sister_step_cpu(active_state_id,
             if extruder_id in coupled_to_sister:
                 # This extruder is coupled to sister(s) - move together
                 # Get the sister IDs for this extruder
-                sister_ids = coupled_to_sister[extruder_id]
-                N_coupled_sisters = len(sister_ids)
-                move_prob = 1/(1 + sister_damping * N_coupled_sisters)
-                if rngs[extruder_id, 4] < move_prob:
-                    process_coupled_extruder_movement_SIMPLE(extruder_id, sister_ids, rngs, 
-                                                 positions, sister_positions,
-                                                 stalled, occupied, pause_prob,
-                                                 stall_left, stall_right, 
-                                                 processed_extruders,
-                                                 collision_release_prob)
+                # sister_ids = coupled_to_sister[extruder_id]
+                # N_coupled_sisters = len(sister_ids)
+                # move_prob = 1/(1 + sister_damping * N_coupled_sisters)
+                if rngs[extruder_id, 4] < bypass_prob:
+                    process_extruder_movement(extruder_id, rngs, positions, stalled, 
+                                        occupied, pause_prob, stall_left, 
+                                        stall_right, processed_extruders)
+                    
                 else:
                     continue
             else:

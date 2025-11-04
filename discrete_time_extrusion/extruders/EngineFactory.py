@@ -23,7 +23,7 @@ except:
     
 try:
     import numba as nb
-    use_numba = False
+    use_numba = True
 
     diffusion_step_numba = nb.njit(fastmath=True)(_diffusion_step_cpu)
     symmetric_step_numba = nb.njit(fastmath=True)(_symmetric_step_cpu)
@@ -31,11 +31,12 @@ try:
 
 	# Add sister stepping engine for numba
     symmetric_sister_step_numba = nb.njit(fastmath=True)(symmetric_sister_step_cpu)
-    
+	
     numba_engines = {'diffusion' : diffusion_step_numba,
                      'symmetric' : symmetric_step_numba,
                      'asymmetric' : asymmetric_step_numba,
-                     'symmetric_sister' : symmetric_sister_step_numba}
+                     'symmetric_sister' : symmetric_sister_step_numba,
+					}
 
 except ImportError:
     use_numba = False
@@ -89,8 +90,8 @@ def SteppingEngine(sim, mode, unbound_state_id, active_state_id, threads_per_blo
                           sim.coupled_to_extruder,
                           sim.coupled_to_sister,
 						  sim.sister_tau,
-						  sim.sister_damping,
-						  sim.collision_release_prob])
+						  sim.sister_damping, 
+						  sim.bypass_prob])
 			mode_key = "symmetric_sister"
 		else: 
 			rngs = sim.xp.random.random((sim.number, 4)).astype(sim.xp.float32)

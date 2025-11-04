@@ -51,7 +51,18 @@ ctcf_right_positions = []
 
 start = time.time()
 
-common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
+# common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
+
+
+# Shared base indices
+common_sisters_1 = np.random.choice(np.arange(monomers_per_replica),
+                                    size=num_of_sisters, replace=False)
+misalign_sigma = 500  # for example
+gaussian_offsets = np.random.normal(loc=0, scale=misalign_sigma, size=num_of_sisters).astype(int)
+# Perturbed sister indices
+common_sisters_2 = common_sisters_1 + gaussian_offsets
+# Clamp to valid range
+common_sisters_2 = np.clip(common_sisters_2, 0, monomers_per_replica - 1)
 
 
 translocator1 = Translocator_Sister(MultistateExtruder_Sister,
@@ -60,7 +71,7 @@ translocator1 = Translocator_Sister(MultistateExtruder_Sister,
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
-                            initial_sister_positions = common_sisters, 
+                            initial_sister_positions = common_sisters_1, 
                             **paramdict_WT)
 
 translocator2 = Translocator_Sister(MultistateExtruder_Sister,
@@ -69,7 +80,7 @@ translocator2 = Translocator_Sister(MultistateExtruder_Sister,
                             site_types,
                             ctcf_left_positions,
                             ctcf_right_positions, 
-                            initial_sister_positions = common_sisters, 
+                            initial_sister_positions = common_sisters_2, 
                             **paramdict_WT)
 
 def shared_sister_update(translocator1, translocator2, step_number, shared_decay_decisions):

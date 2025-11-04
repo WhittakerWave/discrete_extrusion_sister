@@ -62,5 +62,6 @@
     "number_of_replica": 1,
     "steps": 65000,
     "dummy_steps": 0,
-    "velocity_multiplier": 0.7909275467183094
+    "velocity_multiplier": 0.7909275467183094, 
+    "bypass_prob": 0.2 
 }

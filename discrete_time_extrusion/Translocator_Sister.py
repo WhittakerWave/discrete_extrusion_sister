@@ -50,14 +50,14 @@ class Translocator_Sister():
         sister_tau  = kwargs['sister_lifetime']
         sister_damping = kwargs['sister_damping']
         
-        collision_release_prob = kwargs['collision_release_prob']
+        bypass_prob = kwargs['bypass_prob']
 
         self.extrusion_engine = extrusion_engine(
                                number_of_LEFs, 
                                number_of_sisters,
                                sister_tau,
                                sister_damping,
-                               collision_release_prob, 
+                               bypass_prob, 
                                initial_sister_positions, 
                                self.barrier_engine, 
                                *lef_arrays, **lef_transition_dict)
@@ -88,9 +88,7 @@ class Translocator_Sister():
                 
     def run(self, N, **kwargs):
         self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
-    
-    ## function to run loop extrusion and one sister chain 
-    
+        
     def run_trajectory_one_sister(self, period = None, steps = None, 
             prune_unbound_LEFs = True, track_sisters = False, sample_interval = 1, **kwargs):
         self.clear_trajectory()
