@@ -1,0 +1,32 @@
+==========================================
+SLURM_JOB_ID = 1958717
+SLURM_JOB_NODELIST = b23-08
+TMPDIR = /tmp/SLURM_1958717
+==========================================
+/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/EngineFactory.py:140: UserWarning: Running lattice extrusion on the CPU using Numba
+  warnings.warn("Running lattice extrusion on the CPU using Numba")
+Running job with residence_time=13, bypass_probs=5
+0.0077659568918644435 1.0
+Loaded sisters from fixed positions 
+Loaded sisters from fixed positions 
+Generated shared decay schedule for 64800 total steps
+Running 0 dummy steps...
+Step 0 completed
+Traceback (most recent call last):
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/WT_sweep_1104_Nipbl_no_sister6h.py", line 199, in <module>
+    run_synchronized_trajectories_continue(
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/WT_sweep_1104_Nipbl_no_sister6h.py", line 150, in run_synchronized_trajectories_continue
+    translocator1.run(1)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/Translocator_Sister.py", line 90, in run
+    self.extrusion_engine.steps(N, self.params['mode'], **kwargs)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/NullExtruder.py", line 35, in steps
+    self.step(*args, **kwargs)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/MultistateExtruder_Sister.py", line 104, in step
+    super().step(mode, active_state_id=self.state_dict['RN'], **kwargs)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/BaseExtruder_Sister.py", line 427, in step
+    self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/EngineFactory.py", line 142, in SteppingEngine
+    numba_engines[mode_key](*args)
+  File "/home1/xingchiy/sister_c/examples/Code0415/10long_cubicIC_1Volume/HBD/RC_Run/Run_1104_bypass/discrete_time_extrusion/extruders/engines/SymmetricEngines_Sisters.py", line 113, in symmetric_sister_step_cpu
+    if rngs[extruder_id, 4] < bypass_prob:
+TypeError: '<' not supported between instances of 'float' and 'NoneType'

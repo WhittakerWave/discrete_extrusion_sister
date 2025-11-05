@@ -52,7 +52,6 @@ start = time.time()
 
 # common_sisters = np.random.choice(np.arange(monomers_per_replica), size = num_of_sisters, replace=False)
 
-
 # Shared base indices
 common_sisters_1 = np.random.choice(np.arange(monomers_per_replica),
                                     size=num_of_sisters, replace=False)

@@ -87,7 +87,7 @@ MODEL_EXT_COH_TEMPLATE ='''
     # deacetylation
     # Rac_free -> R_free; K_Rac_free_R_free*Rac_free
     
-    # Rates for cohesive network,  9 rates
+    # Rates for cohesive network,  7 rates
     K_Rac_RacP = {K_Rac_RacP}; 
     K_RacP_Rac = {K_RacP_Rac}; 
     K_RacP_RacPS = {K_RacP_RacPS}; 
