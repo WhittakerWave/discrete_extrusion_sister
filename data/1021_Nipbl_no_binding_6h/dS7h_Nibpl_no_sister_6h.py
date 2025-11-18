@@ -9,6 +9,7 @@ import sympy as sym
 import tellurium as te
 import pandas as pd
 from pathlib import Path
+from itertools import product
 
 
 # Load configuration files
@@ -18,10 +19,17 @@ def load_config(filename):
         return json.load(f)
     
 # Define the ranges 
-RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
+# RESIDENCE_TIMES = [6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 5000]         
 # Define the damping values
 # SISTER_DAMPINGS = [22, 24, 26, 28, 30, 32, 34, 36, 38, 40]   
-SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]  
+# SISTER_DAMPINGS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25, 5000, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40]  
+# RESIDENCE_TIMES = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]          
+# Define the damping values
+# SISTER_DAMPINGS = [40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 5000]  
+
+RESIDENCE_TIMES = [7, 9, 11, 13, 15, 17, 19]
+SISTER_DAMPINGS = [10, 20, 25, 5000]
+pairs = [(a, b) for a, b in product(RESIDENCE_TIMES, SISTER_DAMPINGS)]  
 
 # Physical constants
 NUM_EXTRUDERS = 7765 
@@ -325,15 +333,17 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters_dS7h_d85.json')
+    config = load_config('network_parameters_dS7h.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # Run parameter sweep
-    for residence_time in RESIDENCE_TIMES:
-        for sister_damping in SISTER_DAMPINGS:
+    # for residence_time in RESIDENCE_TIMES:
+    #     for sister_damping in SISTER_DAMPINGS:
+    for residence_time, sister_damping in pairs:
+            
             print(f"\nRunning: residence_time={residence_time}h, sister_damping={sister_damping}")
             
             # Run simulation

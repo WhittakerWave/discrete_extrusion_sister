@@ -28,7 +28,7 @@
         "analysis_timepoint_hours": 5,
         "num_of_sisters": 776
     },
-    "output_directory": "dWdS_sweep_1021_Nipbl_no_sister_6h",
+    "output_directory": "dWdS_sweep_1107_Nipbl_no_sister_6h",
     "output_prefix": "dWdS",
     "output_template_file": "extrusion_dict_RN_RB_RP_RW_HBD_dWdS.json"
 }
