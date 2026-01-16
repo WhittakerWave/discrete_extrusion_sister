@@ -246,7 +246,7 @@ def run_simulation(config, residence_time, sister_damping):
        RP_init: 0, 
        RPW_init: 0, 
     
-       N_init: config['base_parameters']['N_N']* remaining_level,
+       N_init: config['base_parameters']['N_N'] * remaining_level,
        S_init: paras_dict_coh_local[N_S],
        W_init: config['base_parameters']['N_W'],
        P_init: config['base_parameters']['N_P'],
@@ -265,7 +265,6 @@ def run_simulation(config, residence_time, sister_damping):
                'Rac_free', 'R_free', 'N', 'RN', 'R', 'RP', 'RPW']
     df_since_0h = pd.DataFrame(Model_ext_coh_WT, columns=columns)
 
-    
     analysis_hours = config['simulation_parameters']['analysis_timepoint_hours'] 
     index = 3600 * analysis_hours  - 1 
 
@@ -277,12 +276,12 @@ def run_simulation(config, residence_time, sister_damping):
     extC_bound_frac = total_bound_ext / (total_bound_ext + df_since_0h['R_free'][index])
     extC_value = int(NUM_SISTERCS * bound_extC_ratio)
     # velocity_8h = 1/5 * total_bound_ext / df_since_1h['RN'][index]
-    LEF_sep_10h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
+    LEF_sep_9h = int(LATTICE_SIZE * extC_bound_frac / (extC_value / 2))
     total_sister_rad21 = (df_since_0h['RacPS'][index] + df_since_0h['RacPW'][index] + 
                           df_since_0h['RacP'][index] + df_since_0h['Rac'][index])
 
-    sister_RAD21_time_10h = calculate_sister_RAD21_bound_time(
-        K_RacPW_Rac_free = paras_dict_ext_local['K_RacPW_Rac_free'], \
+    sister_RAD21_time_9h = calculate_sister_RAD21_bound_time(
+        K_RacPW_Rac_free = paras_dict_ext_coh_local['K_RacPW_Rac_free'], \
         B_W_sister = df_since_0h['RacPW'][index], \
         B_R_sister = total_sister_rad21)
     
@@ -312,7 +311,7 @@ def run_simulation(config, residence_time, sister_damping):
     output_params["LEF_transition_rates"]["34"]["A"] = float(rates['RP_RPW'])
     output_params["LEF_transition_rates"]["43"]["A"] = float(rates['RPW_RP'])
     
-    output_params["LEF_separation"] = LEF_sep_10h
+    output_params["LEF_separation"] = LEF_sep_9h
     # output_params["velocity_multiplier"] = float(velocity_8h)
     output_params["velocity_multiplier"] = 0.8
     output_params["monomers_per_replica"] = 32000
@@ -327,7 +326,7 @@ def run_simulation(config, residence_time, sister_damping):
 def main():
     """Main execution function"""
     # Load configuration
-    config = load_config('network_parameters_dNd99.json')
+    config = load_config('network_parameters_dNd80_all_G2.json')
     
     # Create output directory
     output_dir = Path(config['output_directory'])
