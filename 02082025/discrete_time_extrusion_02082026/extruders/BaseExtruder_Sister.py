@@ -68,7 +68,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(initial_positions) >= self.num_sisters:
             self.sister_positions = initial_positions[:self.num_sisters]
         print(f"Loaded sisters from fixed positions ")
-        
+
     def _update_extruder_position_cache(self):
         """Vectorized extruder position cache update - much faster than looping through all extruders"""
         ### Build position to extruder mapping

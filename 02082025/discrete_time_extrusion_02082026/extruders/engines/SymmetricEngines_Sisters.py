@@ -15,7 +15,7 @@ def symmetric_sister_step_cpu(active_state_id,
                               stalled,
                               sister_positions = None,  # Separate sister position array
                               num_sisters = 0,
-                              coupled_to_extruder = None,
+                              coupled_to_extruders = None,
                               coupled_to_sister = None,
                               sister_tau = None,
                               sister_damping = None, 
