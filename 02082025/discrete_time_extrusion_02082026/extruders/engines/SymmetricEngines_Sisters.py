@@ -104,7 +104,7 @@ def symmetric_sister_step_cpu(active_state_id,
                 # This extruder is coupled to sister(s) - move together
                 # Get the sister IDs for this extruder
                 sister_ids = coupled_to_sister[extruder_id]
-                sister_ids = sister_ids[sister_ids>=0]
+                sister_ids = sister_ids[sister_ids >= 0]
                 
                 N_coupled_sisters = len(sister_ids)
                 move_prob = 1/(1 + sister_damping * N_coupled_sisters)

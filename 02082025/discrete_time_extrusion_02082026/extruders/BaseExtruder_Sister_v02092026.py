@@ -1,7 +1,7 @@
 
 import numpy as np
 # import matplotlib.pyplot as plt 
-from . import NullExtruder, EngineFactory
+from . import NullExtruder, EngineFactory_v02092026
 
 class BaseExtruder_Sister(NullExtruder.NullExtruder):
 
@@ -43,7 +43,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.pause_prob = pause_prob
         self.sister_tau = sister_tau
         self.sister_damping = sister_damping
-        self.stepping_engine = EngineFactory.SteppingEngine
+        self.stepping_engine = EngineFactory_v02092026.SteppingEngine
         
         # Initialize sisters 
         # Way1: randomly 
@@ -136,7 +136,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         print(f"Result: {self.sister_positions}")
     
     def _update_extruder_position_cache(self):
-        ### Build the extruder two leg postions -- id map 
+        ### Build the extruder two leg postions -- extruder id map 
         ### Position to extruder lef and right legs (both are indexed by the extruder ID)
         self._position_to_extruders = {}
         active_extruders = []
@@ -411,7 +411,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # self.update_sister_active_states()
         
         self.check_sister_coupling()      
-    
+        
         self.update_occupancies()
         # Parent class step
         super().step(**kwargs)

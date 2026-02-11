@@ -24,6 +24,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
 
         self.sister_positions = None
         # self.sister_coupled_to = None       # Array: sister_id -> extruder_id (-1 if uncoupled)
+        self.sister_coupled_to = None
         self.extruder_sister_counts = None  # Array: extruder_id -> number of coupled sisters
         
         # Change dictionary format: sister_id -> extruder_id [many:1] into matrix with -1 for no coupling
@@ -84,7 +85,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             return
     
         # VECTORIZED: Get all active extruder positions at once using fancy indexing
-        active_positions = self.positions[active_ids]  # Shape: (n_active, 2)
+        # Shape: (n_active, 2)
+        active_positions = self.positions[active_ids]  
     
         # Build cache dictionary - loop only over active extruders (much smaller subset)
         for idx, extruder_id in enumerate(active_ids):
@@ -117,11 +119,10 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                 self.coupled_to_extruder[int(sister_id)] = extruder_id
                 self.coupled_to_sister[extruder_id, int(sister_id)] = int(sister_id)
 
-
     def check_sister_coupling(self):
         """Optimized coupling check with immediate dict sync and safe caching"""
         # or self.xp.all(self.sister_coupled_to == -1):
-        if self.sister_positions is None: 
+        if self.sister_positions is None or self.sister_coupled_to is None:
             return
         ## Update position cache for extruders if invalid
         self._update_extruder_position_cache()
@@ -143,7 +144,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
                 self.sister_coupled_to[sister_id] = extruder_id
                 self.extruder_sister_counts[extruder_id] += 1
                 ## update dictionaries
-                
                 self.coupled_to_extruder[sister_id] = extruder_id
                 self.coupled_to_sister[extruder_id, int(sister_id)] = int(sister_id)
             else:
@@ -152,14 +152,14 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def _check_extruder_deaths(self):
         """Uncouple sisters whose extruders have died"""
         """Vectorized uncoupling of sisters from dead extruders"""
-        if self.sister_coupled_to is None:
+        if self.coupled_to_extruder is None:
             return
-        coupled_mask = self.sister_coupled_to != -1
+        coupled_mask = self.coupled_to_extruder != -1
         if not self.xp.any(coupled_mask):
             return
         coupled_sisters = self.xp.where(coupled_mask)[0]
-        extruder_ids = self.sister_coupled_to[coupled_sisters]
-
+        extruder_ids = self.coupled_to_extruder[coupled_sisters]
+        
         # Check which extruders are dead (vectorized), if 0 dead, if 1 is active 
         dead_mask = self.states[extruder_ids] == 0 
         dead_couplings = coupled_sisters[dead_mask]
@@ -168,7 +168,12 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             # Uncouple dead extruders (vectorized)
             dead_extruder_ids = self.sister_coupled_to[dead_couplings]
             self.extruder_sister_counts[dead_extruder_ids] -= 1
+            
+            self.coupled_to_sister[dead_extruder_ids, dead_couplings] = -1
             self.sister_coupled_to[dead_couplings] = -1
+            
+            # SYNC AFTER CHANGES!
+            # self._sync_coupling_dicts()
 
     def _uncouple_dead_extruders(self):
         """Vectorized uncoupling of sisters from dead extruders"""
@@ -250,7 +255,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(coupled_sisters_death) > 0:
             # Reset sister coupling status to -1 for unload coupled sisters
             self.sister_coupled_to[coupled_sisters_death] = -1
-        # Reset sister counts for dying extruders
+        # Reset sister counts for fallen off extruders
         self.extruder_sister_counts[ids_death] = 0
         # Standard unload for extruders
         self.stalled[ids_death] = False
