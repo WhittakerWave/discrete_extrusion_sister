@@ -34,7 +34,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.coupled_to_sister = np.full((number_of_extruders, number_of_sisters), -1, dtype=int)     
         
         # Pre-computed position lookup for faster coupling checks
-        self._position_to_extruders = {}    # Cache for position -> extruder mapping
+        self._extruder_position_to_ID = {}    # Cache for extruder position -> ID mapping
         self._position_cache_valid = False
 
         super().__init__(number_of_extruders, barrier_engine)
@@ -68,11 +68,22 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(initial_positions) >= self.num_sisters:
             self.sister_positions = initial_positions[:self.num_sisters]
         print(f"Loaded sisters from fixed positions ")
+    
+    def _initialize_sisters(self):
+        """Initialize sisters either randomly or from saved file"""
+        if self.num_sisters <= 0:
+            print("No sisters to initialize")
+            return
+        # Initialize arrays
+        self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
+        # self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
+        self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
 
-    def _update_extruder_position_cache(self):
+
+    def _update_extruder_position_to_ID_cache(self):
         """Vectorized extruder position cache update - faster than looping through all extruders"""
         ### Build position to extruder ID mapping
-        self._position_to_extruders = {}
+        self._extruder_position_to_ID = {}
 
         # VECTORIZED: Find all active extruders (state != 0) in one operation
         active_extruder_mask = self.states != 0
@@ -87,20 +98,21 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Shape: (n_active, 2)
         active_positions = self.positions[active_ids]  
         
-        # Build cache dictionary - loop only over active extruders (much smaller subset)
+        # Build cache dictionary - loop only over active extruders
         for idx, extruder_id in enumerate(active_ids):
             pos1 = int(active_positions[idx, 0])
             pos2 = int(active_positions[idx, 1])
             # Add first leg position
-            if pos1 not in self._position_to_extruders:
-                self._position_to_extruders[pos1] = []
-            self._position_to_extruders[pos1].append(int(extruder_id))
+            if pos1 not in self._extruder_position_to_ID:
+                self._extruder_position_to_ID[pos1] = []
+            self._extruder_position_to_ID[pos1].append(int(extruder_id))
         
             # Add second leg position if different
             if pos2 != pos1:
-                if pos2 not in self._position_to_extruders:
-                    self._position_to_extruders[pos2] = []
-                self._position_to_extruders[pos2].append(int(extruder_id))
+                if pos2 not in self._extruder_position_to_ID:
+                    self._extruder_position_to_ID[pos2] = []
+                self._extruder_position_to_ID[pos2].append(int(extruder_id))
+
         self._position_cache_valid = True
    
     def _check_extruder_fallen_off(self):
@@ -123,18 +135,21 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             # Uncouple dead extruders (vectorized)
             dead_extruder_ids = self.coupled_to_extruder[dead_couplings]
             self.extruder_sister_counts[dead_extruder_ids] -= 1
-            
             self.coupled_to_sister[dead_extruder_ids, dead_couplings] = -1
+            self.coupled_to_extruder[dead_couplings] = -1 
             # self.sister_coupled_to[dead_couplings] = -1
-
+    
+    
+    
     def check_sister_coupling(self):
         """Optimized coupling check with immediate dict sync and safe caching"""
         # or self.xp.all(self.sister_coupled_to == -1):
         # or self.sister_coupled_to is None:
         if self.sister_positions is None: 
             return
+        
         ## Update position cache for extruders if invalid
-        self._update_extruder_position_cache()
+        self._update_extruder_position_to_ID_cache()
         ## First, uncouple any sisters whose extruders have falled off 
         self._check_extruder_fallen_off()
         # Second pass: find new couplings
@@ -146,8 +161,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         for sister_id in uncoupled_sisters:
             sister_pos = int(self.sister_positions[sister_id])
             ## if sister pos in the extruder positions, couple them 
-            if sister_pos in self._position_to_extruders:
-                extruder_id = self._position_to_extruders[sister_pos][0]
+            if sister_pos in self._extruder_position_to_ID:
+                extruder_id = self._extruder_position_to_ID[sister_pos][0]
                 ## update the arrary sister_couple_to 
                 # self.sister_coupled_to[sister_id] = extruder_id
                 self.extruder_sister_counts[extruder_id] += 1
@@ -213,7 +228,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.positions[ids_death] = -1
         # Invalidate position cache
         self._position_cache_valid = False
-
+    
+    # Not used, used the function in multistate 
     def update_states(self, unbound_state_id, bound_state_id):
         ids_birth = self.birth(unbound_state_id)
         ids_death = self.death(bound_state_id)
@@ -222,6 +238,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.states[ids_death] = unbound_state_id
         
         self.unload(ids_death)
+    
     
     def get_coupling_status(self):
         """Optimized coupling status using vectorized operations"""
@@ -268,7 +285,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         ## test simple cases for extruders 
         # self.setup_test_scenario()
 
-        ## Update extruders
+        ## Update extruders, doesn't use?
         self.update_states(unbound_state_id, bound_state_id)
         
         ## Update sister states for decaying
