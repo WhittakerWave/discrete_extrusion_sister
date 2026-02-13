@@ -57,7 +57,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Test function of loading sisterCs
         # self._test_single_position()
 
-        self.setup_test_scenario_mean_field_density()
+        self.setup_test_scenario_mean_field_alpha()
 
 
     def _initialize_sisters_fix(self, initial_positions):
@@ -486,9 +486,35 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     
         # Mark as initialized
         self._test_initialized = True
-        self._position_cache_valid = False
+        self._position_cache_valid = False 
     
-        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+    def setup_test_scenario_mean_field_alpha(self):
+        """Setup a single permanent LEF at position [3000, 3000]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+        
+        # Take the first unbound LEF
+        # lef_id = unbound_ids[0]
+        
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:500]
+        starts = np.random.choice(np.arange(32000), size=500, replace=False)
+        self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
+
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
 
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""

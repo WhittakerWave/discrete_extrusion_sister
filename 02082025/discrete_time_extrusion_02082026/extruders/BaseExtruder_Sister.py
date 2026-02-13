@@ -335,7 +335,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._test_initialized = True
         self._position_cache_valid = False
     
-        print(f"Test LEF {lef_id} initialized at position [50, 50]")
 
     def setup_test_scenario_5(self):
         """Setup a single permanent LEF at position [3000, 3000]"""
@@ -365,9 +364,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Mark as initialized
         self._test_initialized = True
         self._position_cache_valid = False
-    
-        print(f"Test LEF {lef_id} initialized at position [50, 50]")
-    
+
 
     def setup_test_scenario_mean_field(self):
         """Setup a single permanent LEF at position [3000, 3000]"""
@@ -397,8 +394,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Mark as initialized
         self._test_initialized = True
         self._position_cache_valid = False
-    
-        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+
     
     def setup_test_scenario_mean_field_density(self):
         """Setup a single permanent LEF at position [3000, 3000]"""
