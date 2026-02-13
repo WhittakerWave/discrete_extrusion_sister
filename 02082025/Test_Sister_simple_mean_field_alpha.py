@@ -28,7 +28,7 @@ from discrete_time_extrusion_02082026.boundaries.DynamicBoundary import DynamicB
 from discrete_time_extrusion_02082026.extruders.BaseExtruder_Sister import BaseExtruder_Sister
 
 
-with open("extrusion_dict_simple_mean_field_density.json", 'r') as dict_file:
+with open("extrusion_dict_simple_mean_field_alpha.json", 'r') as dict_file:
         paramdict = json.load(dict_file)
     
 monomers_per_replica = paramdict['monomers_per_replica'] 
@@ -88,13 +88,13 @@ translocator1 = Translocator_Sister(BaseExtruder_Sister,
                     **paramdict)
 
 # translocator1.run(10000)
-translocator1.run_trajectory_one_sister(steps = 65000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=100)
+translocator1.run_trajectory_one_sister(steps = 10000, prune_unbound_LEFs=True, track_sisters=True, sample_interval=100)
 
 end = time.time()
 print(f"Run time: {end - start:.2f} seconds")
 print(f"Before manual init: num_sisters = {translocator1.extrusion_engine}")
 
-with open('test_case_mean_field_density.pkl', 'wb') as f:
+with open('test_case_mean_field_alpha.pkl', 'wb') as f:
     pickle.dump({
         "sister": translocator1.sister_trajectory,
         "lef": translocator1.lef_trajectory,
