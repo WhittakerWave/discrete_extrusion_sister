@@ -179,15 +179,15 @@ def run_synchronized_trajectories_continue(translocator1, translocator2, sister_
             if track_sisters:
                 if hasattr(translocator1.extrusion_engine, 'sister_positions'):
                     sister_positions_1 = translocator1.extrusion_engine.sister_positions.copy()
-                    coupling_status_1 = translocator1.extrusion_engine.get_coupling_status()
+                    # coupling_status_1 = translocator1.extrusion_engine.get_coupling_status()
                     translocator1.sister_trajectory.append(sister_positions_1)
-                    translocator1.coupling_trajectory.append(coupling_status_1)
+                    # translocator1.coupling_trajectory.append(coupling_status_1)
                 
                 if hasattr(translocator2.extrusion_engine, 'sister_positions'):
                     sister_positions_2 = translocator2.extrusion_engine.sister_positions.copy()
-                    coupling_status_2 = translocator2.extrusion_engine.get_coupling_status()
+                    # coupling_status_2 = translocator2.extrusion_engine.get_coupling_status()
                     translocator2.sister_trajectory.append(sister_positions_2)
-                    translocator2.coupling_trajectory.append(coupling_status_2)
+                    # translocator2.coupling_trajectory.append(coupling_status_2)
 
 
 np.save(f"{savepath}/ctcf_left_positions_full.npy", ctcf_left_positions)

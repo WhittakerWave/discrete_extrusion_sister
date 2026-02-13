@@ -1,6 +1,6 @@
-from . import BaseExtruder_Sister_v02092026_simple
+from . import BaseExtruder_Sister_v02092026
     
-class MultistateExtruder_Sister(BaseExtruder_Sister_v02092026_simple.BaseExtruder_Sister):
+class MultistateExtruder_Sister(BaseExtruder_Sister_v02092026.BaseExtruder_Sister):
     
     def __init__(self,
                  number,

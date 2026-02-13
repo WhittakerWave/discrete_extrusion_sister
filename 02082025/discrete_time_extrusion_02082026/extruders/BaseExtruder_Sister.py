@@ -54,6 +54,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         else:
             self._initialize_sisters()
         
+        self.setup_test_scenario_mean_field()
+
     
     def _initialize_sisters_fix(self, initial_positions):
         """Initialize sisters either randomly or from saved file"""
@@ -68,16 +70,41 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         if len(initial_positions) >= self.num_sisters:
             self.sister_positions = initial_positions[:self.num_sisters]
         print(f"Loaded sisters from fixed positions ")
-    
+
+
     def _initialize_sisters(self):
-        """Initialize sisters either randomly or from saved file"""
+        """Optimized sister initialization using vectorized operations"""
         if self.num_sisters <= 0:
             print("No sisters to initialize")
             return
+        
+        lattice_size = len(self.occupied)
+        print(f"Initializing {self.num_sisters} sisters on lattice of size {lattice_size}")
+
         # Initialize arrays
         self.sister_positions = self.xp.zeros(self.num_sisters, dtype=self.xp.int32)
-        # self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
+        self.sister_coupled_to = self.xp.full(self.num_sisters, -1, dtype=self.xp.int32)
         self.extruder_sister_counts = self.xp.zeros(self.num_extruders, dtype=self.xp.int32)
+
+        # Vectorized initialization: find all free positions at once
+        free_positions = self.xp.where(~self.occupied)[0]
+        
+        if len(free_positions) >= self.num_sisters:
+            # Randomly select from free positions
+            selected_positions = self.xp.random.choice(
+                free_positions, size = self.num_sisters, replace=False
+            )
+            self.sister_positions = selected_positions
+        else:
+            print(f"WARNING: Not enough free positions ({len(free_positions)}) for {self.num_sisters} sisters")
+            # Place as many as possible
+            num_to_place = min(self.num_sisters, len(free_positions))
+            self.sister_positions[:num_to_place] = free_positions[:num_to_place]
+            # Mark excess sisters as inactive
+            self.sister_positions[num_to_place:] = -1
+        
+        self.xp.save("sister.npy", self.sister_positions) 
+        print(f"Initialized {self.num_sisters} sisters at positions: {self.sister_positions}")
 
 
     def _update_extruder_position_to_ID_cache(self):
@@ -138,7 +165,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             self.coupled_to_sister[dead_extruder_ids, dead_couplings] = -1
             self.coupled_to_extruder[dead_couplings] = -1 
             # self.sister_coupled_to[dead_couplings] = -1
-    
     
     
     def check_sister_coupling(self):
@@ -279,12 +305,136 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             'total_sisters': self.num_sisters
         }
     
+
+    def setup_test_scenario_4(self):
+        """Setup a single permanent LEF at position [3000, 3000]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+        
+        # Take the first unbound LEF
+        # lef_id = unbound_ids[0]
+        
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:1]
+
+        # starts = np.random.choice(np.arange(32000), size=1000, replace=False)
+        # self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
+        self.positions[lef_id] = 1000
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
+    
+        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+
+    def setup_test_scenario_5(self):
+        """Setup a single permanent LEF at position [3000, 3000]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+        
+        # Take the first unbound LEF
+        # lef_id = unbound_ids[0]
+        
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:1]
+
+        # starts = np.random.choice(np.arange(32000), size=1000, replace=False)
+        # self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
+        self.positions[lef_id] = 3000
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
+    
+        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+    
+
+    def setup_test_scenario_mean_field(self):
+        """Setup a single permanent LEF at position [3000, 3000]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+        
+        # Take the first unbound LEF
+        # lef_id = unbound_ids[0]
+        
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:1]
+
+        # starts = np.random.choice(np.arange(32000), size=1000, replace=False)
+        # self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
+        self.positions[lef_id] = 1
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
+    
+        print(f"Test LEF {lef_id} initialized at position [50, 50]")
+    
+    def setup_test_scenario_mean_field_density(self):
+        """Setup a single permanent LEF at position [3000, 3000]"""
+        if hasattr(self, '_test_initialized') and self._test_initialized:
+            return
+        # Find one unbound LEF
+        unbound_ids = self.xp.where(self.states == 0)[0]
+
+        if len(unbound_ids) == 0:
+            print("No unbound LEFs available")
+            return
+        
+        # Take the first unbound LEF
+        # lef_id = unbound_ids[0]
+        
+        # Set it at position [1, 1] (left) as one test case and make it bound
+        # self.positions[lef_id] = self.xp.array([1, 1])
+        lef_id = unbound_ids[0:200]
+        starts = np.random.choice(np.arange(32000), size=200, replace=False)
+        self.positions[lef_id] = self.xp.stack([starts, starts], axis=1)
+
+        self.positions[lef_id] = 1
+        self.states[lef_id] = 1  # bound state
+        self.directions[lef_id] = 0
+        self.stalled[lef_id] = False
+    
+        # Mark as initialized
+        self._test_initialized = True
+        self._position_cache_valid = False
+    
+
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
        
         ## test simple cases for extruders 
         # self.setup_test_scenario()
-
         ## Update extruders, doesn't use?
         self.update_states(unbound_state_id, bound_state_id)
         
