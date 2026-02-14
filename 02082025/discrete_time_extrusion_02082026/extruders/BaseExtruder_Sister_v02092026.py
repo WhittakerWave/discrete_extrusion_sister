@@ -57,7 +57,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Test function of loading sisterCs
         # self._test_single_position()
 
-        self.setup_test_scenario_mean_field_alpha()
+        # self.setup_test_scenario_mean_field_alpha()
 
 
     def _initialize_sisters_fix(self, initial_positions):
@@ -515,6 +515,52 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         # Mark as initialized
         self._test_initialized = True
         self._position_cache_valid = False
+    
+
+    def diagnose_birth_death(self, unbound_state_id=0, bound_state_id=1):
+        """Detailed diagnosis of birth/death balance"""
+    
+        # Current state counts
+        unbound_count = int(self.xp.sum(self.states == unbound_state_id))
+        bound_count = int(self.xp.sum(self.states != unbound_state_id))
+    
+        print(f"\n=== Birth/Death Diagnosis ===")
+        print(f"Unbound (state=0): {unbound_count}")
+        print(f"Bound (state!=0):  {bound_count}")
+    
+        # Check free sites
+        free_sites = self.sites[~self.occupied]
+        print(f"Free sites: {len(free_sites)}")
+    
+        # Check birth probabilities
+        if len(free_sites) > 0:
+            birth_probs = self.birth_prob[free_sites]
+            print(f"Birth prob range: {birth_probs.min():.6f} - {birth_probs.max():.6f}")
+            print(f"Birth prob mean:  {birth_probs.mean():.6f}")
+    
+        # Check death probabilities for bound extruders
+        bound_ids = self.xp.where(self.states != unbound_state_id)[0]
+        if len(bound_ids) > 0:
+            death_probs = self.death_prob[self.positions[bound_ids]].max(axis=1)
+            print(f"Death prob range: {death_probs.min():.6f} - {death_probs.max():.6f}")
+            print(f"Death prob mean:  {death_probs.mean():.6f}")
+    
+        # Expected births/deaths per step
+        expected_births = unbound_count * birth_probs.mean() if len(free_sites) > 0 else 0
+        expected_deaths = bound_count * death_probs.mean() if len(bound_ids) > 0 else 0
+        print(f"Expected births/step: {expected_births:.2f}")
+        print(f"Expected deaths/step: {expected_deaths:.2f}")
+    
+        # Test birth function directly
+        print(f"\n--- Testing birth() ---")
+        test_ids = self.birth(unbound_state_id)
+        print(f"birth() returned {len(test_ids)} new extruders")
+    
+        # Check state_dict
+        print(f"\n--- State dict ---")
+        print(f"state_dict: {self.state_dict}")
+        print(f"States distribution: {[(int(s), int(self.xp.sum(self.states == s))) for s in set(self.states.flatten())]}")
+        
 
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""

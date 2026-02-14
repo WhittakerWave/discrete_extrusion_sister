@@ -97,5 +97,6 @@ class MultistateExtruder_Sister(BaseExtruder_Sister_v02092026.BaseExtruder_Siste
 
 
     def step(self, mode, **kwargs):
-    
+        
+        # self.diagnose_birth_death()
         super().step(mode, active_state_id=self.state_dict['RN'], **kwargs)

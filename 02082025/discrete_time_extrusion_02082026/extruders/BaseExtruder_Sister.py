@@ -54,7 +54,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         else:
             self._initialize_sisters()
         
-        self.setup_test_scenario_mean_field_alpha()
+        # self.setup_test_scenario_mean_field_alpha()
 
     
     def _initialize_sisters_fix(self, initial_positions):
@@ -177,7 +177,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         ## Update position cache for extruders if invalid
         self._update_extruder_position_to_ID_cache()
         ## First, uncouple any sisters whose extruders have falled off 
-        self._check_extruder_fallen_off()
+        # self._check_extruder_fallen_off()
         # Second pass: find new couplings
         uncoupled_sisters = self.xp.where(self.coupled_to_extruder == -1)[0]
         
@@ -242,11 +242,19 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         """Optimized unload using vectorized operations"""
         if len(ids_death) == 0:
             return
+        
+        # === ADD THIS DEBUG ===
+        # print(f"[UNLOAD] {len(ids_death)} extruders dying: {ids_death[:5]}...")
+        # === END DEBUG ===
         # Vectorized uncoupling: find all sisters coupled to dying extruders
         coupled_sisters_death = self.xp.where(self.xp.isin(self.coupled_to_extruder, ids_death))[0]
         if len(coupled_sisters_death) > 0:
+            # print(f"[UNLOAD] Uncoupling {len(coupled_sisters_death)} sisters from dying extruders")
             # Reset sister coupling status to -1 for unload coupled sisters
             self.coupled_to_extruder[coupled_sisters_death] = -1
+
+            for ext_id in ids_death:
+                self.coupled_to_sister[ext_id, :] = -1
         # Reset sister counts for fallen off extruders
         self.extruder_sister_counts[ids_death] = 0
         # Standard unload for extruders
@@ -452,6 +460,111 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self._test_initialized = True
         self._position_cache_valid = False
     
+    
+    def diagnose_extruder_population(self):
+       active_count = self.xp.sum(self.states != 0)
+       inactive_count = self.xp.sum(self.states == 0)
+       free_sites = self.xp.sum(~self.occupied)
+       coupled_sisters = self.xp.sum(self.coupled_to_extruder != -1)
+    
+       print(f"=== Extruder Diagnostics ===")
+       print(f"Active extruders:   {active_count}")
+       print(f"Inactive extruders: {inactive_count}")
+       print(f"Free sites:         {free_sites}")
+       print(f"Coupled sisters:    {coupled_sisters}")
+       print(f"Total sisters:      {self.num_sisters}")
+       return {
+        'active': int(active_count),
+        'inactive': int(inactive_count),
+        'free_sites': int(free_sites),
+        'coupled_sisters': int(coupled_sisters)
+        }
+    
+
+    def diagnose_birth_death(self, unbound_state_id=0, bound_state_id=1):
+        """Detailed diagnosis of birth/death balance"""
+    
+        # Current state counts
+        unbound_count = int(self.xp.sum(self.states == unbound_state_id))
+        bound_count = int(self.xp.sum(self.states != unbound_state_id))
+    
+        print(f"\n=== Birth/Death Diagnosis ===")
+        print(f"Unbound (state=0): {unbound_count}")
+        print(f"Bound (state!=0):  {bound_count}")
+    
+        # Check free sites
+        free_sites = self.sites[~self.occupied]
+        print(f"Free sites: {len(free_sites)}")
+    
+        # Check birth probabilities
+        if len(free_sites) > 0:
+            birth_probs = self.birth_prob[free_sites]
+            print(f"Birth prob range: {birth_probs.min():.6f} - {birth_probs.max():.6f}")
+            print(f"Birth prob mean:  {birth_probs.mean():.6f}")
+    
+        # Check death probabilities for bound extruders
+        bound_ids = self.xp.where(self.states != unbound_state_id)[0]
+        if len(bound_ids) > 0:
+            death_probs = self.death_prob[self.positions[bound_ids]].max(axis=1)
+            print(f"Death prob range: {death_probs.min():.6f} - {death_probs.max():.6f}")
+            print(f"Death prob mean:  {death_probs.mean():.6f}")
+    
+        # Expected births/deaths per step
+        expected_births = unbound_count * birth_probs.mean() if len(free_sites) > 0 else 0
+        expected_deaths = bound_count * death_probs.mean() if len(bound_ids) > 0 else 0
+        print(f"Expected births/step: {expected_births:.2f}")
+        print(f"Expected deaths/step: {expected_deaths:.2f}")
+    
+        # Test birth function directly
+        print(f"\n--- Testing birth() ---")
+        test_ids = self.birth(unbound_state_id)
+        print(f"birth() returned {len(test_ids)} new extruders")
+    
+        # Check state_dict
+        print(f"\n--- State dict ---")
+        print(f"state_dict: {self.state_dict}")
+        print(f"States distribution: {[(int(s), int(self.xp.sum(self.states == s))) for s in set(self.states.flatten())]}")
+
+        # === Sister coupling diagnostics ===
+        print(f"\n--- Sister Coupling Diagnosis ---")
+        if self.coupled_to_extruder is None:
+            print("coupled_to_extruder is None!")
+            return
+    
+        # Find all sisters that are coupled to extruders
+        coupled_mask = self.coupled_to_extruder != -1
+        coupled_count = int(self.xp.sum(coupled_mask))
+        uncoupled_count = int(self.xp.sum(~coupled_mask))
+        print(f"Coupled sisters:   {coupled_count}")
+        print(f"Uncoupled sisters: {uncoupled_count}")
+    
+        if not self.xp.any(coupled_mask):
+            print("No coupled sisters!")
+            return
+    
+        coupled_sisters = self.xp.where(coupled_mask)[0]
+        extruder_ids = self.coupled_to_extruder[coupled_sisters]
+    
+        # Check which extruders are dead (state=0) but still have sisters coupled
+        fallen_off_mask = self.states[extruder_ids] == 0
+        dead_couplings = coupled_sisters[fallen_off_mask]
+    
+        print(f"Sisters coupled to DEAD extruders: {len(dead_couplings)}")
+    
+        if len(dead_couplings) > 0:
+            print(f"  WARNING: These sisters are coupled to dead extruders!")
+            for sister_id in dead_couplings[:5]:  # Show first 5
+                ext_id = int(self.coupled_to_extruder[sister_id])
+                ext_state = int(self.states[ext_id])
+                print(f"    Sister {sister_id} -> Extruder {ext_id} (state={ext_state})")
+    
+        # Check extruder states for coupled sisters
+        coupled_extruder_states = self.states[extruder_ids]
+        state_counts = {}
+        for state in set(coupled_extruder_states.flatten()):
+            state_counts[int(state)] = int(self.xp.sum(coupled_extruder_states == state))
+        print(f"Coupled extruder states: {state_counts}")
+    
 
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
@@ -468,6 +581,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.update_occupancies()
         # Parent class step
         super().step(**kwargs)
+
+        # self.diagnose_extruder_population()
         
         # Update kwargs with coupling info
         kwargs.update({

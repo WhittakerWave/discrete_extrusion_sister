@@ -13,7 +13,7 @@ class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
                  pause_prob,
                  sister_tau,
                  sister_damping,
-                 initial_sister_positions, 
+                 initial_sister_positions,
                  *args, **kwargs):
     
         super().__init__(number,
@@ -23,7 +23,7 @@ class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
                          death_prob,
                          stalled_death_prob,
                          diffusion_prob,
-                         pause_prob,
+                         pause_prob, 
                          sister_tau,
                          sister_damping,
                          initial_sister_positions)
@@ -98,4 +98,5 @@ class MultistateExtruder_Sister(BaseExtruder_Sister.BaseExtruder_Sister):
 
     def step(self, mode, **kwargs):
     
+        # self.diagnose_birth_death()
         super().step(mode, active_state_id=self.state_dict['RN'], **kwargs)
