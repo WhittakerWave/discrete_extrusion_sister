@@ -587,7 +587,7 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
             'coupled_to_extruder': self.coupled_to_extruder,
             'coupled_to_sister': self.coupled_to_sister})
         
-        # Movement step of sisters and extruders with coupling information
+        # Movement step of sisters and extruders with input of coupling information
         self.stepping_engine(self, mode, unbound_state_id, active_state_id, **kwargs)
 
 
