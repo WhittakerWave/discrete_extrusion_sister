@@ -1,6 +1,5 @@
 
 import numpy as np
-# import matplotlib.pyplot as plt 
 from . import NullExtruder, EngineFactory
 
 class BaseExtruder_Sister(NullExtruder.NullExtruder):
@@ -569,8 +568,6 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
     def step(self, mode, unbound_state_id = 0, bound_state_id = 1, active_state_id = 1, **kwargs):
         """Optimized step function"""
        
-        ## test simple cases for extruders 
-        # self.setup_test_scenario()
         ## Update extruders, doesn't use?
         self.update_states(unbound_state_id, bound_state_id)
         
@@ -581,7 +578,8 @@ class BaseExtruder_Sister(NullExtruder.NullExtruder):
         self.update_occupancies()
         # Parent class step
         super().step(**kwargs)
-
+        
+        # Function to diagnoise extruder and sister coupling status 
         # self.diagnose_extruder_population()
         
         # Update kwargs with coupling info
